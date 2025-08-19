@@ -1,0 +1,32 @@
+{
+  "name": "concerto",
+  "version": "1.0.0",
+  "description": "A free music streaming app - where every note matters",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.292.0",
+    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.2.0",
+    "eslint": "^8.51.0",
+    "eslint-config-next": "^14.0.0"
+  },
+  "keywords": ["music", "streaming", "free", "concerto", "player"],
+  "author": "Concerto Team",
+  "license": "MIT"
+}
