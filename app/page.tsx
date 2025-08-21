@@ -6,6 +6,7 @@ import Header from '../components/Header'
 import MusicPlayer from '../components/MusicPlayer'
 import SearchBar from '../components/SearchBar'
 import MusicLibrary from '../components/MusicLibrary'
+import PWAInstaller from '../components/PWAInstaller'
 import { mockSongs, Song } from '../lib/musicData'
 
 export default function Home() {
@@ -199,6 +200,9 @@ export default function Home() {
         onNext={handleNext}
         onPrevious={handlePrevious}
       />
+
+      {/* PWA Installer */}
+      <PWAInstaller />
     </div>
   )
 }
