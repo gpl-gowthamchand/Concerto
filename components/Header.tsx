@@ -38,6 +38,12 @@ export default function Header() {
             <Link href="/discover" className="text-gray-300 hover:text-white transition-colors">
               Discover
             </Link>
+            <Link href="/analytics" className="text-gray-300 hover:text-white transition-colors">
+              Analytics
+            </Link>
+            <Link href="/analytics" className="text-gray-300 hover:text-white transition-colors">
+              Analytics
+            </Link>
           </nav>
 
           {/* Search Bar */}

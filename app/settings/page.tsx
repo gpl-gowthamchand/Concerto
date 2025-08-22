@@ -234,6 +234,43 @@ export default function SettingsPage() {
                     />
                     <span className="text-gray-300">High quality audio streaming</span>
                   </label>
+                  
+                  <div className="pt-4 border-t border-dark-600">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Crossfade Duration: <span className="text-primary-400">3.5s</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="12"
+                      step="0.5"
+                      defaultValue="3.5"
+                      className="w-full slider"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Audio Quality: <span className="text-primary-400">Lossless</span>
+                    </label>
+                    <select className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                      <option value="lossy">Lossy (MP3)</option>
+                      <option value="lossless">Lossless (FLAC)</option>
+                      <option value="hires">Hi-Res (24-bit/96kHz)</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Sample Rate: <span className="text-primary-400">44.1 kHz</span>
+                    </label>
+                    <select className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                      <option value="44.1">44.1 kHz</option>
+                      <option value="48">48 kHz</option>
+                      <option value="96">96 kHz</option>
+                      <option value="192">192 kHz</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

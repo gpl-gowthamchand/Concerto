@@ -116,4 +116,78 @@
   .gradient-text {
     @apply bg-gradient-to-r from-primary-400 to-purple-400 bg-clip-text text-transparent;
   }
+
+  /* Vertical slider styles for equalizer */
+  .slider-vertical {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 6px;
+    border-radius: 3px;
+    background: #374151;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .slider-vertical:hover {
+    opacity: 1;
+  }
+
+  .slider-vertical::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #0ea5e9;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .slider-vertical::-webkit-slider-thumb:hover {
+    background: #0284c7;
+    transform: scale(1.1);
+  }
+
+  .slider-vertical::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #0ea5e9;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .slider-vertical::-moz-range-thumb:hover {
+    background: #0284c7;
+    transform: scale(1.1);
+  }
+
+  /* Audio visualizer animations */
+  .audio-visualizer {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 0.8;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* Enhanced focus styles */
+  .focus-ring:focus {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    background: rgba(17, 24, 39, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 }

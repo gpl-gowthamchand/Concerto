@@ -10,8 +10,12 @@ import {
   VolumeX,
   Shuffle,
   Repeat,
-  Heart
+  Heart,
+  List,
+  Maximize2,
+  Minimize2
 } from 'lucide-react'
+import AudioVisualizer from './AudioVisualizer'
 
 interface Song {
   id: string
@@ -44,6 +48,8 @@ export default function MusicPlayer({
   const [isLiked, setIsLiked] = useState(false)
   const [isShuffled, setIsShuffled] = useState(false)
   const [repeatMode, setRepeatMode] = useState<'none' | 'one' | 'all'>('none')
+  const [showQueue, setShowQueue] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
   
   const audioRef = useRef<HTMLAudioElement>(null)
   const progressRef = useRef<HTMLDivElement>(null)
@@ -174,6 +180,24 @@ export default function MusicPlayer({
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary-400 rounded-full"></span>
               )}
             </button>
+            
+            {/* Queue Button */}
+            <button
+              onClick={() => setShowQueue(!showQueue)}
+              className={`p-2 rounded-full transition-colors ${
+                showQueue ? 'text-primary-400' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <List className="w-5 h-5" />
+            </button>
+            
+            {/* Expand/Collapse Button */}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-2 text-gray-400 hover:text-white transition-colors"
+            >
+              {isExpanded ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+            </button>
           </div>
           
           {/* Progress Bar */}
@@ -197,6 +221,18 @@ export default function MusicPlayer({
               {formatTime(duration)}
             </span>
           </div>
+          
+          {/* Audio Visualizer */}
+          {isExpanded && (
+            <div className="w-full max-w-md">
+              <AudioVisualizer 
+                type="bars" 
+                height={40} 
+                color="#0ea5e9"
+                className="w-full"
+              />
+            </div>
+          )}
         </div>
 
         {/* Volume Control */}
@@ -228,6 +264,39 @@ export default function MusicPlayer({
         onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
         onEnded={onNext}
       />
+      
+      {/* Queue Display */}
+      {showQueue && (
+        <div className="fixed bottom-32 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-40 max-h-96 overflow-y-auto">
+          <div className="p-4 border-b border-dark-600">
+            <h3 className="text-lg font-semibold text-white">Queue</h3>
+            <p className="text-sm text-gray-400">Upcoming songs</p>
+          </div>
+          
+          <div className="p-2">
+            {/* Mock queue items */}
+            {[
+              { id: '1', title: 'Bohemian Rhapsody', artist: 'Queen', duration: 355 },
+              { id: '2', title: 'Hotel California', artist: 'Eagles', duration: 391 },
+              { id: '3', title: 'Imagine', artist: 'John Lennon', duration: 183 },
+              { id: '4', title: 'Stairway to Heaven', artist: 'Led Zeppelin', duration: 482 }
+            ].map((song, index) => (
+              <div key={song.id} className="flex items-center space-x-3 p-2 hover:bg-dark-700 rounded-lg transition-colors">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-xs">{index + 1}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium truncate">{song.title}</p>
+                  <p className="text-gray-400 text-sm truncate">{song.artist}</p>
+                </div>
+                <span className="text-gray-400 text-xs">
+                  {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
