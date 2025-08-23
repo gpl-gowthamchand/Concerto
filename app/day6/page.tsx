@@ -3,13 +3,15 @@
 import { useState } from 'react'
 import AdvancedDiscovery from '../../components/AdvancedDiscovery'
 import MusicProductionStudio from '../../components/MusicProductionStudio'
+import ProfessionalDevOps from '../../components/ProfessionalDevOps'
 
 export default function Day6Page() {
   const [activeComponent, setActiveComponent] = useState('discovery')
 
   const components = [
     { id: 'discovery', name: 'AI Discovery', component: <AdvancedDiscovery /> },
-    { id: 'studio', name: 'Production Studio', component: <MusicProductionStudio /> }
+    { id: 'studio', name: 'Production Studio', component: <MusicProductionStudio /> },
+    { id: 'devops', name: 'DevOps & Deployment', component: <ProfessionalDevOps /> }
   ]
 
   return (
