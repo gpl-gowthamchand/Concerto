@@ -10,6 +10,7 @@ import SocialFeatures from '../../components/SocialFeatures'
 import MoodPlaylists from '../../components/MoodPlaylists'
 import AdvancedUI from '../../components/AdvancedUI'
 import MobileOptimizations from '../../components/MobileOptimizations'
+import PerformanceFeatures from '../../components/PerformanceFeatures'
 
 export default function DiscoverPage() {
   const [currentSong, setCurrentSong] = useState<Song | undefined>()
@@ -109,6 +110,11 @@ export default function DiscoverPage() {
         {/* Mobile Optimizations */}
         <div className="mb-12">
           <MobileOptimizations />
+        </div>
+
+        {/* Performance Features */}
+        <div className="mb-12">
+          <PerformanceFeatures />
         </div>
 
         {/* Search Results */}
