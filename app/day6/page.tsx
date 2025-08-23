@@ -4,6 +4,7 @@ import { useState } from 'react'
 import AdvancedDiscovery from '../../components/AdvancedDiscovery'
 import MusicProductionStudio from '../../components/MusicProductionStudio'
 import ProfessionalDevOps from '../../components/ProfessionalDevOps'
+import BusinessIntelligence from '../../components/BusinessIntelligence'
 
 export default function Day6Page() {
   const [activeComponent, setActiveComponent] = useState('discovery')
@@ -11,7 +12,8 @@ export default function Day6Page() {
   const components = [
     { id: 'discovery', name: 'AI Discovery', component: <AdvancedDiscovery /> },
     { id: 'studio', name: 'Production Studio', component: <MusicProductionStudio /> },
-    { id: 'devops', name: 'DevOps & Deployment', component: <ProfessionalDevOps /> }
+    { id: 'devops', name: 'DevOps & Deployment', component: <ProfessionalDevOps /> },
+    { id: 'analytics', name: 'Business Intelligence', component: <BusinessIntelligence /> }
   ]
 
   return (
