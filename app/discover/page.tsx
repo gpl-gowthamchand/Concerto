@@ -9,6 +9,7 @@ import AIRecommendations from '../../components/AIRecommendations'
 import SocialFeatures from '../../components/SocialFeatures'
 import MoodPlaylists from '../../components/MoodPlaylists'
 import AdvancedUI from '../../components/AdvancedUI'
+import MobileOptimizations from '../../components/MobileOptimizations'
 
 export default function DiscoverPage() {
   const [currentSong, setCurrentSong] = useState<Song | undefined>()
@@ -103,6 +104,11 @@ export default function DiscoverPage() {
         {/* Advanced UI Components */}
         <div className="mb-12">
           <AdvancedUI />
+        </div>
+
+        {/* Mobile Optimizations */}
+        <div className="mb-12">
+          <MobileOptimizations />
         </div>
 
         {/* Search Results */}
