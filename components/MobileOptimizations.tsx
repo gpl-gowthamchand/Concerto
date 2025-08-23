@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { 
   Smartphone, 
-  Touch, 
-  Swipe, 
-  Pinch, 
-  Rotate, 
-  Shake,
+  Hand, 
+  Move, 
+  ZoomIn, 
+  RotateCcw, 
+  Zap,
   Wifi,
   Battery,
   Signal,
@@ -139,7 +139,7 @@ export default function MobileOptimizations() {
       id: 'swipe',
       name: 'Swipe Navigation',
       description: 'Swipe left/right to change songs, up/down for volume',
-      icon: <Swipe className="w-8 h-8" />,
+              icon: <Move className="w-8 h-8" />,
       demo: (
         <div className="space-y-4">
           <div className="text-center">
@@ -156,7 +156,7 @@ export default function MobileOptimizations() {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <Touch className="w-12 h-12 text-white" />
+            <Hand className="w-12 h-12 text-white" />
           </div>
         </div>
       )
@@ -165,7 +165,7 @@ export default function MobileOptimizations() {
       id: 'pinch',
       name: 'Pinch to Zoom',
       description: 'Pinch in/out to adjust album art size and zoom levels',
-      icon: <Pinch className="w-8 h-8" />,
+              icon: <ZoomIn className="w-8 h-8" />,
       demo: (
         <div className="space-y-4">
           <div className="text-center">
@@ -176,13 +176,13 @@ export default function MobileOptimizations() {
               onClick={() => handlePinch('out')}
               className="p-3 bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors"
             >
-              <Pinch className="w-6 h-6 text-white" />
+                              <ZoomIn className="w-6 h-6 text-white" />
             </button>
             <button
               onClick={() => handlePinch('in')}
               className="p-3 bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors"
             >
-              <Pinch className="w-6 h-6 text-white rotate-180" />
+                              <ZoomIn className="w-6 h-6 text-white rotate-180" />
             </button>
           </div>
           <div 
@@ -198,7 +198,7 @@ export default function MobileOptimizations() {
       id: 'rotate',
       name: 'Rotate Gesture',
       description: 'Rotate to adjust equalizer settings and audio effects',
-      icon: <Rotate className="w-8 h-8" />,
+              icon: <RotateCcw className="w-8 h-8" />,
       demo: (
         <div className="space-y-4">
           <div className="text-center">
@@ -209,13 +209,13 @@ export default function MobileOptimizations() {
               onClick={() => handleRotate('left')}
               className="p-3 bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors"
             >
-              <Rotate className="w-6 h-6 text-white" />
+                              <RotateCcw className="w-6 h-6 text-white" />
             </button>
             <button
               onClick={() => handleRotate('right')}
               className="p-3 bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors"
             >
-              <Rotate className="w-6 h-6 text-white scale-x-[-1]" />
+                              <RotateCcw className="w-6 h-6 text-white scale-x-[-1]" />
             </button>
           </div>
           <div 
@@ -231,7 +231,7 @@ export default function MobileOptimizations() {
       id: 'shake',
       name: 'Shake to Shuffle',
       description: 'Shake your device to shuffle the current playlist',
-      icon: <Shake className="w-8 h-8" />,
+              icon: <Zap className="w-8 h-8" />,
       demo: (
         <div className="space-y-4">
           <div className="text-center">
@@ -241,7 +241,7 @@ export default function MobileOptimizations() {
             onClick={handleShake}
             className="w-32 h-32 bg-gradient-to-br from-red-600 to-pink-600 rounded-2xl flex items-center justify-center mx-auto transition-transform duration-200 hover:scale-105 active:scale-95"
           >
-            <Shake className="w-12 h-12 text-white" />
+                            <Zap className="w-12 h-12 text-white" />
           </button>
         </div>
       )
@@ -373,7 +373,7 @@ export default function MobileOptimizations() {
             description: 'Adapts perfectly to any screen size and orientation'
           },
           {
-            icon: <Touch className="w-8 h-8" />,
+            icon: <Hand className="w-8 h-8" />,
             title: 'Touch Optimized',
             description: 'Large touch targets and intuitive gesture controls'
           },

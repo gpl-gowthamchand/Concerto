@@ -7,7 +7,7 @@ import {
   HardDrive, 
   Network, 
   Cpu, 
-  Memory,
+  HardDriveIcon,
   Clock,
   TrendingUp,
   Download,
