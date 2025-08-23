@@ -7,6 +7,7 @@ import SearchBar from '../../components/SearchBar'
 import { mockSongs, Song, getRandomSongs, getLikedSongs } from '../../lib/musicData'
 import AIRecommendations from '../../components/AIRecommendations'
 import SocialFeatures from '../../components/SocialFeatures'
+import MoodPlaylists from '../../components/MoodPlaylists'
 
 export default function DiscoverPage() {
   const [currentSong, setCurrentSong] = useState<Song | undefined>()
@@ -91,6 +92,11 @@ export default function DiscoverPage() {
         {/* Social Features */}
         <div className="mb-12">
           <SocialFeatures />
+        </div>
+
+        {/* Mood-Based Playlists */}
+        <div className="mb-12">
+          <MoodPlaylists />
         </div>
 
         {/* Search Results */}
