@@ -8,6 +8,7 @@ import { mockSongs, Song, getRandomSongs, getLikedSongs } from '../../lib/musicD
 import AIRecommendations from '../../components/AIRecommendations'
 import SocialFeatures from '../../components/SocialFeatures'
 import MoodPlaylists from '../../components/MoodPlaylists'
+import AdvancedUI from '../../components/AdvancedUI'
 
 export default function DiscoverPage() {
   const [currentSong, setCurrentSong] = useState<Song | undefined>()
@@ -97,6 +98,11 @@ export default function DiscoverPage() {
         {/* Mood-Based Playlists */}
         <div className="mb-12">
           <MoodPlaylists />
+        </div>
+
+        {/* Advanced UI Components */}
+        <div className="mb-12">
+          <AdvancedUI />
         </div>
 
         {/* Search Results */}
