@@ -5,6 +5,7 @@ import Header from '../../components/Header'
 import MusicPlayer from '../../components/MusicPlayer'
 import SearchBar from '../../components/SearchBar'
 import { mockSongs, Song, getRandomSongs, getLikedSongs } from '../../lib/musicData'
+import AIRecommendations from '../../components/AIRecommendations'
 
 export default function DiscoverPage() {
   const [currentSong, setCurrentSong] = useState<Song | undefined>()
@@ -79,6 +80,11 @@ export default function DiscoverPage() {
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-white mb-4">Search & Explore</h2>
           <SearchBar onSearch={handleSearch} className="max-w-2xl" />
+        </div>
+
+        {/* AI Recommendations */}
+        <div className="mb-12">
+          <AIRecommendations />
         </div>
 
         {/* Search Results */}
