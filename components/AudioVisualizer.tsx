@@ -3,6 +3,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePlayer } from '../contexts/PlayerContext'
 
+// Type definition for webkitAudioContext
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext
+  }
+}
+
 interface AudioVisualizerProps {
   className?: string
   type?: 'waveform' | 'spectrum' | 'bars'
@@ -28,7 +35,7 @@ export default function AudioVisualizer({
 
     const initAudioContext = async () => {
       try {
-        const context = new (window.AudioContext || (window as any).webkitAudioContext)()
+        const context = new (window.AudioContext || window.webkitAudioContext)()
         const analyserNode = context.createAnalyser()
         
         analyserNode.fftSize = 256

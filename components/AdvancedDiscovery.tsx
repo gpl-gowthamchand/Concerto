@@ -1,61 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Brain, 
-  Sparkles, 
   Music, 
-  Headphones, 
   Mic, 
-  Radio,
-  Disc3,
-  ListMusic,
-  Search,
-  Heart,
-  Share2,
-  Download,
-  Star,
-  TrendingUp,
-  Users,
-  Clock,
-  Calendar,
-  BarChart3,
-  Palette,
-  Smartphone,
-  Monitor,
-  Tablet,
-  Zap,
-  Play,
-  Pause,
-  SkipForward,
-  SkipBack,
-  Volume2,
-  Shuffle,
-  Repeat,
-  Settings,
   Target,
-  Lightbulb,
-  Cpu,
-  Database,
-  Globe,
-  Shield,
-  Filter,
-  Sliders,
+  Users,
   Activity,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Info,
-  RefreshCw,
-  GitBranch,
-  Code,
-  Package,
-  Rocket,
-  Terminal,
-  Layers,
-  GitPullRequest,
-  GitCommit,
-  GitMerge
+  CheckCircle
 } from 'lucide-react'
 
 interface DiscoveryFeature {
@@ -71,7 +24,7 @@ export default function AdvancedDiscovery() {
   const [activeFeature, setActiveFeature] = useState('ai-recommendations')
   const [isProcessing, setIsProcessing] = useState(false)
   const [currentMood, setCurrentMood] = useState('energetic')
-  const [aiConfidence, setAiConfidence] = useState(94)
+  const [aiConfidence] = useState(94)
   const [processingTime, setProcessingTime] = useState(0)
 
   const discoveryFeatures: DiscoveryFeature[] = [

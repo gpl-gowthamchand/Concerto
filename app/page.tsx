@@ -183,7 +183,7 @@ export default function Home() {
           <div className="container mx-auto px-4 py-16 text-center">
             <h2 className="text-4xl font-bold mb-4">More Features Coming</h2>
             <p className="text-xl text-gray-400 mb-8">
-              We're building something amazing. Stay tuned for the full Concerto experience.
+              We&apos;re building something amazing. Stay tuned for the full Concerto experience.
             </p>
             <div className="inline-block bg-primary-600 text-white px-6 py-3 rounded-full">
               🚀 Development in Progress

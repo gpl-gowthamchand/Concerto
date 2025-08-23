@@ -194,7 +194,7 @@ export default function Equalizer() {
                 onChange={(e) => handleBandChange(index, parseFloat(e.target.value))}
                 className="slider-vertical w-8 h-32 appearance-none bg-dark-600 rounded-lg cursor-pointer"
                 style={{
-                  writingMode: 'vertical-rl' as any,
+                  writingMode: 'vertical-rl' as 'vertical-rl',
                   WebkitAppearance: 'slider-vertical'
                 }}
               />
