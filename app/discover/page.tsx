@@ -11,6 +11,7 @@ import MoodPlaylists from '../../components/MoodPlaylists'
 import AdvancedUI from '../../components/AdvancedUI'
 import MobileOptimizations from '../../components/MobileOptimizations'
 import PerformanceFeatures from '../../components/PerformanceFeatures'
+import FinalPolish from '../../components/FinalPolish'
 
 export default function DiscoverPage() {
   const [currentSong, setCurrentSong] = useState<Song | undefined>()
@@ -115,6 +116,11 @@ export default function DiscoverPage() {
         {/* Performance Features */}
         <div className="mb-12">
           <PerformanceFeatures />
+        </div>
+
+        {/* Final Polish & Day 5 Completion */}
+        <div className="mb-12">
+          <FinalPolish />
         </div>
 
         {/* Search Results */}
