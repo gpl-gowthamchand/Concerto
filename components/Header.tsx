@@ -41,12 +41,7 @@ export default function Header() {
             <Link href="/analytics" className="text-gray-300 hover:text-white transition-colors">
               Analytics
             </Link>
-            <Link href="/day6" className="text-gray-300 hover:text-white transition-colors">
-              Day 6
-            </Link>
-            <Link href="/day7" className="text-gray-300 hover:text-white transition-colors">
-              Day 7
-            </Link>
+
           </nav>
 
           {/* Search Bar */}
@@ -145,12 +140,7 @@ export default function Header() {
               <Link href="/discover" className="text-gray-300 hover:text-white transition-colors">
                 Discover
               </Link>
-              <Link href="/day6" className="text-gray-300 hover:text-white transition-colors">
-                Day 6
-              </Link>
-              <Link href="/day7" className="text-gray-300 hover:text-white transition-colors">
-                Day 7
-              </Link>
+
               <div className="pt-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />

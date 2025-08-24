@@ -1,272 +1,106 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '../../components/Header'
-import MusicPlayer from '../../components/MusicPlayer'
-import SearchBar from '../../components/SearchBar'
-import { mockSongs, Song, getRandomSongs, getLikedSongs } from '../../lib/musicData'
-import AIRecommendations from '../../components/AIRecommendations'
-import SocialFeatures from '../../components/SocialFeatures'
-import MoodPlaylists from '../../components/MoodPlaylists'
-import AdvancedUI from '../../components/AdvancedUI'
-import MobileOptimizations from '../../components/MobileOptimizations'
-import PerformanceFeatures from '../../components/PerformanceFeatures'
-import FinalPolish from '../../components/FinalPolish'
+import { useAuth } from '@/contexts/AuthContext'
+import { usePlayer } from '@/contexts/PlayerContext'
+import AIRecommendations from '@/components/AIRecommendations'
+import SocialFeatures from '@/components/SocialFeatures'
+import MoodPlaylists from '@/components/MoodPlaylists'
+import AdvancedUI from '@/components/AdvancedUI'
+import MobileOptimizations from '@/components/MobileOptimizations'
+import PerformanceFeatures from '@/components/PerformanceFeatures'
+import FinalPolish from '@/components/FinalPolish'
+import AdvancedDiscovery from '@/components/AdvancedDiscovery'
+import MusicProductionStudio from '@/components/MusicProductionStudio'
+import ProfessionalDevOps from '@/components/ProfessionalDevOps'
+import BusinessIntelligence from '@/components/BusinessIntelligence'
 
 export default function DiscoverPage() {
-  const [currentSong, setCurrentSong] = useState<Song | undefined>()
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [searchResults, setSearchResults] = useState<Song[]>([])
-
-  const handlePlay = (song: Song) => {
-    setCurrentSong(song)
-    setIsPlaying(true)
-  }
+  const { user, isAuthenticated } = useAuth()
+  const { playerState } = usePlayer()
+  const [activeTab, setActiveTab] = useState('ai-recommendations')
 
   const handlePause = () => {
-    setIsPlaying(false)
+    // Handle pause functionality
   }
 
-  const handleNext = () => {
-    if (currentSong) {
-      const currentIndex = mockSongs.findIndex(song => song.id === currentSong.id)
-      const nextIndex = (currentIndex + 1) % mockSongs.length
-      setCurrentSong(mockSongs[nextIndex])
-    }
+  const handleAddToPlaylist = (song: any) => {
+    // Handle adding song to playlist
   }
 
-  const handlePrevious = () => {
-    if (currentSong) {
-      const currentIndex = mockSongs.findIndex(song => song.id === currentSong.id)
-      const prevIndex = currentIndex === 0 ? mockSongs.length - 1 : currentIndex - 1
-      setCurrentSong(mockSongs[prevIndex])
-    }
-  }
+  const tabs = [
+    { id: 'ai-recommendations', name: '🤖 AI Recommendations', component: AIRecommendations },
+    { id: 'social-features', name: '👥 Social Features', component: SocialFeatures },
+    { id: 'mood-playlists', name: '🎭 Mood Playlists', component: MoodPlaylists },
+    { id: 'advanced-ui', name: '✨ Advanced UI', component: AdvancedUI },
+    { id: 'mobile-optimizations', name: '📱 Mobile Features', component: MobileOptimizations },
+    { id: 'performance-features', name: '⚡ Performance', component: PerformanceFeatures },
+    { id: 'final-polish', name: '🎯 Quality Assurance', component: FinalPolish },
+    { id: 'ai-discovery', name: '🧠 AI Discovery Engine', component: AdvancedDiscovery },
+    { id: 'production-studio', name: '🎛️ Music Production Studio', component: MusicProductionStudio },
+    { id: 'devops', name: '🚀 DevOps & Deployment', component: ProfessionalDevOps },
+    { id: 'business-intelligence', name: '📊 Business Intelligence', component: BusinessIntelligence }
+  ]
 
-  const handleSearch = (query: string, filters: any) => {
-    const results = mockSongs.filter(song => {
-      const matchesQuery = song.title.toLowerCase().includes(query.toLowerCase()) ||
-                          song.artist.toLowerCase().includes(query.toLowerCase()) ||
-                          song.album.toLowerCase().includes(query.toLowerCase())
-      
-      const matchesFilters = (filters.songs && song.genre) ||
-                            (filters.artists && song.artist) ||
-                            (filters.albums && song.album)
-      
-      return matchesQuery && matchesFilters
-    })
-    
-    setSearchResults(results)
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Authentication Required</h1>
+          <p className="text-gray-600 mb-6">Please sign in to access the discover features.</p>
+          <a href="/auth/login" className="btn-primary">Sign In</a>
+        </div>
+      </div>
+    )
   }
-
-  const handleLike = (songId: string) => {
-    console.log('Liked song:', songId)
-  }
-
-  const handleAddToPlaylist = (song: Song) => {
-    console.log('Add to playlist:', song.title)
-  }
-
-  const recommendedSongs = getRandomSongs(mockSongs, 6)
-  const likedSongs = getLikedSongs(mockSongs).slice(0, 4)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-primary-900">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8 pb-32">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Discover Music</h1>
-          <p className="text-gray-400">
-            Find new music, explore different genres, and discover your next favorite song.
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            🎵 Discover Amazing Music & Features
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Explore AI-powered recommendations, social features, mood-based playlists, and advanced music production tools.
           </p>
         </div>
 
-        {/* Search Section */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white mb-4">Search & Explore</h2>
-          <SearchBar onSearch={handleSearch} className="max-w-2xl" />
-        </div>
-
-        {/* AI Recommendations */}
-        <div className="mb-12">
-          <AIRecommendations />
-        </div>
-
-        {/* Social Features */}
-        <div className="mb-12">
-          <SocialFeatures />
-        </div>
-
-        {/* Mood-Based Playlists */}
-        <div className="mb-12">
-          <MoodPlaylists />
-        </div>
-
-        {/* Advanced UI Components */}
-        <div className="mb-12">
-          <AdvancedUI />
-        </div>
-
-        {/* Mobile Optimizations */}
-        <div className="mb-12">
-          <MobileOptimizations />
-        </div>
-
-        {/* Performance Features */}
-        <div className="mb-12">
-          <PerformanceFeatures />
-        </div>
-
-        {/* Final Polish & Day 5 Completion */}
-        <div className="mb-12">
-          <FinalPolish />
-        </div>
-
-        {/* Search Results */}
-        {searchResults.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-white mb-4">Search Results</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {searchResults.map(song => (
-                <div key={song.id} className="bg-dark-800 rounded-lg p-4 border border-dark-700 hover:border-dark-600 transition-colors">
-                  <div className="text-center space-y-3">
-                    <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold text-2xl">🎵</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-white truncate">{song.title}</h4>
-                      <p className="text-gray-400 text-sm truncate">{song.artist}</p>
-                      <p className="text-gray-500 text-xs truncate">{song.album}</p>
-                    </div>
-                    <div className="flex justify-center space-x-2">
-                      <button
-                        onClick={() => handlePlay(song)}
-                        className="p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-full transition-colors"
-                      >
-                        <span className="text-sm">▶</span>
-                      </button>
-                      <button
-                        onClick={() => handleLike(song.id)}
-                        className={`p-2 rounded-full transition-colors ${
-                          song.isLiked 
-                            ? 'text-red-500 hover:text-red-400' 
-                            : 'text-gray-400 hover:text-white'
-                        }`}
-                      >
-                        <span className="text-sm">❤</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* Navigation Tabs */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="flex flex-wrap justify-center lg:justify-start px-6 overflow-x-auto">
+              {tabs.map((tab) => {
+                const Icon = tab.component
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`py-4 px-4 border-b-2 font-medium text-sm whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    {tab.name}
+                  </button>
+                )
+              })}
+            </nav>
           </div>
-        )}
 
-        {/* Recommended for You */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white mb-4">Recommended for You</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {recommendedSongs.map(song => (
-              <div key={song.id} className="bg-dark-800 rounded-lg p-4 border border-dark-700 hover:border-dark-600 transition-colors">
-                <div className="text-center space-y-3">
-                  <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-2xl">🎵</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-white truncate">{song.title}</h4>
-                    <p className="text-gray-400 text-sm truncate">{song.artist}</p>
-                    <p className="text-gray-500 text-xs truncate">{song.album}</p>
-                  </div>
-                  <div className="flex justify-center space-x-2">
-                    <button
-                      onClick={() => handlePlay(song)}
-                      className="p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-full transition-colors"
-                    >
-                      <span className="text-sm">▶</span>
-                    </button>
-                    <button
-                      onClick={() => handleLike(song.id)}
-                      className={`p-2 rounded-full transition-colors ${
-                        song.isLiked 
-                          ? 'text-red-500 hover:text-red-400' 
-                          : 'text-gray-400 hover:text-white'
-                      }`}
-                    >
-                      <span className="text-sm">❤</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="p-6">
+            {tabs.map((tab) => {
+              if (activeTab === tab.id) {
+                const Component = tab.component
+                return <Component key={tab.id} />
+              }
+              return null
+            })}
           </div>
         </div>
-
-        {/* Based on Your Likes */}
-        {likedSongs.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-white mb-4">Based on Your Likes</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {likedSongs.map(song => (
-                <div key={song.id} className="bg-dark-800 rounded-lg p-4 border border-dark-700 hover:border-dark-600 transition-colors">
-                  <div className="text-center space-y-3">
-                    <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold text-2xl">🎵</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-white truncate">{song.title}</h4>
-                      <p className="text-gray-400 text-sm truncate">{song.artist}</p>
-                      <p className="text-gray-500 text-xs truncate">{song.album}</p>
-                    </div>
-                    <div className="flex justify-center space-x-2">
-                      <button
-                        onClick={() => handlePlay(song)}
-                        className="p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-full transition-colors"
-                      >
-                        <span className="text-sm">▶</span>
-                      </button>
-                      <button
-                        onClick={() => handleLike(song.id)}
-                        className="p-2 text-red-500 hover:text-red-400 rounded-full transition-colors"
-                      >
-                        <span className="text-sm">❤</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Genre Exploration */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white mb-4">Explore Genres</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {['Rock', 'Pop', 'Jazz', 'Classical', 'Hip Hop', 'Electronic', 'Country', 'Blues'].map(genre => (
-              <div key={genre} className="bg-dark-800 rounded-lg p-6 border border-dark-700 hover:border-primary-500 transition-colors cursor-pointer group">
-                <div className="text-center space-y-3">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <span className="text-white font-bold text-xl">🎵</span>
-                  </div>
-                  <h3 className="font-medium text-white group-hover:text-primary-400 transition-colors">{genre}</h3>
-                  <p className="text-gray-400 text-sm">Discover {genre} music</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </main>
-
-      {/* Music Player */}
-      <MusicPlayer
-        currentSong={currentSong}
-        isPlaying={isPlaying}
-        onPlayPause={() => setIsPlaying(!isPlaying)}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-      />
+      </div>
     </div>
   )
 }
