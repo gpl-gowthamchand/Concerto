@@ -41,8 +41,11 @@ export default function Header() {
             <Link href="/analytics" className="text-gray-300 hover:text-white transition-colors">
               Analytics
             </Link>
-            <Link href="/analytics" className="text-gray-300 hover:text-white transition-colors">
-              Analytics
+            <Link href="/day6" className="text-gray-300 hover:text-white transition-colors">
+              Day 6
+            </Link>
+            <Link href="/day7" className="text-gray-300 hover:text-white transition-colors">
+              Day 7
             </Link>
           </nav>
 
@@ -141,6 +144,12 @@ export default function Header() {
               </Link>
               <Link href="/discover" className="text-gray-300 hover:text-white transition-colors">
                 Discover
+              </Link>
+              <Link href="/day6" className="text-gray-300 hover:text-white transition-colors">
+                Day 6
+              </Link>
+              <Link href="/day7" className="text-gray-300 hover:text-white transition-colors">
+                Day 7
               </Link>
               <div className="pt-4">
                 <div className="relative">
