@@ -6,9 +6,7 @@ import {
   Music, 
   Mic, 
   Target,
-  Users,
-  Activity,
-  CheckCircle
+  Users
 } from 'lucide-react'
 
 interface DiscoveryFeature {

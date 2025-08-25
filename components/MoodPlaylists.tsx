@@ -1,22 +1,30 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { usePlayer } from '../contexts/PlayerContext'
 import { 
-  Heart, 
   Zap, 
   Coffee, 
-  Moon, 
+  Heart, 
   Sun, 
+  Moon, 
   Cloud, 
-  Play,
-  Plus,
-  Shuffle,
+  Play, 
   Clock,
-  Music2,
+  Music,
   Sparkles
 } from 'lucide-react'
 import { mockSongs } from '../lib/musicData'
+
+interface Song {
+  id: string
+  title: string
+  artist: string
+  album: string
+  duration: number
+  genre: string
+  energy: number
+  tempo: number
+}
 
 interface Mood {
   id: string
@@ -32,7 +40,7 @@ interface Mood {
 interface MoodPlaylist {
   id: string
   mood: string
-  songs: any[]
+  songs: Song[]
   duration: number
   energy: number
   createdAt: string
@@ -40,7 +48,6 @@ interface MoodPlaylist {
 }
 
 export default function MoodPlaylists() {
-  const { playerState } = usePlayer()
   const [selectedMood, setSelectedMood] = useState<string>('')
   const [playlists, setPlaylists] = useState<MoodPlaylist[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
@@ -261,7 +268,7 @@ export default function MoodPlaylists() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-gradient-to-r from-primary-600 to-purple-600 rounded-lg flex items-center justify-center">
-                    <Music2 className="w-6 h-6 text-white" />
+                    <Music className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h4 className="text-lg font-semibold text-white">{playlist.mood} Vibes</h4>

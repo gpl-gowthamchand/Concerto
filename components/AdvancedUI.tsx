@@ -7,7 +7,6 @@ import {
   Star, 
   Heart, 
   Play, 
-  Pause,
   SkipForward,
   SkipBack,
   Volume2,
@@ -29,7 +28,6 @@ export default function AdvancedUI() {
   const [isVisible, setIsVisible] = useState(false)
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
   const [activeAnimation, setActiveAnimation] = useState<string>('')
-  const [particleCount, setParticleCount] = useState(0)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -148,7 +146,6 @@ export default function AdvancedUI() {
     setActiveAnimation(cardId)
     
     // Add particles
-    setParticleCount(prev => prev + 10)
   }
 
   const handleCardLeave = () => {

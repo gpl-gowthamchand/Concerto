@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { usePlayer } from '../contexts/PlayerContext'
-import { useAuth } from '../contexts/AuthContext'
 import { 
   Brain, 
   Sparkles, 
@@ -13,7 +11,6 @@ import {
   Plus,
   MoreHorizontal
 } from 'lucide-react'
-import { mockSongs } from '../lib/musicData'
 
 interface Recommendation {
   id: string
@@ -28,8 +25,6 @@ interface Recommendation {
 }
 
 export default function AIRecommendations() {
-  const { playerState } = usePlayer()
-  const { user } = useAuth()
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedMood, setSelectedMood] = useState<string>('all')

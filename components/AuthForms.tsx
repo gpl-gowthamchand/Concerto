@@ -93,7 +93,7 @@ export default function AuthForms({
             : 'Failed to create account. Please try again.'
         })
       }
-    } catch (error) {
+    } catch {
       setErrors({
         general: 'An unexpected error occurred. Please try again.'
       })

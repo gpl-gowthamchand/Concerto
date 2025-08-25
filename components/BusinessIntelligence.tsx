@@ -1,77 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { 
   BarChart3, 
   TrendingUp, 
   Users, 
   Music, 
-  Headphones, 
-  Mic, 
-  Radio,
-  Disc3,
   ListMusic,
-  Search,
-  Heart,
   Share2,
-  Download,
-  Star,
-  Play,
-  Pause,
-  SkipForward,
-  SkipBack,
-  Volume2,
-  Shuffle,
-  Repeat,
-  Settings,
-  Target,
-  Lightbulb,
-  Cpu,
-  Database,
-  Globe,
-  Shield,
-  Filter,
-  Sliders,
-  Activity,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Info,
-  RefreshCw,
-  GitBranch,
-  Code,
-  Package,
-  Rocket,
-  Terminal,
-  Layers,
-  GitPullRequest,
-  GitCommit,
-  GitMerge,
-  Calendar,
-  Clock,
-  DollarSign,
-  PieChart,
-  LineChart,
-  BarChart,
-  AreaChart,
-  ScatterChart,
-  MapPin,
-  Globe2,
-  Smartphone,
-  Monitor,
-  Tablet,
-  Wifi,
-  Battery,
-  Signal,
-  Lock,
-  Unlock,
-  Eye,
-  EyeOff,
-  Sun,
-  Moon,
-  Palette,
-  User,
-  Bell
+  DollarSign
 } from 'lucide-react'
 
 interface AnalyticsMetric {
@@ -91,8 +28,6 @@ interface ChartData {
 
 export default function BusinessIntelligence() {
   const [activeTab, setActiveTab] = useState('overview')
-  const [timeRange, setTimeRange] = useState('7d')
-  const [refreshInterval, setRefreshInterval] = useState(30)
 
   const analyticsMetrics: AnalyticsMetric[] = [
     {
@@ -109,7 +44,7 @@ export default function BusinessIntelligence() {
       value: '847K',
       change: 8.3,
       trend: 'up',
-      icon: <Activity className="w-6 h-6" />
+      icon: <Users className="w-6 h-6" /> // Changed from Activity to Users as Activity is removed
     },
     {
       id: 'revenue',

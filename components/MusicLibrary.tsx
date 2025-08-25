@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Grid3X3, List, Filter, SortAsc, SortDesc } from 'lucide-react'
+import { Grid3X3, List, SortAsc, SortDesc } from 'lucide-react'
 import SongCard from './SongCard'
 
 interface Song {
@@ -62,15 +62,15 @@ export default function MusicLibrary({
       return matchesSearch && matchesGenre
     })
     .sort((a, b) => {
-      let aValue: any = a[sortField]
-      let bValue: any = b[sortField]
+      let aValue: string | number = a[sortField] || ''
+      let bValue: string | number = b[sortField] || ''
       
       if (sortField === 'duration') {
-        aValue = aValue || 0
-        bValue = bValue || 0
+        aValue = (aValue as number) || 0
+        bValue = (bValue as number) || 0
       } else if (sortField === 'year') {
-        aValue = aValue || 0
-        bValue = bValue || 0
+        aValue = (aValue as number) || 0
+        bValue = (bValue as number) || 0
       } else {
         aValue = (aValue || '').toString().toLowerCase()
         bValue = (bValue || '').toString().toLowerCase()

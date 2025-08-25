@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Smartphone, 
   Hand, 
@@ -11,9 +11,7 @@ import {
   Wifi,
   Battery,
   Signal,
-  Volume2,
   Play,
-  Pause,
   SkipForward,
   SkipBack,
   Heart,
@@ -31,7 +29,6 @@ interface TouchGesture {
 }
 
 export default function MobileOptimizations() {
-  const [isMobile, setIsMobile] = useState(false)
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
   const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null)
   const [swipeDirection, setSwipeDirection] = useState<string>('')
@@ -41,17 +38,6 @@ export default function MobileOptimizations() {
   const [batteryLevel, setBatteryLevel] = useState(85)
   const [signalStrength, setSignalStrength] = useState(4)
   const [wifiStrength, setWifiStrength] = useState(3)
-
-  // Detect mobile device
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
 
   // Touch gesture handling
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -382,7 +368,7 @@ export default function MobileOptimizations() {
             title: 'Offline Support',
             description: 'Download music for offline listening anywhere'
           }
-        ].map((feature, index) => (
+        ].map((feature) => (
           <div
             key={feature.title}
             className="bg-dark-800 rounded-xl border border-dark-700 p-6 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg"
