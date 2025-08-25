@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Search, Filter, X, Music, User, Disc3 } from 'lucide-react'
 
 interface SearchResult {
@@ -42,13 +42,13 @@ export default function SearchBar({
   const searchRef = useRef<HTMLDivElement>(null)
 
   // Mock search suggestions
-  const mockSuggestions: SearchResult[] = [
+  const mockSuggestions = useCallback((): SearchResult[] => [
     { id: '1', type: 'song', title: 'Bohemian Rhapsody', subtitle: 'Queen', icon: <Music className="w-4 h-4" /> },
     { id: '2', type: 'artist', title: 'Queen', subtitle: 'Rock Band', icon: <User className="w-4 h-4" /> },
     { id: '3', type: 'album', title: 'A Night at the Opera', subtitle: 'Queen', icon: <Disc3 className="w-4 h-4" /> },
     { id: '4', type: 'song', title: 'Hotel California', subtitle: 'Eagles', icon: <Music className="w-4 h-4" /> },
     { id: '5', type: 'artist', title: 'Eagles', subtitle: 'Rock Band', icon: <User className="w-4 h-4" /> },
-  ]
+  ], [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -63,7 +63,7 @@ export default function SearchBar({
 
   useEffect(() => {
     if (query.trim()) {
-      const filtered = mockSuggestions.filter(item =>
+      const filtered = mockSuggestions().filter(item =>
         item.title.toLowerCase().includes(query.toLowerCase()) ||
         item.subtitle.toLowerCase().includes(query.toLowerCase())
       )
@@ -71,7 +71,7 @@ export default function SearchBar({
     } else {
       setSuggestions([])
     }
-  }, [query])
+  }, [query, mockSuggestions])
 
   const handleSearch = () => {
     if (query.trim()) {

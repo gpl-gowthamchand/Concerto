@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { usePlayer } from '../contexts/PlayerContext'
 
 // Type definition for webkitAudioContext
@@ -62,7 +62,7 @@ export default function AudioVisualizer({
         audioContext.close()
       }
     }
-  }, [playerState.currentSong, playerState.isPlaying])
+  }, [playerState.currentSong, playerState.isPlaying, audioContext])
 
   useEffect(() => {
     if (!canvasRef.current || !analyser || !dataArray) return
@@ -77,7 +77,7 @@ export default function AudioVisualizer({
 
       // Get frequency data
       if (dataArray) {
-        analyser.getByteFrequencyData(dataArray as any)
+        analyser.getByteFrequencyData(dataArray)
       }
 
       // Clear canvas
@@ -181,7 +181,7 @@ export default function AudioVisualizer({
   }
 
   // Generate mock data for demo when audio context is not available
-  const generateMockData = () => {
+  const generateMockData = useCallback(() => {
     if (!canvasRef.current) return
 
     const canvas = canvasRef.current
@@ -201,7 +201,7 @@ export default function AudioVisualizer({
     } else if (type === 'spectrum') {
       drawSpectrum(ctx, mockData, width, height, color)
     }
-  }
+  }, [type, color])
 
   useEffect(() => {
     if (!audioContext && playerState.isPlaying) {
@@ -209,7 +209,7 @@ export default function AudioVisualizer({
       const interval = setInterval(generateMockData, 100)
       return () => clearInterval(interval)
     }
-  }, [audioContext, playerState.isPlaying])
+  }, [audioContext, playerState.isPlaying, generateMockData])
 
   return (
     <div className={`audio-visualizer ${className}`}>

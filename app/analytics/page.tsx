@@ -2,24 +2,14 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { usePlayer } from '@/contexts/PlayerContext'
 import AudioVisualizer from '@/components/AudioVisualizer'
 import Equalizer from '@/components/Equalizer'
 import MusicAnalytics from '@/components/MusicAnalytics'
 import ProductionTesting from '@/components/ProductionTesting'
 
 export default function AnalyticsPage() {
-  const { user, isAuthenticated } = useAuth()
-  const { playerState } = usePlayer()
+  const { isAuthenticated } = useAuth()
   const [activeTab, setActiveTab] = useState('audio-visualizer')
-
-  const handlePlay = (song: any) => {
-    // Handle play functionality
-  }
-
-  const handlePause = () => {
-    // Handle pause functionality
-  }
 
   const tabs = [
     { id: 'audio-visualizer', name: '🎵 Audio Visualizer', component: AudioVisualizer },

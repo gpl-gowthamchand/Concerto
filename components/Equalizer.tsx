@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { Settings, RotateCcw, Volume2 } from 'lucide-react'
 
 interface EqualizerBand {
@@ -194,7 +194,7 @@ export default function Equalizer() {
                 onChange={(e) => handleBandChange(index, parseFloat(e.target.value))}
                 className="slider-vertical w-8 h-32 appearance-none bg-dark-600 rounded-lg cursor-pointer"
                 style={{
-                  writingMode: 'vertical-rl' as 'vertical-rl',
+                  writingMode: 'vertical-rl',
                   WebkitAppearance: 'slider-vertical'
                 }}
               />

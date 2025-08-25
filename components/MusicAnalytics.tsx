@@ -1,18 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { usePlayer } from '../contexts/PlayerContext'
-import { useAuth } from '../contexts/AuthContext'
 import { 
-  BarChart3, 
   Clock, 
-  Heart, 
   TrendingUp, 
   Music, 
-  Calendar,
-  Play,
-  SkipForward,
-  Repeat
+  Play
 } from 'lucide-react'
 import { mockSongs } from '../lib/musicData'
 
@@ -38,8 +31,6 @@ interface ArtistStats {
 }
 
 export default function MusicAnalytics() {
-  const { playerState } = usePlayer()
-  const { user } = useAuth()
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d')
   const [listeningSessions, setListeningSessions] = useState<ListeningSession[]>([])
   const [genreStats, setGenreStats] = useState<GenreStats[]>([])
@@ -152,16 +143,6 @@ export default function MusicAnalytics() {
     return `${value.toFixed(1)}%`
   }
 
-  const getTimeRangeLabel = (range: string) => {
-    switch (range) {
-      case '7d': return 'Last 7 days'
-      case '30d': return 'Last 30 days'
-      case '90d': return 'Last 90 days'
-      case '1y': return 'Last year'
-      default: return 'Last 30 days'
-    }
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -173,7 +154,7 @@ export default function MusicAnalytics() {
         
         <select
           value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value as any)}
+          onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d' | '1y')}
           className="px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           <option value="7d">Last 7 days</option>

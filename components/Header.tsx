@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, User, Menu, X, Settings, LogOut } from 'lucide-react'
+import { Search, Menu, X, Settings, LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 

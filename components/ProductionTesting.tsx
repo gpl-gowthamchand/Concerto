@@ -7,14 +7,11 @@ import {
   AlertTriangle, 
   Info, 
   Play, 
-  Pause, 
   RefreshCw, 
   Zap, 
   Shield, 
-  Globe, 
   Search, 
   TrendingUp, 
-  BarChart3, 
   Rocket, 
   Download
 } from 'lucide-react'
@@ -29,7 +26,6 @@ interface TestResult {
 }
 
 export default function ProductionTesting() {
-  const [activeTab, setActiveTab] = useState('testing')
   const [testResults, setTestResults] = useState<TestResult[]>([])
   const [isRunningTests, setIsRunningTests] = useState(false)
   const [overallScore, setOverallScore] = useState(0)
