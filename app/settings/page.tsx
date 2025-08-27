@@ -6,10 +6,8 @@ import { useEffect } from 'react'
 import Header from '../../components/Header'
 import { useAuth } from '../../contexts/AuthContext'
 import { 
-  User, 
   Palette, 
   Bell, 
-  Globe, 
   Music, 
   Shield, 
   LogOut,
@@ -49,9 +47,9 @@ export default function SettingsPage() {
         highQuality: preferences.highQuality
       })
     }
-  }, [user])
+  }, [user, preferences.autoPlay, preferences.crossfade, preferences.highQuality])
 
-  const handlePreferenceChange = (key: string, value: any) => {
+  const handlePreferenceChange = (key: string, value: string | boolean) => {
     setPreferences(prev => ({ ...prev, [key]: value }))
   }
 

@@ -15,10 +15,6 @@ export default function PlaylistsPage() {
     setIsPlaying(true)
   }
 
-  const handlePause = () => {
-    setIsPlaying(false)
-  }
-
   const handleNext = () => {
     if (currentSong) {
       const currentIndex = mockSongs.findIndex(song => song.id === currentSong.id)
@@ -30,17 +26,13 @@ export default function PlaylistsPage() {
   const handlePrevious = () => {
     if (currentSong) {
       const currentIndex = mockSongs.findIndex(song => song.id === currentSong.id)
-      const prevIndex = currentIndex === 0 ? mockSongs.length - 1 : currentIndex - 1
-      setCurrentSong(mockSongs[currentIndex])
+      const nextIndex = currentIndex === 0 ? mockSongs.length - 1 : currentIndex - 1
+      setCurrentSong(mockSongs[nextIndex])
     }
   }
 
   const handleLike = (songId: string) => {
     console.log('Liked song:', songId)
-  }
-
-  const handleAddToPlaylist = (song: Song) => {
-    console.log('Add to playlist:', song.title)
   }
 
   const getPlaylistSongs = (playlist: Playlist): Song[] => {

@@ -11,7 +11,9 @@ import {
   Play, 
   Clock,
   Music,
-  Sparkles
+  Sparkles,
+  Shuffle,
+  Plus
 } from 'lucide-react'
 import { mockSongs } from '../lib/musicData'
 

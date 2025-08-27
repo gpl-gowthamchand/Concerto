@@ -1,70 +1,13 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Music, 
   Mic, 
-  Headphones, 
-  Volume2, 
-  Settings, 
-  Play, 
-  Pause, 
-  SkipForward, 
-  SkipBack,
-  Shuffle, 
-  Repeat, 
-  Heart, 
-  Share2, 
-  Download, 
-  Star, 
-  TrendingUp, 
   Users, 
-  Clock, 
-  Calendar, 
-  BarChart3, 
-  Palette, 
-  Smartphone, 
-  Monitor, 
-  Tablet, 
-  Wifi, 
-  Battery, 
-  Signal, 
-  Lock, 
-  Unlock, 
-  Eye, 
-  EyeOff, 
-  Sun, 
-  Moon,
   Zap,
-  Target,
-  Lightbulb,
-  Cpu,
-  Database,
-  Globe,
-  Shield,
-  Filter,
   Sliders,
-  Activity,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Info,
-  RefreshCw,
-  GitBranch,
-  Code,
-  Package,
-  Rocket,
-  Terminal,
-  Layers,
-  GitPullRequest,
-  GitCommit,
-  GitMerge,
-  Disc3,
-  Radio,
-  ListMusic,
-  Search,
-  User,
-  Bell
+  CheckCircle
 } from 'lucide-react'
 
 interface ProductionFeature {
@@ -80,8 +23,7 @@ export default function MusicProductionStudio() {
   const [activeFeature, setActiveFeature] = useState('recording')
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
-  const [currentBPM, setCurrentBPM] = useState(120)
-  const [metronomeActive, setMetronomeActive] = useState(false)
+
 
   const productionFeatures: ProductionFeature[] = [
     {

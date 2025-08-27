@@ -40,7 +40,7 @@ export default function Home() {
     }
   }
 
-  const handleSearch = (query: string, filters: any) => {
+  const handleSearch = (query: string, filters: { songs?: boolean; artists?: boolean; albums?: boolean }) => {
     const results = mockSongs.filter(song => {
       const matchesQuery = song.title.toLowerCase().includes(query.toLowerCase()) ||
                           song.artist.toLowerCase().includes(query.toLowerCase()) ||
