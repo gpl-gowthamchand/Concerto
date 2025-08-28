@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import {
   Play,
   Pause,
@@ -206,9 +207,11 @@ export default function RealMusicPlayer({
             {/* Track Info */}
             <div className="flex items-center space-x-4 flex-1 min-w-0">
               <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                <img
+                <Image
                   src={currentTrack.thumbnail}
                   alt={currentTrack.title}
+                  width={64}
+                  height={64}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -409,9 +412,11 @@ export default function RealMusicPlayer({
                     onClick={() => onTrackSelect(track)}
                   >
                     <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0">
-                      <img
+                      <Image
                         src={track.thumbnail}
                         alt={track.title}
+                        width={40}
+                        height={40}
                         className="w-full h-full object-cover"
                       />
                     </div>

@@ -76,7 +76,7 @@ export default function AudioVisualizer({
         audioContext.close()
       }
     }
-  }, [playerState.currentSong, playerState.isPlaying, audioElement])
+  }, [playerState.currentSong, playerState.isPlaying, audioElement, audioContext])
 
   useEffect(() => {
     if (!canvasRef.current || !analyser || !dataArray) return

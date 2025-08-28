@@ -37,7 +37,16 @@ interface SearchResult {
   subtitle: string
   description: string
   relevance: number
-  metadata: Record<string, unknown>
+  metadata: {
+    genre?: string
+    mood?: string
+    duration?: number
+    year?: number
+    bpm?: number
+    popularity?: number
+    matchedFields?: string[]
+    [key: string]: unknown
+  }
   actions: string[]
   lyricMatch?: {
     text: string
@@ -346,35 +355,35 @@ export default function SmartSearch({
       }
       
       if (searchFilters.genre.length > 0) {
-        const resultGenre = (result.metadata as any).genre?.toLowerCase()
+        const resultGenre = result.metadata.genre?.toLowerCase()
         if (!resultGenre || !searchFilters.genre.some(g => g.toLowerCase() === resultGenre)) {
           return false
         }
       }
       
       if (searchFilters.mood.length > 0) {
-        const resultMood = (result.metadata as any).mood?.toLowerCase()
+        const resultMood = result.metadata.mood?.toLowerCase()
         if (!resultMood || !searchFilters.mood.some(m => m.toLowerCase() === resultMood)) {
           return false
         }
       }
       
-      if ((result.metadata as any).duration) {
-        const duration = (result.metadata as any).duration
+      if (result.metadata.duration) {
+        const duration = result.metadata.duration
         if (duration < searchFilters.duration.min || duration > searchFilters.duration.max) {
           return false
         }
       }
       
-      if ((result.metadata as any).year) {
-        const year = (result.metadata as any).year
+      if (result.metadata.year) {
+        const year = result.metadata.year
         if (year < searchFilters.year.min || year > searchFilters.year.max) {
           return false
         }
       }
       
-      if ((result.metadata as any).bpm) {
-        const bpm = (result.metadata as any).bpm
+      if (result.metadata.bpm) {
+        const bpm = result.metadata.bpm
         if (bpm < searchFilters.bpm.min || bpm > searchFilters.bpm.max) {
           return false
         }
@@ -402,10 +411,10 @@ export default function SmartSearch({
           comparison = a.subtitle.localeCompare(b.subtitle)
           break
         case 'year':
-          comparison = ((b.metadata as any).year || 0) - ((a.metadata as any).year || 0)
+          comparison = (b.metadata.year || 0) - (a.metadata.year || 0)
           break
         case 'popularity':
-          comparison = ((b.metadata as any).popularity || 0) - ((a.metadata as any).popularity || 0)
+          comparison = (b.metadata.popularity || 0) - (a.metadata.popularity || 0)
           break
       }
       

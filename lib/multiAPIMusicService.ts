@@ -344,9 +344,10 @@ class MultiAPIMusicService {
   }
 
   // Get unified track by ID
-  async getTrackById(_id: string): Promise<UnifiedTrack | null> {
+  async getTrackById(id: string): Promise<UnifiedTrack | null> {
     // This would need to be implemented based on the source
     // For now, return null
+    console.log(`Getting track by ID: ${id}`)
     return null
   }
 }

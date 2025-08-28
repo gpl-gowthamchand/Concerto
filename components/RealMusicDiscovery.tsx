@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import {
   Search,
   TrendingUp,
@@ -396,9 +397,11 @@ export default function RealMusicDiscovery({
                       
                       {/* Track Thumbnail */}
                       <div className={`${viewMode === 'list' ? 'w-16 h-16' : 'w-full h-48'} rounded-lg overflow-hidden flex-shrink-0`}>
-                        <img
+                        <Image
                           src={track.thumbnail}
                           alt={track.title}
+                          width={400}
+                          height={400}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
                         />
                       </div>
