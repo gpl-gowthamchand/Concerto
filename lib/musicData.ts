@@ -9,6 +9,10 @@ export interface Song {
   genre?: string
   year?: number
   url?: string
+  audioUrl?: string
+  lyrics?: string
+  plays?: number
+  addedDate?: string
 }
 
 export interface Artist {
