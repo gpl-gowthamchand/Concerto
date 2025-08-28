@@ -19,17 +19,17 @@ export default function DiscoverPage() {
   const [activeTab, setActiveTab] = useState('ai-recommendations')
 
   const tabs = [
-    { id: 'ai-recommendations', name: '🤖 AI Recommendations', component: AIRecommendations },
-    { id: 'social-features', name: '👥 Social Features', component: SocialFeatures },
-    { id: 'mood-playlists', name: '🎭 Mood Playlists', component: MoodPlaylists },
-    { id: 'advanced-ui', name: '✨ Advanced UI', component: AdvancedUI },
-    { id: 'mobile-optimizations', name: '📱 Mobile Features', component: MobileOptimizations },
-    { id: 'performance-features', name: '⚡ Performance', component: PerformanceFeatures },
-    { id: 'final-polish', name: '🎯 Quality Assurance', component: FinalPolish },
-    { id: 'ai-discovery', name: '🧠 AI Discovery Engine', component: AdvancedDiscovery },
-    { id: 'production-studio', name: '🎛️ Music Production Studio', component: MusicProductionStudio },
-    { id: 'devops', name: '🚀 DevOps & Deployment', component: ProfessionalDevOps },
-    { id: 'business-intelligence', name: '📊 Business Intelligence', component: BusinessIntelligence }
+    { id: 'ai-recommendations', name: '🤖 AI Recommendations', component: AIRecommendations, needsSongProps: true },
+    { id: 'social-features', name: '👥 Social Features', component: SocialFeatures, needsSongProps: false },
+    { id: 'mood-playlists', name: '🎭 Mood Playlists', component: MoodPlaylists, needsSongProps: false },
+    { id: 'advanced-ui', name: '✨ Advanced UI', component: AdvancedUI, needsSongProps: false },
+    { id: 'mobile-optimizations', name: '📱 Mobile Features', component: MobileOptimizations, needsSongProps: false },
+    { id: 'performance-features', name: '⚡ Performance', component: PerformanceFeatures, needsSongProps: false },
+    { id: 'final-polish', name: '🎯 Quality Assurance', component: FinalPolish, needsSongProps: false },
+    { id: 'ai-discovery', name: '🧠 AI Discovery Engine', component: AdvancedDiscovery, needsSongProps: false },
+    { id: 'production-studio', name: '🎛️ Music Production Studio', component: MusicProductionStudio, needsSongProps: false },
+    { id: 'devops', name: '🚀 DevOps & Deployment', component: ProfessionalDevOps, needsSongProps: false },
+    { id: 'business-intelligence', name: '📊 Business Intelligence', component: BusinessIntelligence, needsSongProps: false }
   ]
 
   if (!isAuthenticated) {
@@ -84,7 +84,10 @@ export default function DiscoverPage() {
                 if (tab.id === 'production-studio') {
                   return <Component key={tab.id} onSave={() => {}} onExport={() => {}} />
                 }
-                return <Component key={tab.id} onSongSelect={() => {}} onPlaylistCreate={() => {}} />
+                if (tab.needsSongProps) {
+                  return <Component key={tab.id} onSongSelect={() => {}} onPlaylistCreate={() => {}} />
+                }
+                return <Component key={tab.id} />
               }
               return null
             })}
