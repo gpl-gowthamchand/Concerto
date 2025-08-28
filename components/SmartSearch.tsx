@@ -24,7 +24,8 @@ import {
   Grid3X3,
   List,
   SortAsc,
-  SortDesc
+  SortDesc,
+  Quote
 } from 'lucide-react'
 import { Song, mockSongs } from '../lib/musicData'
 import { FadeIn, SlideIn, StaggeredList, StaggeredItem } from './PageTransition'
@@ -38,6 +39,11 @@ interface SearchResult {
   relevance: number
   metadata: Record<string, unknown>
   actions: string[]
+  lyricMatch?: {
+    text: string
+    position: number
+    context: string
+  }
 }
 
 interface SearchFilter {
@@ -79,6 +85,7 @@ export default function SmartSearch({
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortBy, setSortBy] = useState<'relevance' | 'title' | 'artist' | 'year' | 'popularity'>('relevance')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [searchMode, setSearchMode] = useState<'general' | 'lyrics'>('general')
 
   // Initialize with mock search history and AI suggestions
   useEffect(() => {
@@ -103,7 +110,7 @@ export default function SmartSearch({
   }, [])
 
   // Handle search
-  const handleSearch = useCallback(async (query: string) => {
+  const handleSearch = async (query: string) => {
     if (!query.trim()) return
     
     setIsSearching(true)
@@ -112,7 +119,10 @@ export default function SmartSearch({
     await new Promise(resolve => setTimeout(resolve, 1000))
     
     // Generate search results based on query
-    const results = generateSearchResults(query)
+    const results = searchMode === 'lyrics' 
+      ? generateLyricSearchResults(query)
+      : generateSearchResults(query)
+    
     setSearchResults(results)
     
     // Add to search history
@@ -125,7 +135,7 @@ export default function SmartSearch({
     
     setIsSearching(false)
     onSearchHistory(query)
-  }, [searchHistory, onSearchHistory])
+  }
 
   // Generate mock search results
   const generateSearchResults = (query: string): SearchResult[] => {
@@ -200,6 +210,130 @@ export default function SmartSearch({
     
     // Sort by relevance
     return results.sort((a, b) => b.relevance - a.relevance)
+  }
+
+  // Generate lyric search results
+  const generateLyricSearchResults = (query: string): SearchResult[] => {
+    const queryLower = query.toLowerCase()
+    const results: SearchResult[] = []
+    
+    // Mock lyrics data for demonstration
+    const mockLyrics: Record<string, string[]> = {
+      '1': [
+        "Yesterday, all my troubles seemed so far away",
+        "Now it looks as though they're here to stay",
+        "Oh, I believe in yesterday",
+        "Suddenly, I'm not half the man I used to be",
+        "There's a shadow hanging over me"
+      ],
+      '2': [
+        "Here comes the sun, doo-doo-doo-doo",
+        "Here comes the sun, and I say",
+        "It's all right",
+        "Little darlin', it's been a long cold lonely winter",
+        "Little darlin', it feels like years since it's been here"
+      ],
+      '3': [
+        "Imagine all the people living life in peace",
+        "You may say I'm a dreamer, but I'm not the only one",
+        "I hope someday you'll join us",
+        "And the world will live as one",
+        "Imagine all the people sharing all the world"
+      ],
+      '4': [
+        "We will, we will rock you",
+        "We will, we will rock you",
+        "Buddy, you're a boy, make a big noise",
+        "Playing in the street, gonna be a big man someday",
+        "You got mud on your face, you big disgrace"
+      ],
+      '5': [
+        "Don't stop believin', hold on to that feelin'",
+        "Streetlight people, don't stop believin'",
+        "Hold on to that feelin', streetlight people",
+        "Don't stop believin', hold on to that feelin'",
+        "Streetlight people, don't stop believin'"
+      ]
+    }
+    
+    // Search through lyrics
+    mockSongs.forEach(song => {
+      const lyrics = mockLyrics[song.id]
+      if (lyrics) {
+        let bestMatch: { text: string; position: number; context: string } | undefined
+        let maxRelevance = 0
+        
+        lyrics.forEach((line, index) => {
+          if (line.toLowerCase().includes(queryLower)) {
+            const relevance = calculateLyricRelevance(line, queryLower)
+            if (relevance > maxRelevance) {
+              maxRelevance = relevance
+              bestMatch = {
+                text: line,
+                position: index,
+                context: getLyricContext(lyrics, index)
+              }
+            }
+          }
+        })
+        
+        if (bestMatch && maxRelevance > 0) {
+          results.push({
+            id: song.id,
+            type: 'song',
+            title: song.title,
+            subtitle: song.artist,
+            description: `${song.album} • ${song.genre} • ${formatDuration(song.duration)}`,
+            relevance: maxRelevance,
+            metadata: {
+              ...song,
+              matchedFields: ['lyrics']
+            },
+            actions: ['play', 'add_to_playlist', 'like', 'share', 'download'],
+            lyricMatch: bestMatch
+          })
+        }
+      }
+    })
+    
+    // Sort by relevance
+    return results.sort((a, b) => b.relevance - a.relevance)
+  }
+
+  // Calculate lyric relevance score
+  const calculateLyricRelevance = (lyricLine: string, query: string): number => {
+    const lineLower = lyricLine.toLowerCase()
+    const queryWords = query.split(' ').filter(word => word.length > 2)
+    
+    let score = 0
+    
+    queryWords.forEach(word => {
+      if (lineLower.includes(word)) {
+        score += 5
+        // Bonus for exact matches
+        if (lineLower.includes(word)) {
+          score += 3
+        }
+        // Bonus for word boundaries
+        if (lineLower.includes(` ${word} `) || lineLower.startsWith(`${word} `) || lineLower.endsWith(` ${word}`)) {
+          score += 2
+        }
+      }
+    })
+    
+    // Bonus for longer matches
+    if (lineLower.includes(query)) {
+      score += 10
+    }
+    
+    return score
+  }
+
+  // Get lyric context (surrounding lines)
+  const getLyricContext = (lyrics: string[], position: number): string => {
+    const start = Math.max(0, position - 1)
+    const end = Math.min(lyrics.length, position + 2)
+    return lyrics.slice(start, end).join(' ')
   }
 
   // Apply filters
@@ -360,6 +494,38 @@ export default function SmartSearch({
           </p>
         </div>
 
+        {/* Search Mode Toggle */}
+        <div className="flex justify-center mb-6">
+          <div className="bg-gray-800 rounded-lg p-1 border border-gray-700">
+            <button
+              onClick={() => setSearchMode('general')}
+              className={`px-6 py-3 rounded-md transition-all duration-200 ${
+                searchMode === 'general'
+                  ? 'bg-purple-600 text-white shadow-lg'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Search className="w-4 h-4" />
+                <span>General Search</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setSearchMode('lyrics')}
+              className={`px-6 py-3 rounded-md transition-all duration-200 ${
+                searchMode === 'lyrics'
+                  ? 'bg-purple-600 text-white shadow-lg'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Quote className="w-4 h-4" />
+                <span>Lyric Search</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* Search Bar */}
         <div className="max-w-4xl mx-auto mb-8">
           <form onSubmit={handleSearchSubmit} className="relative">
@@ -367,7 +533,11 @@ export default function SmartSearch({
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search for songs, artists, albums, or describe what you want to hear..."
+                placeholder={
+                  searchMode === 'lyrics' 
+                    ? "Search for songs by typing lyrics... (e.g., 'Yesterday all my troubles')"
+                    : "Search for songs, artists, albums, or describe what you want to hear..."
+                }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-20 py-4 bg-gray-800 text-white placeholder-gray-400 rounded-xl border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
@@ -421,7 +591,9 @@ export default function SmartSearch({
               ) : (
                 <div className="flex items-center justify-center space-x-2">
                   <Sparkles className="w-5 h-5" />
-                  <span>Search with AI</span>
+                  <span>
+                    {searchMode === 'lyrics' ? 'Search Lyrics' : 'Search with AI'}
+                  </span>
                 </div>
               )}
             </button>
@@ -702,6 +874,18 @@ export default function SmartSearch({
                         <p className="text-gray-400 mb-2">{result.subtitle}</p>
                         <p className="text-gray-500 text-sm mb-4">{result.description}</p>
 
+                        {/* Lyric Match Display */}
+                        {result.lyricMatch && (
+                          <div className="bg-blue-600/20 border border-blue-500/30 rounded-lg p-3 mb-4">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <Quote className="w-4 h-4 text-blue-400" />
+                              <span className="text-blue-400 text-sm font-medium">Lyric Match</span>
+                            </div>
+                            <p className="text-white text-sm mb-2">{result.lyricMatch.text}</p>
+                            <p className="text-gray-300 text-xs">{result.lyricMatch.context}</p>
+                          </div>
+                        )}
+
                         {/* Actions */}
                         <div className="flex items-center justify-center space-x-2">
                           {result.actions.includes('play') && (
@@ -752,7 +936,12 @@ export default function SmartSearch({
               <Search className="w-12 h-12 text-gray-400" />
             </div>
             <h3 className="text-xl font-semibold text-gray-300 mb-2">No results found</h3>
-            <p className="text-gray-500 mb-6">Try adjusting your search terms or filters</p>
+            <p className="text-gray-500 mb-6">
+              {searchMode === 'lyrics' 
+                ? 'Try different lyrics or check your spelling'
+                : 'Try adjusting your search terms or filters'
+              }
+            </p>
             <button
               onClick={clearSearch}
               className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
