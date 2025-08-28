@@ -1,36 +1,208 @@
 {
-  "name": "Concerto - Where Every Note Matters",
+  "name": "Concerto - Music App",
   "short_name": "Concerto",
-  "description": "A free music streaming app - discover, play, and enjoy music without limits",
+  "description": "Professional music streaming, production, and discovery platform",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#0ea5e9",
+  "theme_color": "#8b5cf6",
   "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "categories": ["music", "entertainment", "lifestyle"],
+  "scope": "/",
   "lang": "en",
   "dir": "ltr",
-  "scope": "/",
+  "categories": ["music", "entertainment", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Concerto Home Screen"
+    },
+    {
+      "src": "/screenshots/player.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Music Player Interface"
+    },
+    {
+      "src": "/screenshots/studio.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Music Production Studio"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Play Music",
+      "short_name": "Play",
+      "description": "Quick access to music player",
+      "url": "/player",
+      "icons": [
+        {
+          "src": "/icons/play-shortcut.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Create Playlist",
+      "short_name": "Playlist",
+      "description": "Start creating a new playlist",
+      "url": "/playlists/create",
+      "icons": [
+        {
+          "src": "/icons/playlist-shortcut.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Music Studio",
+      "short_name": "Studio",
+      "description": "Open music production studio",
+      "url": "/studio",
+      "icons": [
+        {
+          "src": "/icons/studio-shortcut.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Discover Music",
+      "short_name": "Discover",
+      "description": "Find new music and artists",
+      "url": "/discover",
+      "icons": [
+        {
+          "src": "/icons/discover-shortcut.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://concerto.app"
+    }
+  ],
   "prefer_related_applications": false,
-  "related_applications": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "handle_links": "preferred",
+  "protocol_handlers": [
+    {
+      "protocol": "web+concerto",
+      "url": "/?action=%s"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/open-file",
+      "accept": {
+        "audio/*": [".mp3", ".wav", ".ogg", ".m4a", ".flac"],
+        "application/octet-stream": [".mid", ".midi"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "audio",
+          "accept": ["audio/*", ".mp3", ".wav", ".ogg", ".m4a"]
+        }
+      ]
+    }
+  },
+  "background": {
+    "service_worker": "/sw.js",
+    "type": "module"
+  },
+  "permissions": [
+    "notifications",
+    "background-sync",
+    "periodic-background-sync",
+    "storage"
+  ],
   "features": [
     "Cross Platform",
     "Offline Support",
+    "Push Notifications",
+    "Background Sync",
     "Music Streaming",
-    "Playlist Management"
-  ]
+    "Production Tools",
+    "Social Features",
+    "AI Recommendations"
+  ],
+  "developer": {
+    "name": "Concerto Team",
+    "url": "https://concerto.app"
+  },
+  "version": "1.0.0",
+  "minimum_version": "1.0.0"
 }
