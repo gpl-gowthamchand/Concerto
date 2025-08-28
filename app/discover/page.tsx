@@ -81,7 +81,10 @@ export default function DiscoverPage() {
             {tabs.map((tab) => {
               if (activeTab === tab.id) {
                 const Component = tab.component
-                return <Component key={tab.id} />
+                if (tab.id === 'production-studio') {
+                  return <Component key={tab.id} onSave={() => {}} onExport={() => {}} />
+                }
+                return <Component key={tab.id} onSongSelect={() => {}} onPlaylistCreate={() => {}} />
               }
               return null
             })}

@@ -159,7 +159,7 @@ export default function SmartSearch({
         relevance += 6
         matchedFields.push('album')
       }
-      if (song.genre.toLowerCase().includes(queryLower)) {
+      if (song.genre?.toLowerCase().includes(queryLower)) {
         relevance += 5
         matchedFields.push('genre')
       }
@@ -346,35 +346,35 @@ export default function SmartSearch({
       }
       
       if (searchFilters.genre.length > 0) {
-        const resultGenre = result.metadata.genre?.toLowerCase()
+        const resultGenre = (result.metadata as any).genre?.toLowerCase()
         if (!resultGenre || !searchFilters.genre.some(g => g.toLowerCase() === resultGenre)) {
           return false
         }
       }
       
       if (searchFilters.mood.length > 0) {
-        const resultMood = result.metadata.mood?.toLowerCase()
+        const resultMood = (result.metadata as any).mood?.toLowerCase()
         if (!resultMood || !searchFilters.mood.some(m => m.toLowerCase() === resultMood)) {
           return false
         }
       }
       
-      if (result.metadata.duration) {
-        const duration = result.metadata.duration
+      if ((result.metadata as any).duration) {
+        const duration = (result.metadata as any).duration
         if (duration < searchFilters.duration.min || duration > searchFilters.duration.max) {
           return false
         }
       }
       
-      if (result.metadata.year) {
-        const year = result.metadata.year
+      if ((result.metadata as any).year) {
+        const year = (result.metadata as any).year
         if (year < searchFilters.year.min || year > searchFilters.year.max) {
           return false
         }
       }
       
-      if (result.metadata.bpm) {
-        const bpm = result.metadata.bpm
+      if ((result.metadata as any).bpm) {
+        const bpm = (result.metadata as any).bpm
         if (bpm < searchFilters.bpm.min || bpm > searchFilters.bpm.max) {
           return false
         }
@@ -402,10 +402,10 @@ export default function SmartSearch({
           comparison = a.subtitle.localeCompare(b.subtitle)
           break
         case 'year':
-          comparison = (b.metadata.year || 0) - (a.metadata.year || 0)
+          comparison = ((b.metadata as any).year || 0) - ((a.metadata as any).year || 0)
           break
         case 'popularity':
-          comparison = (b.metadata.popularity || 0) - (a.metadata.popularity || 0)
+          comparison = ((b.metadata as any).popularity || 0) - ((a.metadata as any).popularity || 0)
           break
       }
       
@@ -890,7 +890,7 @@ export default function SmartSearch({
                         <div className="flex items-center justify-center space-x-2">
                           {result.actions.includes('play') && (
                             <button
-                              onClick={() => result.type === 'song' && onSongSelect(result.metadata as Song)}
+                              onClick={() => result.type === 'song' && onSongSelect(result.metadata as unknown as Song)}
                               className="p-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
                               title="Play"
                             >
