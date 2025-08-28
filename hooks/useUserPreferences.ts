@@ -206,3 +206,4 @@ export function useUserPreferences(): UserPreferencesManager {
     updateListeningStats
   }
 }
+

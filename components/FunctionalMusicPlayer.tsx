@@ -1,19 +1,22 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { 
+  useState, 
+  useEffect, 
+  useRef
+} from 'react'
 import { 
   Play, 
   Pause, 
-  SkipBack, 
   SkipForward, 
+  SkipBack, 
   Volume2, 
   VolumeX,
-  Shuffle,
-  Repeat,
-  Heart,
-  Maximize2,
-  Download,
-  Share2
+  Shuffle, 
+  Repeat, 
+  Heart, 
+  Share2, 
+  Download
 } from 'lucide-react'
 
 interface Song {
@@ -90,15 +93,15 @@ export default function FunctionalMusicPlayer({
 
   // Audio event handlers
   useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
+    const audioElement = audioRef.current
+    if (!audioElement) return
 
     const handleLoadedMetadata = () => {
-      setDuration(audio.duration)
+      setDuration(audioElement.duration)
     }
 
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime)
+      setCurrentTime(audioElement.currentTime)
     }
 
     const handleCanPlay = () => {
@@ -118,38 +121,53 @@ export default function FunctionalMusicPlayer({
       console.log('Audio error occurred')
     }
 
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata)
-    audio.addEventListener('timeupdate', handleTimeUpdate)
-    audio.addEventListener('canplay', handleCanPlay)
-    audio.addEventListener('waiting', handleWaiting)
-    audio.addEventListener('ended', handleEnded)
-    audio.addEventListener('error', handleError)
+    audioElement.addEventListener('loadedmetadata', handleLoadedMetadata)
+    audioElement.addEventListener('timeupdate', handleTimeUpdate)
+    audioElement.addEventListener('canplay', handleCanPlay)
+    audioElement.addEventListener('waiting', handleWaiting)
+    audioElement.addEventListener('ended', handleEnded)
+    audioElement.addEventListener('error', handleError)
 
     return () => {
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      audio.removeEventListener('timeupdate', handleTimeUpdate)
-      audio.removeEventListener('canplay', handleCanPlay)
-      audio.removeEventListener('waiting', handleWaiting)
-      audio.removeEventListener('ended', handleEnded)
-      audio.removeEventListener('error', handleError)
+      audioElement.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      audioElement.removeEventListener('timeupdate', handleTimeUpdate)
+      audioElement.removeEventListener('canplay', handleCanPlay)
+      audioElement.removeEventListener('waiting', handleWaiting)
+      audioElement.removeEventListener('ended', handleEnded)
+      audioElement.removeEventListener('error', handleError)
     }
   }, [])
 
-  const handleSongEnd = useCallback(() => {
-    if (repeatMode === 'one') {
-      // Repeat current song
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0
-        audioRef.current.play()
+  useEffect(() => {
+    const audioElement = audioRef.current
+    if (audioElement) {
+      const handleEnded = () => {
+        if (repeatMode === 'one') {
+          audioElement.currentTime = 0
+          audioElement.play()
+        } else if (repeatMode === 'all' || playlist.length > 1) {
+          onNext()
+        } else {
+          onPlayPause()
+        }
       }
-    } else if (repeatMode === 'all' || playlist.length > 1) {
-      // Move to next song
-      onNext()
-    } else {
-      // Stop playing
-      onPlayPause()
+      
+      audioElement.addEventListener('ended', handleEnded)
+      return () => {
+        audioElement.removeEventListener('ended', handleEnded)
+      }
     }
   }, [repeatMode, playlist.length, onNext, onPlayPause])
+
+  useEffect(() => {
+    const audioElement = audioRef.current
+    if (audioElement) {
+      audioElement.addEventListener('timeupdate', handleTimeUpdate)
+      return () => {
+        audioElement.removeEventListener('timeupdate', handleTimeUpdate)
+      }
+    }
+  }, [])
 
   const formatTime = (time: number) => {
     if (isNaN(time)) return '0:00'
@@ -380,3 +398,4 @@ export default function FunctionalMusicPlayer({
     </>
   )
 }
+

@@ -7,7 +7,8 @@ import {
   Users, 
   Zap,
   Sliders,
-  CheckCircle
+  CheckCircle,
+  Volume2
 } from 'lucide-react'
 
 interface ProductionFeature {
@@ -302,17 +303,6 @@ export default function MusicProductionStudio() {
       return () => clearInterval(interval)
     }
   }, [isRecording])
-
-  // Simulate metronome
-  useEffect(() => {
-    if (metronomeActive) {
-      const interval = setInterval(() => {
-        // In a real app, this would play a metronome sound
-        console.log('Tick')
-      }, (60 / currentBPM) * 1000)
-      return () => clearInterval(interval)
-    }
-  }, [metronomeActive, currentBPM])
 
   return (
     <div className="min-h-screen bg-dark-900 text-white p-6">

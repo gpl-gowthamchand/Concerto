@@ -4,14 +4,11 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { 
   Share2, 
-  Users, 
   Heart, 
   MessageCircle, 
   Send,
   UserPlus,
   UserMinus,
-  Globe,
-  Lock,
   Music,
   Play
 } from 'lucide-react'
@@ -259,7 +256,7 @@ export default function SocialFeatures() {
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setSelectedTab(tab.id as any)}
+            onClick={() => setSelectedTab(tab.id as 'feed' | 'discover' | 'following')}
             className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               selectedTab === tab.id
                 ? 'bg-primary-600 text-white'

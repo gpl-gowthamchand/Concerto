@@ -39,8 +39,7 @@ export default function ModernMusicPlayer({
   onPrevious 
 }: ModernMusicPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(180) // 3 minutes default
-  const [volume, setVolume] = useState(0.7)
+  const [volume, setVolume] = useState(1)
   const [isMuted, setIsMuted] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [isShuffled, setIsShuffled] = useState(false)
@@ -66,7 +65,7 @@ export default function ModernMusicPlayer({
     if (isPlaying) {
       interval = setInterval(() => {
         setCurrentTime(prev => {
-          if (prev >= duration) {
+          if (prev >= song.duration) {
             onNext()
             return 0
           }
@@ -75,7 +74,7 @@ export default function ModernMusicPlayer({
       }, 1000)
     }
     return () => clearInterval(interval)
-  }, [isPlaying, duration, onNext])
+  }, [isPlaying, song.duration, onNext])
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60)
@@ -87,7 +86,7 @@ export default function ModernMusicPlayer({
     if (progressRef.current) {
       const rect = progressRef.current.getBoundingClientRect()
       const percent = (e.clientX - rect.left) / rect.width
-      const newTime = percent * duration
+      const newTime = percent * song.duration
       setCurrentTime(newTime)
     }
   }
@@ -100,7 +99,7 @@ export default function ModernMusicPlayer({
     })
   }
 
-  const progress = (currentTime / duration) * 100
+  const progress = (currentTime / song.duration) * 100
 
   if (!currentSong) return null
 
@@ -195,7 +194,7 @@ export default function ModernMusicPlayer({
           <div className="flex items-center space-x-2 text-xs text-gray-400 w-full">
             <span className="w-10 text-right">{formatTime(currentTime)}</span>
             <div className="flex-1" />
-            <span className="w-10">{formatTime(duration)}</span>
+            <span className="w-10">{formatTime(song.duration)}</span>
           </div>
         </div>
 

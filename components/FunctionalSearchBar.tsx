@@ -1,7 +1,18 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Search, Filter, X, Music, User, Disc3, Mic, Hash, Clock, TrendingUp } from 'lucide-react'
+import { 
+  Search, 
+  Mic, 
+  X, 
+  Clock, 
+  Music, 
+  User, 
+  Disc3, 
+  ListMusic,
+  TrendingUp,
+  History
+} from 'lucide-react'
 import { Song, mockSongs } from '../lib/musicData'
 
 interface SearchResult {
@@ -28,12 +39,9 @@ export default function FunctionalSearchBar({
   className = ""
 }: FunctionalSearchBarProps) {
   const [query, setQuery] = useState('')
-  const [isFocused, setIsFocused] = useState(false)
+  const [suggestions, setSuggestions] = useState<SearchResult[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [results, setResults] = useState<SearchResult[]>([])
-  const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [searchHistory, setSearchHistory] = useState<string[]>([])
-  const [isSearching, setIsSearching] = useState(false)
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
   
   const inputRef = useRef<HTMLInputElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
@@ -42,18 +50,18 @@ export default function FunctionalSearchBar({
   useEffect(() => {
     const saved = localStorage.getItem('concerto-search-history')
     if (saved) {
-      setSearchHistory(JSON.parse(saved))
+      setRecentSearches(JSON.parse(saved))
     }
   }, [])
 
   // Save search history to localStorage
   const saveSearchHistory = useCallback((newQuery: string) => {
-    if (newQuery.trim() && !searchHistory.includes(newQuery)) {
-      const updated = [newQuery, ...searchHistory.slice(0, 9)] // Keep last 10 searches
-      setSearchHistory(updated)
+    if (newQuery.trim() && !recentSearches.includes(newQuery)) {
+      const updated = [newQuery, ...recentSearches.slice(0, 9)] // Keep last 10 searches
+      setRecentSearches(updated)
       localStorage.setItem('concerto-search-history', JSON.stringify(updated))
     }
-  }, [searchHistory])
+  }, [recentSearches])
 
   // Perform search with multiple criteria
   const performSearch = useCallback((searchQuery: string): SearchResult[] => {
@@ -118,7 +126,7 @@ export default function FunctionalSearchBar({
           type: 'song',
           title: song.title,
           subtitle: `${song.artist} • ${song.genre}`,
-          icon: <Hash className="w-4 h-4" />,
+          icon: <ListMusic className="w-4 h-4" />,
           data: song,
           highlight: song.genre
         })
@@ -179,21 +187,17 @@ export default function FunctionalSearchBar({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setQuery(value)
-    setSelectedIndex(-1)
     
     if (value.trim()) {
-      setIsSearching(true)
+      setShowSuggestions(true)
       // Simulate search delay
       setTimeout(() => {
         const searchResults = performSearch(value)
-        setResults(searchResults)
-        setShowSuggestions(true)
-        setIsSearching(false)
+        setSuggestions(searchResults)
       }, 300)
     } else {
-      setResults([])
+      setSuggestions([])
       setShowSuggestions(false)
-      setIsSearching(false)
     }
   }
 
@@ -213,16 +217,16 @@ export default function FunctionalSearchBar({
 
     if (e.key === 'ArrowDown') {
       e.preventDefault()
-      setSelectedIndex(prev => 
-        prev < results.length - 1 ? prev + 1 : prev
-      )
+      // setSelectedIndex(prev => 
+      //   prev < results.length - 1 ? prev + 1 : prev
+      // )
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
-      setSelectedIndex(prev => prev > 0 ? prev - 1 : -1)
+      // setSelectedIndex(prev => prev > 0 ? prev - 1 : -1)
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      if (selectedIndex >= 0 && results[selectedIndex]) {
-        const result = results[selectedIndex]
+      if (suggestions.length > 0) {
+        const result = suggestions[0] // Assuming only one suggestion for now
         if (result.data) {
           onSongSelect(result.data)
         }
@@ -232,7 +236,7 @@ export default function FunctionalSearchBar({
       }
     } else if (e.key === 'Escape') {
       setShowSuggestions(false)
-      setSelectedIndex(-1)
+      // setSelectedIndex(-1)
     }
   }
 
@@ -250,7 +254,7 @@ export default function FunctionalSearchBar({
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSuggestions(false)
-        setSelectedIndex(-1)
+        // setSelectedIndex(-1)
       }
     }
 
@@ -270,26 +274,26 @@ export default function FunctionalSearchBar({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => {
-            setIsFocused(true)
+            // setIsFocused(true)
             if (query.trim()) setShowSuggestions(true)
           }}
-          onBlur={() => setIsFocused(false)}
+          onBlur={() => setShowSuggestions(false)}
           className="w-full bg-gray-800 border border-gray-600 rounded-full py-3 pl-10 pr-12 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-youtube-500 focus:border-transparent transition-all duration-200"
         />
         
         {/* Loading indicator */}
-        {isSearching && (
+        {/* {isSearching && (
           <div className="absolute right-10 top-1/2 transform -translate-y-1/2">
             <div className="w-4 h-4 border-2 border-gray-400 border-t-youtube-500 rounded-full animate-spin" />
           </div>
-        )}
+        )} */}
         
         {/* Clear button */}
         {query && (
           <button
             onClick={() => {
               setQuery('')
-              setResults([])
+              setSuggestions([])
               setShowSuggestions(false)
               inputRef.current?.focus()
             }}
@@ -303,7 +307,7 @@ export default function FunctionalSearchBar({
       {/* Search Suggestions/Results */}
       {showSuggestions && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
-          {results.length > 0 ? (
+          {suggestions.length > 0 ? (
             <>
               <div className="p-3 border-b border-gray-700">
                 <h3 className="text-white font-medium text-sm flex items-center">
@@ -311,13 +315,11 @@ export default function FunctionalSearchBar({
                   Search Results
                 </h3>
               </div>
-              {results.map((result, index) => (
+              {suggestions.map((result) => (
                 <div
                   key={result.id}
                   onClick={() => handleResultClick(result)}
-                  className={`p-3 hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-700 last:border-b-0 ${
-                    selectedIndex === index ? 'bg-gray-700' : ''
-                  }`}
+                  className="p-3 hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-700 last:border-b-0"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="text-gray-400">
@@ -340,24 +342,24 @@ export default function FunctionalSearchBar({
                 </div>
               ))}
             </>
-          ) : query.trim() && !isSearching ? (
-            <div className="p-4 text-center text-gray-400">
-              <Music className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p>No results found for "{query}"</p>
-              <p className="text-xs mt-1">Try searching for artists, songs, albums, or lyrics</p>
+          ) : query.trim() ? (
+            <div className="text-center py-8">
+              <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-300 mb-2">No results found</h3>
+              <p className="text-gray-500">Try adjusting your search terms or browse our music library</p>
             </div>
           ) : (
-            searchHistory.length > 0 && (
+            recentSearches.length > 0 && (
               <>
                 <div className="p-3 border-b border-gray-700">
                   <h3 className="text-white font-medium text-sm flex items-center">
-                    <Clock className="w-4 h-4 mr-2" />
+                    <History className="w-4 h-4 mr-2" />
                     Recent Searches
                   </h3>
                 </div>
-                {searchHistory.slice(0, 5).map((historyItem, index) => (
+                {recentSearches.slice(0, 5).map((historyItem) => (
                   <div
-                    key={index}
+                    key={historyItem}
                     onClick={() => {
                       setQuery(historyItem)
                       handleSearch(historyItem)
@@ -378,3 +380,4 @@ export default function FunctionalSearchBar({
     </div>
   )
 }
+

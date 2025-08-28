@@ -277,12 +277,12 @@ export const filterSongsByGenre = (songs: Song[], genres: string[]): Song[] => {
 
 export const sortSongs = (songs: Song[], field: keyof Song, order: 'asc' | 'desc'): Song[] => {
   return [...songs].sort((a, b) => {
-    let aValue: any = a[field]
-    let bValue: any = b[field]
+    let aValue: string | number = a[field] as string | number || ''
+    let bValue: string | number = b[field] as string | number || ''
     
     if (field === 'duration' || field === 'year') {
-      aValue = aValue || 0
-      bValue = bValue || 0
+      aValue = (aValue as number) || 0
+      bValue = (bValue as number) || 0
     } else {
       aValue = (aValue || '').toString().toLowerCase()
       bValue = (bValue || '').toString().toLowerCase()

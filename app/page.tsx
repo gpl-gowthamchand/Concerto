@@ -12,16 +12,14 @@ import {
   Users, 
   ChevronLeft, 
   ChevronRight, 
-  Search,
   Shuffle,
-  MoreHorizontal,
   Download,
-  Share2,
   Volume2,
   Mic,
   Radio,
   List,
-  Settings
+  Settings,
+  X
 } from 'lucide-react'
 
 // Import all our new functional components and hooks

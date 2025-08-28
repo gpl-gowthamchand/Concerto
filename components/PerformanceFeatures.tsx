@@ -1,28 +1,17 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { 
   Zap, 
   Database, 
   HardDrive, 
   Network, 
   Cpu, 
-  HardDriveIcon,
   Clock,
   TrendingUp,
   Download,
-  Upload,
   RefreshCw,
   Settings,
-  Play,
-  Pause,
-  SkipForward,
-  SkipBack,
-  Volume2,
-  Shuffle,
-  Repeat,
-  Heart,
-  Share2,
   Battery
 } from 'lucide-react'
 
