@@ -105,39 +105,39 @@ export default function ModernMusicPlayer({
   if (!currentSong) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-dark-900 border-t border-dark-700 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 z-50">
       {/* Progress Bar */}
       <div 
         ref={progressRef}
-        className="w-full h-1 bg-dark-600 cursor-pointer group hover:h-2 transition-all duration-200"
+        className="w-full h-1 bg-gray-700 cursor-pointer group hover:h-2 transition-all duration-200"
         onClick={handleProgressClick}
       >
         <div 
-          className="h-full bg-spotify-500 relative group-hover:bg-spotify-400 transition-colors"
+          className="h-full bg-gradient-to-r from-spotify-500 to-youtube-600 relative transition-colors"
           style={{ width: `${progress}%` }}
         >
-          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" />
         </div>
       </div>
 
       <div className="flex items-center justify-between px-4 py-3">
         {/* Song Info */}
         <div className="flex items-center space-x-4 min-w-0 w-1/4">
-          <div className="w-14 h-14 bg-gradient-to-br from-spotify-500 to-spotify-400 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-lg">🎵</span>
+          <div className="w-14 h-14 bg-gradient-to-br from-youtube-600 to-spotify-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+            <span className="text-white font-bold text-lg">♪</span>
           </div>
           <div className="min-w-0 flex-1">
             <h4 className="text-white font-medium truncate text-sm hover:underline cursor-pointer">{song.title}</h4>
             <p className="text-gray-400 text-xs truncate hover:underline cursor-pointer">{song.artist}</p>
           </div>
-          <button
-            onClick={() => setIsLiked(!isLiked)}
-            className={`p-2 rounded-full transition-colors hidden md:block ${
-              isLiked ? 'text-spotify-500' : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-          </button>
+                      <button
+              onClick={() => setIsLiked(!isLiked)}
+              className={`p-2 rounded-full transition-colors hidden md:block ${
+                isLiked ? 'text-youtube-500' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+            </button>
         </div>
 
         {/* Player Controls */}
@@ -147,7 +147,7 @@ export default function ModernMusicPlayer({
             <button
               onClick={() => setIsShuffled(!isShuffled)}
               className={`p-2 rounded-full transition-colors ${
-                isShuffled ? 'text-spotify-500' : 'text-gray-400 hover:text-white'
+                isShuffled ? 'text-youtube-500' : 'text-gray-400 hover:text-white'
               }`}
             >
               <Shuffle className="w-4 h-4" />
@@ -180,13 +180,13 @@ export default function ModernMusicPlayer({
 
             <button
               onClick={toggleRepeat}
-              className={`p-2 rounded-full transition-colors ${
-                repeatMode !== 'none' ? 'text-spotify-500' : 'text-gray-400 hover:text-white'
+              className={`p-2 rounded-full transition-colors relative ${
+                repeatMode !== 'none' ? 'text-youtube-500' : 'text-gray-400 hover:text-white'
               }`}
             >
               <Repeat className="w-4 h-4" />
               {repeatMode === 'one' && (
-                <span className="absolute -mt-1 -ml-1 text-xs">1</span>
+                <span className="absolute -top-1 -right-1 text-xs bg-youtube-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">1</span>
               )}
             </button>
           </div>
