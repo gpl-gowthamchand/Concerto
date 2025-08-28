@@ -57,7 +57,8 @@ export const mockSongs: Song[] = [
     cover: '/api/placeholder/300/300',
     genre: 'Rock',
     year: 1975,
-    isLiked: true
+    isLiked: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
   },
   {
     id: '2',
@@ -68,7 +69,8 @@ export const mockSongs: Song[] = [
     cover: '/api/placeholder/300/300',
     genre: 'Rock',
     year: 1976,
-    isLiked: false
+    isLiked: false,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
   },
   {
     id: '3',
@@ -79,7 +81,8 @@ export const mockSongs: Song[] = [
     cover: '/api/placeholder/300/300',
     genre: 'Pop',
     year: 1971,
-    isLiked: true
+    isLiked: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
   },
   {
     id: '4',
@@ -90,7 +93,8 @@ export const mockSongs: Song[] = [
     cover: '/api/placeholder/300/300',
     genre: 'Rock',
     year: 1971,
-    isLiked: false
+    isLiked: false,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
   },
   {
     id: '5',
@@ -101,7 +105,8 @@ export const mockSongs: Song[] = [
     cover: '/api/placeholder/300/300',
     genre: 'Pop',
     year: 1982,
-    isLiked: true
+    isLiked: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
   },
   {
     id: '6',
@@ -112,7 +117,8 @@ export const mockSongs: Song[] = [
     cover: '/api/placeholder/300/300',
     genre: 'Alternative',
     year: 1991,
-    isLiked: false
+    isLiked: false,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
   },
   {
     id: '7',
@@ -123,7 +129,8 @@ export const mockSongs: Song[] = [
     cover: '/api/placeholder/300/300',
     genre: 'Folk Rock',
     year: 1965,
-    isLiked: true
+    isLiked: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
   },
   {
     id: '8',
@@ -134,7 +141,8 @@ export const mockSongs: Song[] = [
     cover: '/api/placeholder/300/300',
     genre: 'Pop Rock',
     year: 1966,
-    isLiked: false
+    isLiked: false,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
   },
   {
     id: '9',
@@ -145,7 +153,8 @@ export const mockSongs: Song[] = [
     cover: '/api/placeholder/300/300',
     genre: 'Soul',
     year: 1967,
-    isLiked: true
+    isLiked: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
   },
   {
     id: '10',
@@ -156,7 +165,8 @@ export const mockSongs: Song[] = [
     cover: '/api/placeholder/300/300',
     genre: 'Rock and Roll',
     year: 1958,
-    isLiked: false
+    isLiked: false,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
   }
 ]
 

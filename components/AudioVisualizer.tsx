@@ -12,16 +12,18 @@ declare global {
 
 interface AudioVisualizerProps {
   className?: string
-  type?: 'waveform' | 'spectrum' | 'bars'
+  type?: 'waveform' | 'spectrum' | 'bars' | 'circular' | '3d'
   height?: number
   color?: string
+  audioElement?: HTMLAudioElement | null
 }
 
 export default function AudioVisualizer({ 
   className = '', 
   type = 'bars',
   height = 60,
-  color = '#0ea5e9'
+  color = '#0ea5e9',
+  audioElement
 }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
@@ -30,6 +32,7 @@ export default function AudioVisualizer({
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null)
   const [dataArray, setDataArray] = useState<Uint8Array | null>(null)
 
+  // Initialize audio context and analyzer
   useEffect(() => {
     if (!playerState.currentSong || !playerState.isPlaying) return
 
@@ -38,18 +41,29 @@ export default function AudioVisualizer({
         const context = new (window.AudioContext || window.webkitAudioContext)()
         const analyserNode = context.createAnalyser()
         
-        analyserNode.fftSize = 256
-        analyserNode.smoothingTimeConstant = 0.8
+        // Enhanced analyzer settings
+        analyserNode.fftSize = 512 // Higher resolution
+        analyserNode.smoothingTimeConstant = 0.6 // More responsive
+        analyserNode.minDecibels = -90
+        analyserNode.maxDecibels = -10
         
         const bufferLength = analyserNode.frequencyBinCount
-        const data = new Uint8Array(bufferLength) as Uint8Array
+        const data = new Uint8Array(bufferLength)
         
         setAudioContext(context)
         setAnalyser(analyserNode)
         setDataArray(data)
         
-        // Connect to audio source (mock for now)
-        // In real app, connect to actual audio element
+        // Connect to real audio source if available
+        if (audioElement && context.state === 'running') {
+          try {
+            const source = context.createMediaElementSource(audioElement)
+            source.connect(analyserNode)
+            analyserNode.connect(context.destination)
+          } catch {
+            console.log('Audio source already connected or not available')
+          }
+        }
       } catch (error) {
         console.error('Audio context not supported:', error)
       }
@@ -62,7 +76,7 @@ export default function AudioVisualizer({
         audioContext.close()
       }
     }
-  }, [playerState.currentSong, playerState.isPlaying, audioContext])
+  }, [playerState.currentSong, playerState.isPlaying, audioElement])
 
   useEffect(() => {
     if (!canvasRef.current || !analyser || !dataArray) return
@@ -89,6 +103,10 @@ export default function AudioVisualizer({
         drawWaveform(ctx, dataArray, width, height, color)
       } else if (type === 'spectrum') {
         drawSpectrum(ctx, dataArray, width, height, color)
+      } else if (type === 'circular') {
+        drawCircular(ctx, dataArray, width, height, color)
+      } else if (type === '3d') {
+        draw3D(ctx, dataArray, width, height, color)
       }
 
       animationRef.current = requestAnimationFrame(draw)
@@ -180,6 +198,70 @@ export default function AudioVisualizer({
     })
   }
 
+  const drawCircular = (
+    ctx: CanvasRenderingContext2D, 
+    data: Uint8Array, 
+    width: number, 
+    height: number, 
+    color: string
+  ) => {
+    const centerX = width / 2
+    const centerY = height / 2
+    const radius = Math.min(width, height) / 3
+    const barCount = data.length
+    const angleStep = (2 * Math.PI) / barCount
+
+    ctx.strokeStyle = color
+    ctx.lineWidth = 2
+
+    data.forEach((value, index) => {
+      const angle = index * angleStep
+      const amplitude = (value / 255) * radius * 0.5
+      
+      const x1 = centerX + Math.cos(angle) * radius
+      const y1 = centerY + Math.sin(angle) * radius
+      const x2 = centerX + Math.cos(angle) * (radius + amplitude)
+      const y2 = centerY + Math.sin(angle) * (radius + amplitude)
+      
+      ctx.beginPath()
+      ctx.moveTo(x1, y1)
+      ctx.lineTo(x2, y2)
+      ctx.stroke()
+    })
+  }
+
+  const draw3D = (
+    ctx: CanvasRenderingContext2D, 
+    data: Uint8Array, 
+    width: number, 
+    height: number, 
+    color: string
+  ) => {
+    const centerX = width / 2
+    const centerY = height / 2
+    const maxRadius = Math.min(width, height) / 2.5
+
+    // Create gradient for 3D effect
+    const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius)
+    gradient.addColorStop(0, color)
+    gradient.addColorStop(0.7, color + '80')
+    gradient.addColorStop(1, color + '20')
+
+    ctx.fillStyle = gradient
+
+    data.forEach((value, index) => {
+      const angle = (index / data.length) * 2 * Math.PI
+      const amplitude = (value / 255) * maxRadius * 0.8
+      
+      const x = centerX + Math.cos(angle) * amplitude
+      const y = centerY + Math.sin(angle) * amplitude
+      
+      // Draw 3D bars
+      const barHeight = (value / 255) * 20
+      ctx.fillRect(x - 2, y - barHeight / 2, 4, barHeight)
+    })
+  }
+
   // Generate mock data for demo when audio context is not available
   const generateMockData = useCallback(() => {
     if (!canvasRef.current) return
@@ -200,6 +282,10 @@ export default function AudioVisualizer({
       drawWaveform(ctx, mockData, width, height, color)
     } else if (type === 'spectrum') {
       drawSpectrum(ctx, mockData, width, height, color)
+    } else if (type === 'circular') {
+      drawCircular(ctx, mockData, width, height, color)
+    } else if (type === '3d') {
+      draw3D(ctx, mockData, width, height, color)
     }
   }, [type, color])
 

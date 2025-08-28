@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Search, Menu, X, Settings, LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import ThemeToggle from './ThemeToggle'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -54,6 +55,10 @@ export default function Header() {
                 className="bg-dark-700 text-white placeholder-gray-400 pl-10 pr-4 py-2 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
+            
+            {/* Theme Toggle */}
+            <ThemeToggle />
+            
             {/* User Menu */}
             {isAuthenticated ? (
               <div className="relative">

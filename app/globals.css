@@ -3,12 +3,71 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Light theme colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --accent-primary: #3b82f6;
+    --accent-secondary: #8b5cf6;
+  }
+
+  .dark {
+    /* Dark theme colors */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-color: #475569;
+    --accent-primary: #0ea5e9;
+    --accent-secondary: #a855f7;
+  }
+
   html {
     scroll-behavior: smooth;
   }
   
   body {
-    @apply bg-dark-800 text-white font-sans;
+    @apply font-sans transition-colors duration-300;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  /* Theme-aware component styles */
+  .card {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .music-card {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .music-card:hover {
+    background-color: var(--bg-tertiary);
+  }
+
+  .sidebar-item {
+    color: var(--text-secondary);
+  }
+
+  .sidebar-item:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+  }
+
+  .sidebar-item.active {
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
   }
 }
 
@@ -22,7 +81,14 @@
   }
   
   .btn-secondary {
-    @apply bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full font-medium transition-all duration-200 border border-gray-600;
+    @apply px-4 py-2 rounded-full font-medium transition-all duration-200 border;
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .btn-secondary:hover {
+    background-color: var(--bg-tertiary);
   }
   
   .card {
