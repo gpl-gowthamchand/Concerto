@@ -84,13 +84,12 @@ export default function DiscoverPage() {
                   const ProductionComponent = tab.component as typeof MusicProductionStudio
                   return <ProductionComponent key={tab.id} onSave={() => {}} onExport={() => {}} />
                 }
-                if (tab.id === 'ai-recommendations') {
+                if (tab.needsSongProps) {
                   const AIComponent = tab.component as typeof AIRecommendations
                   return <AIComponent key={tab.id} onSongSelect={() => {}} onPlaylistCreate={() => {}} />
                 }
-                const DefaultComponent = tab.component
-                return <
-                   key={tab.id} />
+                const DefaultComponent = tab.component as React.ComponentType
+                return <DefaultComponent key={tab.id} />
               }
               return null
             })}
