@@ -80,14 +80,17 @@ export default function DiscoverPage() {
           <div className="p-6">
             {tabs.map((tab) => {
               if (activeTab === tab.id) {
-                const Component = tab.component
                 if (tab.id === 'production-studio') {
-                  return <Component key={tab.id} onSave={() => {}} onExport={() => {}} />
+                  const ProductionComponent = tab.component as typeof MusicProductionStudio
+                  return <ProductionComponent key={tab.id} onSave={() => {}} onExport={() => {}} />
                 }
-                if (tab.needsSongProps) {
-                  return <Component key={tab.id} onSongSelect={() => {}} onPlaylistCreate={() => {}} />
+                if (tab.id === 'ai-recommendations') {
+                  const AIComponent = tab.component as typeof AIRecommendations
+                  return <AIComponent key={tab.id} onSongSelect={() => {}} onPlaylistCreate={() => {}} />
                 }
-                return <Component key={tab.id} />
+                const DefaultComponent = tab.component
+                return <
+                   key={tab.id} />
               }
               return null
             })}
