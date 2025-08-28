@@ -13,7 +13,7 @@ import {
   Volume2,
   Music,
   Speaker,
-  Record,
+  Circle,
   StopCircle,
   SkipBack
 } from 'lucide-react'
@@ -343,7 +343,7 @@ export default function MusicProductionStudio({
                   : 'bg-gray-600 hover:bg-gray-700'
               }`}
             >
-              {isRecording ? <StopCircle className="w-6 h-6" /> : <Record className="w-6 h-6" />}
+                              {isRecording ? <StopCircle className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
             </button>
           </div>
           

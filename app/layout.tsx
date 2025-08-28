@@ -4,6 +4,7 @@ import './globals.css'
 import { ThemeProvider } from '../components/ThemeProvider'
 import { AudioProvider } from '../components/AudioProvider'
 import { PWAProvider } from '../components/PWAProvider'
+import { AuthProvider } from '../contexts/AuthContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -101,13 +102,15 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={inter.className}>
-        <ThemeProvider>
-          <AudioProvider>
-            <PWAProvider>
-              {children}
-            </PWAProvider>
-          </AudioProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <AudioProvider>
+              <PWAProvider>
+                {children}
+              </PWAProvider>
+            </AudioProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )
