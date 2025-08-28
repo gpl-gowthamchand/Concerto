@@ -2,11 +2,32 @@
 
 import { useState } from 'react'
 import { Sun, Moon, Monitor, ChevronDown } from 'lucide-react'
-import { useTheme } from '../contexts/ThemeContext'
+import { useTheme } from './ThemeProvider'
 
 export default function ThemeToggle() {
-  const { theme, setTheme, isDark, toggleTheme } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
+  
+  // Check if we're in browser environment
+  const isBrowser = typeof window !== 'undefined'
+  
+  // Don't render during SSR
+  if (!isBrowser) {
+    return null
+  }
+  
+  const { theme, setTheme, resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+  
+  const toggleTheme = () => {
+    if (theme === 'dark') {
+      setTheme('light')
+    } else if (theme === 'light') {
+      setTheme('dark')
+    } else {
+      // If auto, toggle to dark
+      setTheme('dark')
+    }
+  }
 
   const themes = [
     { value: 'light', label: 'Light', icon: Sun, description: 'Bright and clean' },
