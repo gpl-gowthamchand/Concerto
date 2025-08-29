@@ -6,20 +6,25 @@ interface PWAProviderProps {
   children: React.ReactNode
 }
 
-export function PWAProvider({ children }: PWAProviderProps) {
+export function PWAProvider({ children }: React.ReactNode) {
   const [isOnline, setIsOnline] = useState(true)
   const [updateAvailable, setUpdateAvailable] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    registerServiceWorker()
-    checkOnlineStatus()
+    setMounted(true)
     
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-    
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+    if (typeof window !== 'undefined') {
+      registerServiceWorker()
+      checkOnlineStatus()
+      
+      window.addEventListener('online', handleOnline)
+      window.addEventListener('offline', handleOffline)
+      
+      return () => {
+        window.removeEventListener('online', handleOnline)
+        window.removeEventListener('offline', handleOffline)
+      }
     }
   }, [])
 
@@ -71,6 +76,11 @@ export function PWAProvider({ children }: PWAProviderProps) {
     }
   }
 
+  // Prevent hydration mismatch by not rendering PWA features until mounted
+  if (!mounted) {
+    return <>{children}</>
+  }
+
   return (
     <>
       {children}
@@ -98,7 +108,7 @@ export function PWAProvider({ children }: PWAProviderProps) {
       {/* Offline Indicator */}
       {!isOnline && (
         <div className="fixed top-0 left-0 right-0 bg-red-600 text-white p-2 text-center z-50">
-          <span className="text-sm">You&apos;re offline. Some features may be limited.</span>
+          <span className="text-sm">You&apos;re offline. Some features may not work.</span>
         </div>
       )}
     </>

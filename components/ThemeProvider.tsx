@@ -15,8 +15,11 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('system')
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark')
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+    
     // Get theme from localStorage or default to system
     const savedTheme = localStorage.getItem('theme') as Theme
     if (savedTheme) {
@@ -25,6 +28,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
+    if (!mounted) return
+    
     const root = window.document.documentElement
 
     // Remove existing theme classes
@@ -41,9 +46,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     // Save theme preference
     localStorage.setItem('theme', theme)
-  }, [theme])
+  }, [theme, mounted])
 
   useEffect(() => {
+    if (!mounted) return
+    
     // Listen for system theme changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handleChange = () => {
@@ -58,7 +65,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [theme])
+  }, [theme, mounted])
+
+  // Prevent hydration mismatch by not rendering theme classes until mounted
+  if (!mounted) {
+    return (
+      <ThemeContext.Provider value={{
+        theme: 'system',
+        setTheme: () => {},
+        resolvedTheme: 'dark'
+      }}>
+        {children}
+      </ThemeContext.Provider>
+    )
+  }
 
   const value = {
     theme,

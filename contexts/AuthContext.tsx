@@ -42,9 +42,12 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   // Check for existing session on mount
   useEffect(() => {
+    setMounted(true)
+    
     const checkAuth = async () => {
       try {
         // Check localStorage for existing token
@@ -63,8 +66,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
-    checkAuth()
-  }, [])
+    if (mounted) {
+      checkAuth()
+    }
+  }, [mounted])
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -88,8 +93,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         
         setUser(mockUser)
-        localStorage.setItem('concerto_token', 'mock_jwt_token')
-        localStorage.setItem('concerto_user', JSON.stringify(mockUser))
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('concerto_token', 'mock_jwt_token')
+          localStorage.setItem('concerto_user', JSON.stringify(mockUser))
+        }
         return true
       } else {
         throw new Error('Invalid credentials')
@@ -110,11 +117,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       // Mock signup - in real app, call backend API
-      const newUser: User = {
+      const mockUser: User = {
         id: Date.now().toString(),
         username,
         email,
-        avatar: '/api/placeholder/100/100',
         preferences: {
           theme: 'dark',
           language: 'en',
@@ -122,9 +128,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
       
-      setUser(newUser)
-      localStorage.setItem('concerto_token', 'mock_jwt_token')
-      localStorage.setItem('concerto_user', JSON.stringify(newUser))
+      setUser(mockUser)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('concerto_token', 'mock_jwt_token')
+        localStorage.setItem('concerto_user', JSON.stringify(mockUser))
+      }
       return true
     } catch (error) {
       console.error('Signup failed:', error)
@@ -136,28 +144,54 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('concerto_token')
-    localStorage.removeItem('concerto_user')
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('concerto_token')
+      localStorage.removeItem('concerto_user')
+    }
   }
 
   const updateUser = (updates: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...updates }
       setUser(updatedUser)
-      localStorage.setItem('concerto_user', JSON.stringify(updatedUser))
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('concerto_user', JSON.stringify(updatedUser))
+      }
     }
   }
 
   const updatePreferences = (preferences: Partial<User['preferences']>) => {
     if (user) {
-      const updatedPreferences = { ...user.preferences, ...preferences }
-      const updatedUser = { ...user, preferences: updatedPreferences }
+      const updatedUser = {
+        ...user,
+        preferences: { ...user.preferences, ...preferences }
+      }
       setUser(updatedUser)
-      localStorage.setItem('concerto_user', JSON.stringify(updatedUser))
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('concerto_user', JSON.stringify(updatedUser))
+      }
     }
   }
 
-  const value: AuthContextType = {
+  // Prevent hydration mismatch by not rendering auth state until mounted
+  if (!mounted) {
+    return (
+      <AuthContext.Provider value={{
+        user: null,
+        isAuthenticated: false,
+        isLoading: true,
+        login: async () => false,
+        signup: async () => false,
+        logout: () => {},
+        updateUser: () => {},
+        updatePreferences: () => {}
+      }}>
+        {children}
+      </AuthContext.Provider>
+    )
+  }
+
+  const value = {
     user,
     isAuthenticated: !!user,
     isLoading,
