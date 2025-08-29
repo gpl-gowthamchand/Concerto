@@ -1,314 +1,251 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { usePlayer } from '../contexts/PlayerContext'
-
-// Type definition for webkitAudioContext
-declare global {
-  interface Window {
-    webkitAudioContext: typeof AudioContext
-  }
-}
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 interface AudioVisualizerProps {
-  className?: string
-  type?: 'waveform' | 'spectrum' | 'bars' | 'circular' | '3d'
+  width?: number
   height?: number
+  barCount?: number
+  barWidth?: number
+  barGap?: number
   color?: string
-  audioElement?: HTMLAudioElement | null
+  backgroundColor?: string
+  animationSpeed?: number
+  type?: 'bars' | 'waveform' | 'circular' | '3d'
 }
 
-export default function AudioVisualizer({ 
-  className = '', 
-  type = 'bars',
-  height = 60,
-  color = '#0ea5e9',
-  audioElement
+export default function AudioVisualizer({
+  width = 800,
+  height = 200,
+  barCount = 64,
+  barWidth = 8,
+  barGap = 2,
+  color = '#8b5cf6',
+  backgroundColor = 'transparent',
+  animationSpeed = 50,
+  type = 'bars'
 }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
-  const { playerState } = usePlayer()
-  const [audioContext, setAudioContext] = useState<AudioContext | null>(null)
-  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null)
-  const [dataArray, setDataArray] = useState<Uint8Array | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
 
-  // Initialize audio context and analyzer
+  // Generate mock audio data for visualization
+  const generateMockData = useCallback(() => {
+    const data = new Uint8Array(barCount)
+    for (let i = 0; i < barCount; i++) {
+      // Create a more realistic audio pattern
+      const baseValue = Math.random() * 0.3
+      const frequency = (i / barCount) * Math.PI * 2
+      const time = Date.now() * 0.001
+      const waveValue = Math.sin(frequency + time) * 0.2
+      const noiseValue = Math.random() * 0.1
+      
+      data[i] = Math.floor((baseValue + waveValue + noiseValue) * 255)
+    }
+    return data
+  }, [barCount])
+
+  const drawBars = useCallback((ctx: CanvasRenderingContext2D, data: Uint8Array) => {
+    const barHeight = height / 255
+    const totalBarWidth = barWidth + barGap
+    const startX = (width - (barCount * totalBarWidth - barGap)) / 2
+
+    ctx.clearRect(0, 0, width, height)
+    ctx.fillStyle = backgroundColor
+    ctx.fillRect(0, 0, width, height)
+
+    for (let i = 0; i < barCount; i++) {
+      const barHeightValue = (data[i] / 255) * height
+      const x = startX + i * totalBarWidth
+      const y = height - barHeightValue
+
+      // Create gradient effect
+      const gradient = ctx.createLinearGradient(x, y, x, height)
+      gradient.addColorStop(0, color)
+      gradient.addColorStop(1, color + '80')
+
+      ctx.fillStyle = gradient
+      ctx.fillRect(x, y, barWidth, barHeightValue)
+
+      // Add glow effect
+      ctx.shadowColor = color
+      ctx.shadowBlur = 10
+      ctx.fillRect(x, y, barWidth, barHeightValue)
+      ctx.shadowBlur = 0
+    }
+  }, [width, height, barCount, barWidth, barGap, color, backgroundColor])
+
+  const drawWaveform = useCallback((ctx: CanvasRenderingContext2D, data: Uint8Array) => {
+    ctx.clearRect(0, 0, width, height)
+    ctx.fillStyle = backgroundColor
+    ctx.fillRect(0, 0, width, height)
+
+    ctx.beginPath()
+    ctx.strokeStyle = color
+    ctx.lineWidth = 2
+
+    const centerY = height / 2
+    const stepX = width / barCount
+
+    for (let i = 0; i < barCount; i++) {
+      const value = (data[i] / 255) * (height / 2)
+      const x = i * stepX
+      const y = centerY + (i % 2 === 0 ? value : -value)
+
+      if (i === 0) {
+        ctx.moveTo(x, y)
+      } else {
+        ctx.lineTo(x, y)
+      }
+    }
+
+    ctx.stroke()
+  }, [width, height, barCount, color, backgroundColor])
+
+  const drawCircular = useCallback((ctx: CanvasRenderingContext2D, data: Uint8Array) => {
+    ctx.clearRect(0, 0, width, height)
+    ctx.fillStyle = backgroundColor
+    ctx.fillRect(0, 0, width, height)
+
+    const centerX = width / 2
+    const centerY = height / 2
+    const radius = Math.min(width, height) / 3
+    const angleStep = (Math.PI * 2) / barCount
+
+    ctx.beginPath()
+    ctx.strokeStyle = color
+    ctx.lineWidth = 3
+
+    for (let i = 0; i < barCount; i++) {
+      const value = (data[i] / 255) * radius * 0.5
+      const angle = i * angleStep
+      const x1 = centerX + Math.cos(angle) * radius
+      const y1 = centerY + Math.sin(angle) * radius
+      const x2 = centerX + Math.cos(angle) * (radius + value)
+      const y2 = centerY + Math.sin(angle) * (radius + value)
+
+      ctx.moveTo(x1, y1)
+      ctx.lineTo(x2, y2)
+    }
+
+    ctx.stroke()
+  }, [width, height, barCount, color, backgroundColor])
+
+  const draw3D = useCallback((ctx: CanvasRenderingContext2D, data: Uint8Array) => {
+    ctx.clearRect(0, 0, width, height)
+    ctx.fillStyle = backgroundColor
+    ctx.fillRect(0, 0, width, height)
+
+    const centerX = width / 2
+    const centerY = height / 2
+    const maxRadius = Math.min(width, height) / 3
+
+    for (let i = 0; i < barCount; i++) {
+      const value = (data[i] / 255) * maxRadius
+      const angle = (i / barCount) * Math.PI * 2
+      const radius = maxRadius - value
+
+      // Create 3D effect with multiple layers
+      for (let layer = 0; layer < 3; layer++) {
+        const layerRadius = radius + layer * 10
+        const alpha = 1 - (layer * 0.3)
+        
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, layerRadius, 0, Math.PI * 2)
+        ctx.strokeStyle = color + Math.floor(alpha * 255).toString(16).padStart(2, '0')
+        ctx.lineWidth = 2
+        ctx.stroke()
+      }
+    }
+  }, [width, height, barCount, color, backgroundColor])
+
+  const animate = useCallback(() => {
+    if (!canvasRef.current) return
+
+    const ctx = canvasRef.current.getContext('2d')
+    if (!ctx) return
+
+    const data = generateMockData()
+
+    switch (type) {
+      case 'bars':
+        drawBars(ctx, data)
+        break
+      case 'waveform':
+        drawWaveform(ctx, data)
+        break
+      case 'circular':
+        drawCircular(ctx, data)
+        break
+      case '3d':
+        draw3D(ctx, data)
+        break
+      default:
+        drawBars(ctx, data)
+    }
+
+    animationRef.current = requestAnimationFrame(animate)
+  }, [type, generateMockData, drawBars, drawWaveform, drawCircular, draw3D])
+
   useEffect(() => {
-    if (!playerState.currentSong || !playerState.isPlaying) return
-
-    const initAudioContext = async () => {
-      try {
-        const context = new (window.AudioContext || window.webkitAudioContext)()
-        const analyserNode = context.createAnalyser()
-        
-        // Enhanced analyzer settings
-        analyserNode.fftSize = 512 // Higher resolution
-        analyserNode.smoothingTimeConstant = 0.6 // More responsive
-        analyserNode.minDecibels = -90
-        analyserNode.maxDecibels = -10
-        
-        const bufferLength = analyserNode.frequencyBinCount
-        const data = new Uint8Array(bufferLength)
-        
-        setAudioContext(context)
-        setAnalyser(analyserNode)
-        setDataArray(data)
-        
-        // Connect to real audio source if available
-        if (audioElement && context.state === 'running') {
-          try {
-            const source = context.createMediaElementSource(audioElement)
-            source.connect(analyserNode)
-            analyserNode.connect(context.destination)
-          } catch {
-            console.log('Audio source already connected or not available')
-          }
-        }
-      } catch (error) {
-        console.error('Audio context not supported:', error)
+    if (isPlaying) {
+      animate()
+    } else {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
       }
     }
-
-    initAudioContext()
-
-    return () => {
-      if (audioContext) {
-        audioContext.close()
-      }
-    }
-  }, [playerState.currentSong, playerState.isPlaying, audioElement, audioContext])
-
-  useEffect(() => {
-    if (!canvasRef.current || !analyser || !dataArray) return
-
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')!
-    const width = canvas.width
-    const height = canvas.height
-
-    const draw = () => {
-      if (!analyser || !dataArray) return
-
-      // Get frequency data
-      if (dataArray) {
-        analyser.getByteFrequencyData(dataArray)
-      }
-
-      // Clear canvas
-      ctx.clearRect(0, 0, width, height)
-
-      if (type === 'bars') {
-        drawBars(ctx, dataArray, width, height, color)
-      } else if (type === 'waveform') {
-        drawWaveform(ctx, dataArray, width, height, color)
-      } else if (type === 'spectrum') {
-        drawSpectrum(ctx, dataArray, width, height, color)
-      } else if (type === 'circular') {
-        drawCircular(ctx, dataArray, width, height, color)
-      } else if (type === '3d') {
-        draw3D(ctx, dataArray, width, height, color)
-      }
-
-      animationRef.current = requestAnimationFrame(draw)
-    }
-
-    draw()
 
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [analyser, dataArray, type, color])
-
-  const drawBars = (
-    ctx: CanvasRenderingContext2D, 
-    data: Uint8Array, 
-    width: number, 
-    height: number, 
-    color: string
-  ) => {
-    const barWidth = width / data.length
-    const barSpacing = 2
-
-    data.forEach((value, index) => {
-      const barHeight = (value / 255) * height
-      const x = index * (barWidth + barSpacing)
-      const y = height - barHeight
-
-      // Create gradient
-      const gradient = ctx.createLinearGradient(0, y, 0, height)
-      gradient.addColorStop(0, color)
-      gradient.addColorStop(1, `${color}80`)
-
-      ctx.fillStyle = gradient
-      ctx.fillRect(x, y, barWidth, barHeight)
-    })
-  }
-
-  const drawWaveform = (
-    ctx: CanvasRenderingContext2D, 
-    data: Uint8Array, 
-    width: number, 
-    height: number, 
-    color: string
-  ) => {
-    ctx.strokeStyle = color
-    ctx.lineWidth = 2
-    ctx.beginPath()
-
-    const sliceWidth = width / data.length
-    let x = 0
-
-    data.forEach((value, index) => {
-      const y = (value / 255) * height
-      
-      if (index === 0) {
-        ctx.moveTo(x, y)
-      } else {
-        ctx.lineTo(x, y)
-      }
-      
-      x += sliceWidth
-    })
-
-    ctx.stroke()
-  }
-
-  const drawSpectrum = (
-    ctx: CanvasRenderingContext2D, 
-    data: Uint8Array, 
-    width: number, 
-    height: number, 
-    color: string
-  ) => {
-    const centerY = height / 2
-    const sliceWidth = width / data.length
-
-    data.forEach((value, index) => {
-      const amplitude = (value / 255) * (height / 2)
-      const x = index * sliceWidth
-      
-      // Top half
-      ctx.fillStyle = color
-      ctx.fillRect(x, centerY - amplitude, sliceWidth - 1, amplitude)
-      
-      // Bottom half (mirrored)
-      ctx.fillRect(x, centerY, sliceWidth - 1, amplitude)
-    })
-  }
-
-  const drawCircular = (
-    ctx: CanvasRenderingContext2D, 
-    data: Uint8Array, 
-    width: number, 
-    height: number, 
-    color: string
-  ) => {
-    const centerX = width / 2
-    const centerY = height / 2
-    const radius = Math.min(width, height) / 3
-    const barCount = data.length
-    const angleStep = (2 * Math.PI) / barCount
-
-    ctx.strokeStyle = color
-    ctx.lineWidth = 2
-
-    data.forEach((value, index) => {
-      const angle = index * angleStep
-      const amplitude = (value / 255) * radius * 0.5
-      
-      const x1 = centerX + Math.cos(angle) * radius
-      const y1 = centerY + Math.sin(angle) * radius
-      const x2 = centerX + Math.cos(angle) * (radius + amplitude)
-      const y2 = centerY + Math.sin(angle) * (radius + amplitude)
-      
-      ctx.beginPath()
-      ctx.moveTo(x1, y1)
-      ctx.lineTo(x2, y2)
-      ctx.stroke()
-    })
-  }
-
-  const draw3D = (
-    ctx: CanvasRenderingContext2D, 
-    data: Uint8Array, 
-    width: number, 
-    height: number, 
-    color: string
-  ) => {
-    const centerX = width / 2
-    const centerY = height / 2
-    const maxRadius = Math.min(width, height) / 2.5
-
-    // Create gradient for 3D effect
-    const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius)
-    gradient.addColorStop(0, color)
-    gradient.addColorStop(0.7, color + '80')
-    gradient.addColorStop(1, color + '20')
-
-    ctx.fillStyle = gradient
-
-    data.forEach((value, index) => {
-      const angle = (index / data.length) * 2 * Math.PI
-      const amplitude = (value / 255) * maxRadius * 0.8
-      
-      const x = centerX + Math.cos(angle) * amplitude
-      const y = centerY + Math.sin(angle) * amplitude
-      
-      // Draw 3D bars
-      const barHeight = (value / 255) * 20
-      ctx.fillRect(x - 2, y - barHeight / 2, 4, barHeight)
-    })
-  }
-
-  // Generate mock data for demo when audio context is not available
-  const generateMockData = useCallback(() => {
-    if (!canvasRef.current) return
-
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')!
-    const width = canvas.width
-    const height = canvas.height
-
-    const mockData = new Uint8Array(64)
-    for (let i = 0; i < mockData.length; i++) {
-      mockData[i] = Math.random() * 255
-    }
-
-    if (type === 'bars') {
-      drawBars(ctx, mockData, width, height, color)
-    } else if (type === 'waveform') {
-      drawWaveform(ctx, mockData, width, height, color)
-    } else if (type === 'spectrum') {
-      drawSpectrum(ctx, mockData, width, height, color)
-    } else if (type === 'circular') {
-      drawCircular(ctx, mockData, width, height, color)
-    } else if (type === '3d') {
-      draw3D(ctx, mockData, width, height, color)
-    }
-  }, [type, color])
+  }, [isPlaying, animate])
 
   useEffect(() => {
-    if (!audioContext && playerState.isPlaying) {
-      // Use mock data when audio context is not available
-      const interval = setInterval(generateMockData, 100)
-      return () => clearInterval(interval)
-    }
-  }, [audioContext, playerState.isPlaying, generateMockData])
+    // Simulate playing state
+    setIsPlaying(true)
+  }, [])
 
   return (
-    <div className={`audio-visualizer ${className}`}>
+    <div className="w-full">
       <canvas
         ref={canvasRef}
-        width={300}
+        width={width}
         height={height}
-        className="w-full h-full"
-        style={{ 
-          background: 'transparent',
-          borderRadius: '8px'
-        }}
+        className="w-full h-auto rounded-lg"
+        style={{ backgroundColor }}
       />
+      
+      <div className="mt-4 flex items-center justify-center space-x-4">
+        <button
+          onClick={() => setIsPlaying(!isPlaying)}
+          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+        >
+          {isPlaying ? 'Pause' : 'Play'} Visualization
+        </button>
+        
+        <select
+          value={type}
+          onChange={(e) => {
+            const newType = e.target.value as 'bars' | 'waveform' | 'circular' | '3d'
+            // Reset animation when changing type
+            if (animationRef.current) {
+              cancelAnimationFrame(animationRef.current)
+            }
+            // Trigger re-render
+            setIsPlaying(false)
+            setTimeout(() => setIsPlaying(true), 100)
+          }}
+          className="px-3 py-2 bg-dark-700 text-white rounded-lg border border-dark-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          <option value="bars">Bars</option>
+          <option value="waveform">Waveform</option>
+          <option value="circular">Circular</option>
+          <option value="3d">3D</option>
+        </select>
+      </div>
     </div>
   )
 }
