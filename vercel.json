@@ -4,10 +4,15 @@
   "framework": "vite",
   "installCommand": "npm install",
   "devCommand": "npm run start",
-  "routes": [
+  "functions": {
+    "app/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
