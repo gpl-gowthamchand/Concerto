@@ -43,7 +43,12 @@
     "eject": "react-scripts eject",
     "dev": "vite",
     "build:vite": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "setup": "./scripts/setup.sh",
+    "setup:skip-dev": "./scripts/setup.sh --skip-dev",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",

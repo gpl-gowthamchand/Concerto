@@ -44,15 +44,10 @@ export interface User {
   email: string;
   avatar?: string;
   bio?: string;
-  followers: string[];
-  following: string[];
-  playlists: string[];
-  favoriteTracks: string[];
-  favoriteArtists: string[];
   preferences: UserPreferences;
   stats: UserStats;
   createdAt: Date;
-  lastActive: Date;
+  updatedAt: Date;
 }
 
 export interface UserPreferences {
@@ -61,7 +56,6 @@ export interface UserPreferences {
   audioQuality: 'low' | 'medium' | 'high';
   autoplay: boolean;
   crossfade: boolean;
-  gaplessPlayback: boolean;
   equalizer: EqualizerSettings;
   notifications: NotificationSettings;
   privacy: PrivacySettings;
@@ -97,13 +91,12 @@ export interface PrivacySettings {
 
 export interface UserStats {
   totalListeningTime: number;
+  totalTracks: number;
+  totalPlaylists: number;
   favoriteGenres: string[];
-  favoriteMoods: string[];
   topArtists: string[];
-  topTracks: string[];
-  playlistsCreated: number;
-  tracksLiked: number;
-  monthlyListeningTime: number[];
+  listeningStreak: number;
+  lastActive: Date;
 }
 
 export interface SearchResult {

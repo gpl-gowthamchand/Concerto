@@ -12,7 +12,7 @@ interface QueuePanelProps {
 
 const QueuePanel: React.FC<QueuePanelProps> = ({ queue, currentTrack, onClose }) => {
   const { play, removeFromQueue, clearQueue } = useAudioStore();
-  const { user, addFavoriteTrack, removeFavoriteTrack } = useUserStore();
+  const { user } = useUserStore();
 
   const handlePlayTrack = (track: Track) => {
     play(track);
@@ -23,15 +23,13 @@ const QueuePanel: React.FC<QueuePanelProps> = ({ queue, currentTrack, onClose })
   };
 
   const handleLikeTrack = (track: Track) => {
-    if (user?.favoriteTracks.includes(track.id)) {
-      removeFavoriteTrack(track.id);
-    } else {
-      addFavoriteTrack(track);
-    }
+    // This would need to be implemented with actual favorite tracks storage
+    console.log('Toggle like for track:', track.id);
   };
 
-  const isLiked = (trackId: string) => {
-    return user?.favoriteTracks.includes(trackId) || false;
+  const isTrackLiked = (trackId: string): boolean => {
+    // This would need to be implemented with actual favorite tracks storage
+    return false;
   };
 
   const formatDuration = (seconds: number) => {
@@ -87,12 +85,12 @@ const QueuePanel: React.FC<QueuePanelProps> = ({ queue, currentTrack, onClose })
             <button
               onClick={() => handleLikeTrack(currentTrack)}
               className={`p-1 rounded transition-colors ${
-                isLiked(currentTrack.id)
+                isTrackLiked(currentTrack.id)
                   ? 'text-red-400 hover:text-red-300'
                   : 'text-dark-400 hover:text-dark-300'
               }`}
             >
-              <Heart className={`h-4 w-4 ${isLiked(currentTrack.id) ? 'fill-current' : ''}`} />
+              <Heart className={`h-4 w-4 ${isTrackLiked(currentTrack.id) ? 'fill-current' : ''}`} />
             </button>
             <button className="p-1 text-dark-400 hover:text-dark-300 rounded transition-colors">
               <MoreVertical className="h-4 w-4" />
@@ -145,12 +143,12 @@ const QueuePanel: React.FC<QueuePanelProps> = ({ queue, currentTrack, onClose })
                     <button
                       onClick={() => handleLikeTrack(item.track)}
                       className={`p-1 rounded transition-colors ${
-                        isLiked(item.track.id)
+                        isTrackLiked(item.track.id)
                           ? 'text-red-400 hover:text-red-300'
                           : 'text-dark-400 hover:text-dark-300'
                       }`}
                     >
-                      <Heart className={`h-4 w-4 ${isLiked(item.track.id) ? 'fill-current' : ''}`} />
+                      <Heart className={`h-4 w-4 ${isTrackLiked(item.track.id) ? 'fill-current' : ''}`} />
                     </button>
                     <button
                       onClick={() => handleRemoveFromQueue(index)}

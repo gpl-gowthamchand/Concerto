@@ -59,7 +59,14 @@ const Header: React.FC = () => {
           
           {/* Voice Search Modal */}
           {showVoiceSearch && (
-            <VoiceSearch onClose={() => setShowVoiceSearch(false)} />
+            <VoiceSearch 
+              onClose={() => setShowVoiceSearch(false)} 
+              onTranscript={(transcript) => {
+                // Handle voice search transcript
+                console.log('Voice search:', transcript);
+                setShowVoiceSearch(false);
+              }}
+            />
           )}
         </div>
 

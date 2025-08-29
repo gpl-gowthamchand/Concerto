@@ -1,229 +1,139 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, X, Search, Volume2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Mic, MicOff, X } from 'lucide-react';
 
 interface VoiceSearchProps {
   onClose: () => void;
+  onTranscript: (transcript: string) => void;
 }
 
-const VoiceSearch: React.FC<VoiceSearchProps> = ({ onClose }) => {
-  const navigate = useNavigate();
+// Extend Window interface for SpeechRecognition
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
+export default function VoiceSearch({ onClose, onTranscript }: VoiceSearchProps) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [confidence, setConfidence] = useState(0);
-  const [error, setError] = useState('');
-  const [isSupported, setIsSupported] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if speech recognition is supported
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      setIsSupported(true);
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+    if (isListening) {
+      startListening();
+    }
+  }, [isListening]);
 
-      recognitionRef.current.onstart = () => {
-        setIsListening(true);
-        setError('');
+  const startListening = () => {
+    try {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) {
+        setError('Speech recognition is not supported in this browser');
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setError(null);
       };
 
-      recognitionRef.current.onresult = (event: any) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
-        let maxConfidence = 0;
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          const confidence = event.results[i][0].confidence;
-
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript;
-            maxConfidence = Math.max(maxConfidence, confidence);
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-
-        setTranscript(finalTranscript || interimTranscript);
-        setConfidence(maxConfidence);
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setTranscript(transcript);
+        setIsListening(false);
+        onTranscript(transcript);
       };
 
-      recognitionRef.current.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
+      recognition.onerror = (event: any) => {
         setError(`Error: ${event.error}`);
         setIsListening(false);
       };
 
-      recognitionRef.current.onend = () => {
+      recognition.onend = () => {
         setIsListening(false);
       };
-    }
-  }, []);
 
-  const startListening = () => {
-    if (recognitionRef.current && isSupported) {
-      try {
-        recognitionRef.current.start();
-      } catch (error) {
-        setError('Failed to start voice recognition');
-      }
+      recognition.start();
+    } catch (err) {
+      setError('Failed to start speech recognition');
+      setIsListening(false);
     }
   };
 
   const stopListening = () => {
-    if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
-    }
+    setIsListening(false);
   };
 
-  const handleSearch = () => {
-    if (transcript.trim()) {
-      navigate(`/search?q=${encodeURIComponent(transcript.trim())}`);
-      onClose();
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      setIsListening(true);
     }
   };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
-  if (!isSupported) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-dark-800 rounded-lg p-6 max-w-md w-full mx-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-dark-100 text-lg font-medium">Voice Search</h3>
-            <button
-              onClick={onClose}
-              className="text-dark-400 hover:text-dark-100 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <div className="text-center py-8">
-            <MicOff className="h-16 w-16 text-red-400 mx-auto mb-4" />
-            <p className="text-dark-300 mb-2">Voice Search Not Supported</p>
-            <p className="text-dark-400 text-sm">
-              Your browser doesn't support speech recognition. Please use text search instead.
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-full btn-primary"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-dark-800 rounded-lg p-6 max-w-md w-full mx-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-dark-100 text-lg font-medium">Voice Search</h3>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-96 max-w-[90vw]">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Voice Search
+          </h2>
           <button
             onClick={onClose}
-            className="text-dark-400 hover:text-dark-100 transition-colors"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            <X className="h-5 w-5" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Voice Input Area */}
-        <div className="text-center mb-6">
-          <div className="relative inline-block">
+        {error ? (
+          <div className="text-center py-8">
+            <div className="text-red-500 mb-4">
+              <MicOff className="w-16 h-16 mx-auto" />
+            </div>
+            <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Try using a different browser or check your microphone permissions.
+            </p>
+          </div>
+        ) : (
+          <div className="text-center py-8">
             <button
-              onClick={isListening ? stopListening : startListening}
-              className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${
+              onClick={toggleListening}
+              className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 ${
                 isListening
                   ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-                  : 'bg-primary-600 hover:bg-primary-700'
+                  : 'bg-blue-500 hover:bg-blue-600'
               }`}
             >
               {isListening ? (
-                <MicOff className="h-8 w-8 text-white" />
+                <MicOff className="w-8 h-8 text-white" />
               ) : (
-                <Mic className="h-8 w-8 text-white" />
+                <Mic className="w-8 h-8 text-white" />
               )}
             </button>
             
-            {/* Ripple effect when listening */}
-            {isListening && (
-              <div className="absolute inset-0 rounded-full border-4 border-red-400 animate-ping" />
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              {isListening ? 'Listening... Speak now!' : 'Click to start voice search'}
+            </p>
+            
+            {transcript && (
+              <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <strong>You said:</strong> {transcript}
+                </p>
+              </div>
             )}
           </div>
-          
-          <p className="text-dark-300 mt-4">
-            {isListening ? 'Listening...' : 'Click to start voice search'}
-          </p>
-        </div>
-
-        {/* Transcript Display */}
-        {transcript && (
-          <div className="mb-6">
-            <label className="block text-dark-300 text-sm font-medium mb-2">
-              What you said:
-            </label>
-            <div className="bg-dark-700 rounded-lg p-3 border border-dark-600">
-              <p className="text-dark-100 text-lg">{transcript}</p>
-              {confidence > 0 && (
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-dark-400 text-sm">Confidence:</span>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-20 h-2 bg-dark-600 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary-500 rounded-full transition-all duration-300"
-                        style={{ width: `${confidence * 100}%` }}
-                      />
-                    </div>
-                    <span className="text-dark-400 text-sm">
-                      {Math.round(confidence * 100)}%
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
         )}
-
-        {/* Error Display */}
-        {error && (
-          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
-
-        {/* Search Button */}
-        <button
-          onClick={handleSearch}
-          disabled={!transcript.trim()}
-          className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-        >
-          <Search className="h-4 w-4" />
-          <span>Search for "{transcript}"</span>
-        </button>
-
-        {/* Instructions */}
-        <div className="mt-6 text-center">
-          <p className="text-dark-400 text-sm mb-2">Voice Search Tips:</p>
-          <ul className="text-dark-500 text-xs space-y-1">
-            <li>• Speak clearly and at a normal pace</li>
-            <li>• Try saying "play [song name]" or "search for [artist]"</li>
-            <li>• Use natural language like "songs by [artist]"</li>
-            <li>• You can also search by mood or genre</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
-};
-
-export default VoiceSearch;
+}
