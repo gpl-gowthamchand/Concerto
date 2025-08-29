@@ -16,34 +16,39 @@ interface PlaylistManager {
 
 export function usePlaylistManager(): PlaylistManager {
   const [playlists, setPlaylists] = useState<Playlist[]>([])
+  const [mounted, setMounted] = useState(false)
 
   // Load playlists from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('concerto-playlists')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setPlaylists(parsed.map((p: any) => ({
-          ...p,
-          createdAt: new Date(p.createdAt),
-          updatedAt: new Date(p.updatedAt)
-        })))
-      } catch (error) {
-        console.error('Failed to load playlists:', error)
-        // Initialize with default playlists
+    setMounted(true)
+    
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('concerto-playlists')
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          setPlaylists(parsed.map((p: any) => ({
+            ...p,
+            createdAt: new Date(p.createdAt),
+            updatedAt: new Date(p.updatedAt)
+          })))
+        } catch (error) {
+          console.error('Failed to load playlists:', error)
+          // Initialize with default playlists
+          initializeDefaultPlaylists()
+        }
+      } else {
         initializeDefaultPlaylists()
       }
-    } else {
-      initializeDefaultPlaylists()
     }
   }, [])
 
   // Save playlists to localStorage whenever they change
   useEffect(() => {
-    if (playlists.length > 0) {
+    if (mounted && playlists.length > 0 && typeof window !== 'undefined') {
       localStorage.setItem('concerto-playlists', JSON.stringify(playlists))
     }
-  }, [playlists])
+  }, [playlists, mounted])
 
   const initializeDefaultPlaylists = useCallback(() => {
     const defaultPlaylists: Playlist[] = [
@@ -102,72 +107,60 @@ export function usePlaylistManager(): PlaylistManager {
   }, [])
 
   const deletePlaylist = useCallback((playlistId: string) => {
-    // Prevent deletion of system playlists
-    if (['liked-songs', 'recently-played', 'downloads'].includes(playlistId)) {
-      console.warn('Cannot delete system playlists')
-      return
-    }
-
     setPlaylists(prev => prev.filter(p => p.id !== playlistId))
   }, [])
 
   const addToPlaylist = useCallback((playlistId: string, song: Song) => {
-    setPlaylists(prev => prev.map(playlist => {
-      if (playlist.id === playlistId) {
-        // Don't add duplicates
-        if (playlist.songs.includes(song.id)) {
-          return playlist
-        }
-        
-        return {
-          ...playlist,
-          songs: [...playlist.songs, song.id],
-          updatedAt: new Date()
-        }
-      }
-      return playlist
-    }))
+    setPlaylists(prev => prev.map(p => 
+      p.id === playlistId 
+        ? { ...p, songs: [...p.songs, song], updatedAt: new Date() }
+        : p
+    ))
   }, [])
 
   const removeFromPlaylist = useCallback((playlistId: string, songId: string) => {
-    setPlaylists(prev => prev.map(playlist => {
-      if (playlist.id === playlistId) {
-        return {
-          ...playlist,
-          songs: playlist.songs.filter(id => id !== songId),
-          updatedAt: new Date()
-        }
-      }
-      return playlist
-    }))
+    setPlaylists(prev => prev.map(p => 
+      p.id === playlistId 
+        ? { ...p, songs: p.songs.filter(s => s.id !== songId), updatedAt: new Date() }
+        : p
+    ))
   }, [])
 
   const updatePlaylist = useCallback((playlistId: string, updates: Partial<Playlist>) => {
-    setPlaylists(prev => prev.map(playlist => {
-      if (playlist.id === playlistId) {
-        return {
-          ...playlist,
-          ...updates,
-          updatedAt: new Date()
-        }
-      }
-      return playlist
-    }))
+    setPlaylists(prev => prev.map(p => 
+      p.id === playlistId 
+        ? { ...p, ...updates, updatedAt: new Date() }
+        : p
+    ))
   }, [])
 
   const getPlaylistSongs = useCallback((playlistId: string, allSongs: Song[]): Song[] => {
     const playlist = playlists.find(p => p.id === playlistId)
     if (!playlist) return []
-
-    return playlist.songs
-      .map(songId => allSongs.find(song => song.id === songId))
-      .filter((song): song is Song => song !== undefined)
+    
+    return playlist.songs.map(songId => 
+      allSongs.find(song => song.id === songId)
+    ).filter((song): song is Song => song !== undefined)
   }, [playlists])
 
   const isInPlaylist = useCallback((playlistId: string, songId: string): boolean => {
     const playlist = playlists.find(p => p.id === playlistId)
     return playlist ? playlist.songs.includes(songId) : false
   }, [playlists])
+
+  // Return empty state during SSR
+  if (!mounted) {
+    return {
+      playlists: [],
+      createPlaylist: () => ({ id: '', name: '', description: '', cover: '', songs: [], createdBy: '', isPublic: false, createdAt: new Date(), updatedAt: new Date() }),
+      deletePlaylist: () => {},
+      addToPlaylist: () => {},
+      removeFromPlaylist: () => {},
+      updatePlaylist: () => {},
+      getPlaylistSongs: () => [],
+      isInPlaylist: () => false
+    }
+  }
 
   return {
     playlists,

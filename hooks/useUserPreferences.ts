@@ -3,207 +3,140 @@
 import { useState, useEffect, useCallback } from 'react'
 
 interface UserPreferences {
-  // Audio settings
-  volume: number
-  isMuted: boolean
-  audioQuality: 'low' | 'medium' | 'high'
-  crossfade: boolean
-  crossfadeDuration: number
-
-  // Playback settings
-  shuffleMode: boolean
-  repeatMode: 'none' | 'one' | 'all'
-  autoplay: boolean
-  
-  // UI settings
-  theme: 'dark' | 'light' | 'auto'
+  theme: 'light' | 'dark' | 'auto'
   language: string
-  showLyrics: boolean
-  compactMode: boolean
-  
-  // Privacy settings
-  shareListeningActivity: boolean
-  allowExplicitContent: boolean
-  
-  // Notification settings
-  pushNotifications: boolean
-  emailNotifications: boolean
-  
-  // Social settings
-  profileVisible: boolean
-  showRecentlyPlayed: boolean
-  
-  // Recently played songs
+  notifications: boolean
   recentlyPlayed: string[]
-  
-  // Liked songs
   likedSongs: string[]
-  
-  // User stats
-  totalListeningTime: number
-  songsPlayed: number
-  favoriteGenres: string[]
+  volume: number
+  shuffle: boolean
+  repeat: 'none' | 'one' | 'all'
+  crossfade: boolean
+  highQuality: boolean
+  autoPlay: boolean
 }
 
-const defaultPreferences: UserPreferences = {
-  volume: 0.7,
-  isMuted: false,
-  audioQuality: 'high',
-  crossfade: false,
-  crossfadeDuration: 3,
-  
-  shuffleMode: false,
-  repeatMode: 'none',
-  autoplay: true,
-  
-  theme: 'dark',
-  language: 'en',
-  showLyrics: true,
-  compactMode: false,
-  
-  shareListeningActivity: true,
-  allowExplicitContent: true,
-  
-  pushNotifications: true,
-  emailNotifications: false,
-  
-  profileVisible: true,
-  showRecentlyPlayed: true,
-  
-  recentlyPlayed: [],
-  likedSongs: [],
-  
-  totalListeningTime: 0,
-  songsPlayed: 0,
-  favoriteGenres: []
-}
-
-interface UserPreferencesManager {
-  preferences: UserPreferences
-  updatePreference: <K extends keyof UserPreferences>(key: K, value: UserPreferences[K]) => void
-  resetPreferences: () => void
-  exportPreferences: () => string
-  importPreferences: (data: string) => boolean
-  
-  // Helper methods for common operations
-  toggleLike: (songId: string) => boolean
-  isLiked: (songId: string) => boolean
-  addToRecentlyPlayed: (songId: string) => void
-  incrementPlayCount: (duration: number) => void
-  updateListeningStats: (genre: string) => void
-}
-
-export function useUserPreferences(): UserPreferencesManager {
-  const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences)
+export function useUserPreferences() {
+  const [preferences, setPreferences] = useState<UserPreferences>({
+    theme: 'dark',
+    language: 'en',
+    notifications: true,
+    recentlyPlayed: [],
+    likedSongs: [],
+    volume: 0.8,
+    shuffle: false,
+    repeat: 'none',
+    crossfade: false,
+    highQuality: true,
+    autoPlay: false
+  })
+  const [mounted, setMounted] = useState(false)
 
   // Load preferences from localStorage on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('concerto-user-preferences')
+    setMounted(true)
+    
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('concerto-preferences')
       if (saved) {
-        const parsed = JSON.parse(saved)
-        setPreferences({ ...defaultPreferences, ...parsed })
+        try {
+          const parsed = JSON.parse(saved)
+          setPreferences(prev => ({ ...prev, ...parsed }))
+        } catch (error) {
+          console.error('Failed to load preferences:', error)
+        }
       }
-    } catch (error) {
-      console.error('Failed to load user preferences:', error)
     }
   }, [])
 
   // Save preferences to localStorage whenever they change
   useEffect(() => {
-    try {
-      localStorage.setItem('concerto-user-preferences', JSON.stringify(preferences))
-    } catch (error) {
-      console.error('Failed to save user preferences:', error)
+    if (mounted && typeof window !== 'undefined') {
+      localStorage.setItem('concerto-preferences', JSON.stringify(preferences))
     }
-  }, [preferences])
+  }, [preferences, mounted])
 
-  const updatePreference = useCallback(<K extends keyof UserPreferences>(
-    key: K, 
-    value: UserPreferences[K]
-  ) => {
+  const updatePreference = useCallback((key: keyof UserPreferences, value: any) => {
+    setPreferences(prev => ({ ...prev, [key]: value }))
+  }, [])
+
+  const toggleLiked = useCallback((songId: string) => {
     setPreferences(prev => ({
       ...prev,
-      [key]: value
+      likedSongs: prev.likedSongs.includes(songId)
+        ? prev.likedSongs.filter(id => id !== songId)
+        : [...prev.likedSongs, songId]
     }))
   }, [])
 
-  const resetPreferences = useCallback(() => {
-    setPreferences(defaultPreferences)
-    localStorage.removeItem('concerto-user-preferences')
-  }, [])
-
-  const exportPreferences = useCallback((): string => {
-    return JSON.stringify(preferences, null, 2)
-  }, [preferences])
-
-  const importPreferences = useCallback((data: string): boolean => {
-    try {
-      const parsed = JSON.parse(data)
-      setPreferences({ ...defaultPreferences, ...parsed })
-      return true
-    } catch (error) {
-      console.error('Failed to import preferences:', error)
-      return false
-    }
-  }, [])
-
-  const toggleLike = useCallback((songId: string): boolean => {
-    const isCurrentlyLiked = preferences.likedSongs.includes(songId)
-    const newLikedSongs = isCurrentlyLiked
-      ? preferences.likedSongs.filter(id => id !== songId)
-      : [...preferences.likedSongs, songId]
-    
-    updatePreference('likedSongs', newLikedSongs)
-    return !isCurrentlyLiked
-  }, [preferences.likedSongs, updatePreference])
-
-  const isLiked = useCallback((songId: string): boolean => {
+  const isLiked = useCallback((songId: string) => {
     return preferences.likedSongs.includes(songId)
   }, [preferences.likedSongs])
 
   const addToRecentlyPlayed = useCallback((songId: string) => {
-    const filtered = preferences.recentlyPlayed.filter(id => id !== songId)
-    const newRecentlyPlayed = [songId, ...filtered].slice(0, 50) // Keep last 50
-    
-    updatePreference('recentlyPlayed', newRecentlyPlayed)
-  }, [preferences.recentlyPlayed, updatePreference])
+    setPreferences(prev => ({
+      ...prev,
+      recentlyPlayed: [
+        songId,
+        ...prev.recentlyPlayed.filter(id => id !== songId)
+      ].slice(0, 50) // Keep only last 50 songs
+    }))
+  }, [])
 
-  const incrementPlayCount = useCallback((duration: number) => {
-    updatePreference('songsPlayed', preferences.songsPlayed + 1)
-    updatePreference('totalListeningTime', preferences.totalListeningTime + duration)
-  }, [preferences.songsPlayed, preferences.totalListeningTime, updatePreference])
+  const clearRecentlyPlayed = useCallback(() => {
+    setPreferences(prev => ({ ...prev, recentlyPlayed: [] }))
+  }, [])
 
-  const updateListeningStats = useCallback((genre: string) => {
-    if (!genre) return
-    
-    const currentGenres = [...preferences.favoriteGenres]
-    const existingIndex = currentGenres.findIndex(g => g === genre)
-    
-    if (existingIndex >= 0) {
-      // Move to front (most recently played)
-      currentGenres.splice(existingIndex, 1)
-      currentGenres.unshift(genre)
-    } else {
-      // Add new genre
-      currentGenres.unshift(genre)
+  const resetPreferences = useCallback(() => {
+    const defaultPrefs: UserPreferences = {
+      theme: 'dark',
+      language: 'en',
+      notifications: true,
+      recentlyPlayed: [],
+      likedSongs: [],
+      volume: 0.8,
+      shuffle: false,
+      repeat: 'none',
+      crossfade: false,
+      highQuality: true,
+      autoPlay: false
     }
-    
-    // Keep only top 10 genres
-    updatePreference('favoriteGenres', currentGenres.slice(0, 10))
-  }, [preferences.favoriteGenres, updatePreference])
+    setPreferences(defaultPrefs)
+  }, [])
+
+  // Return default state during SSR
+  if (!mounted) {
+    return {
+      preferences: {
+        theme: 'dark',
+        language: 'en',
+        notifications: true,
+        recentlyPlayed: [],
+        likedSongs: [],
+        volume: 0.8,
+        shuffle: false,
+        repeat: 'none',
+        crossfade: false,
+        highQuality: true,
+        autoPlay: false
+      },
+      updatePreference: () => {},
+      toggleLiked: () => {},
+      isLiked: () => false,
+      addToRecentlyPlayed: () => {},
+      clearRecentlyPlayed: () => {},
+      resetPreferences: () => {}
+    }
+  }
 
   return {
     preferences,
     updatePreference,
-    resetPreferences,
-    exportPreferences,
-    importPreferences,
-    toggleLike,
+    toggleLiked,
     isLiked,
     addToRecentlyPlayed,
-    incrementPlayCount,
-    updateListeningStats
+    clearRecentlyPlayed,
+    resetPreferences
   }
 }
 
