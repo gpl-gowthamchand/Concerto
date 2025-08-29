@@ -10,7 +10,6 @@ interface AudioVisualizerProps {
   barGap?: number
   color?: string
   backgroundColor?: string
-  animationSpeed?: number
   type?: 'bars' | 'waveform' | 'circular' | '3d'
 }
 
@@ -22,7 +21,6 @@ export default function AudioVisualizer({
   barGap = 2,
   color = '#8b5cf6',
   backgroundColor = 'transparent',
-  animationSpeed = 50,
   type = 'bars'
 }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -46,7 +44,6 @@ export default function AudioVisualizer({
   }, [barCount])
 
   const drawBars = useCallback((ctx: CanvasRenderingContext2D, data: Uint8Array) => {
-    const barHeight = height / 255
     const totalBarWidth = barWidth + barGap
     const startX = (width - (barCount * totalBarWidth - barGap)) / 2
 
@@ -118,11 +115,11 @@ export default function AudioVisualizer({
 
     for (let i = 0; i < barCount; i++) {
       const value = (data[i] / 255) * radius * 0.5
-      const angle = i * angleStep
-      const x1 = centerX + Math.cos(angle) * radius
-      const y1 = centerY + Math.sin(angle) * radius
-      const x2 = centerX + Math.cos(angle) * (radius + value)
-      const y2 = centerY + Math.sin(angle) * (radius + value)
+      const currentAngle = i * angleStep
+      const x1 = centerX + Math.cos(currentAngle) * radius
+      const y1 = centerY + Math.sin(currentAngle) * radius
+      const x2 = centerX + Math.cos(currentAngle) * (radius + value)
+      const y2 = centerY + Math.sin(currentAngle) * (radius + value)
 
       ctx.moveTo(x1, y1)
       ctx.lineTo(x2, y2)
@@ -142,7 +139,6 @@ export default function AudioVisualizer({
 
     for (let i = 0; i < barCount; i++) {
       const value = (data[i] / 255) * maxRadius
-      const angle = (i / barCount) * Math.PI * 2
       const radius = maxRadius - value
 
       // Create 3D effect with multiple layers
@@ -228,8 +224,7 @@ export default function AudioVisualizer({
         
         <select
           value={type}
-          onChange={(e) => {
-            const newType = e.target.value as 'bars' | 'waveform' | 'circular' | '3d'
+          onChange={() => {
             // Reset animation when changing type
             if (animationRef.current) {
               cancelAnimationFrame(animationRef.current)

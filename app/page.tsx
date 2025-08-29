@@ -1,36 +1,23 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { 
-  Play, 
   Heart, 
-  Plus, 
   Music, 
   TrendingUp, 
-  Clock, 
-  Users, 
-  ChevronLeft, 
-  ChevronRight, 
-  Shuffle,
-  Download,
-  Volume2,
-  Mic,
   Radio,
   List,
-  Settings,
-  X
+  Mic
 } from 'lucide-react'
 
 // Import all our new functional components and hooks
 import FunctionalMusicPlayer from '../components/FunctionalMusicPlayer'
 import FunctionalSearchBar from '../components/FunctionalSearchBar'
-import MusicLibrary from '../components/MusicLibrary'
 import PWAInstaller from '../components/PWAInstaller'
 import { mockSongs, Song } from '../lib/musicData'
 import { usePlaylistManager } from '../hooks/usePlaylistManager'
 import { useUserPreferences } from '../hooks/useUserPreferences'
-import { useQueueManager } from '../hooks/useQueueManager'
 
 interface SearchResult {
   id: string
@@ -50,12 +37,10 @@ export default function Home() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false)
   const [newPlaylistName, setNewPlaylistName] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
 
   // Use our custom hooks
   const playlistManager = usePlaylistManager()
   const userPrefs = useUserPreferences()
-  const queueManager = useQueueManager()
 
   // Update time every minute for greeting
   useEffect(() => {
@@ -105,7 +90,6 @@ export default function Home() {
   ]
 
   const handleSearch = (query: string, filters: { songs?: boolean; artists?: boolean; albums?: boolean }) => {
-    setSearchQuery(query)
     if (!query.trim()) {
       setSearchResults([])
       setShowSearchResults(false)
@@ -142,7 +126,6 @@ export default function Home() {
     setIsPlaying(true)
     userPrefs.addToRecentlyPlayed(song.id)
     setShowSearchResults(false)
-    setSearchQuery('')
   }
 
   const handlePlayPause = () => {
@@ -181,13 +164,6 @@ export default function Home() {
 
   const handleLikeSong = (songId: string) => {
     userPrefs.toggleLiked(songId)
-  }
-
-  const handleAddToPlaylist = (songId: string, playlistId: string) => {
-    const song = mockSongs.find(s => s.id === songId)
-    if (song) {
-      playlistManager.addToPlaylist(playlistId, song)
-    }
   }
 
   return (
@@ -286,7 +262,7 @@ export default function Home() {
                 <TrendingUp className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Trending Now</h3>
-              <p className="text-gray-400 mb-4">Discover what's hot in music right now</p>
+              <p className="text-gray-400 mb-4">Discover what&apos;s hot in music right now</p>
               <Link href="/discover" className="btn-primary w-full">
                 Explore Trends
               </Link>

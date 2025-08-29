@@ -10,12 +10,15 @@ export default function ThemeToggle() {
   // Check if we're in browser environment
   const isBrowser = typeof window !== 'undefined'
   
+  // Always call useTheme, but handle the result safely
+  const themeContext = useTheme()
+  
   // Don't render during SSR
   if (!isBrowser) {
     return null
   }
   
-  const { theme, setTheme, resolvedTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = themeContext
   const isDark = resolvedTheme === 'dark'
   
   const toggleTheme = () => {

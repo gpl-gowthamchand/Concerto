@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-interface PWAProviderProps {
-  children: React.ReactNode
-}
-
-export function PWAProvider({ children }: React.ReactNode) {
+export function PWAProvider({ children }: { children: React.ReactNode }) {
   const [isOnline, setIsOnline] = useState(true)
   const [updateAvailable, setUpdateAvailable] = useState(false)
   const [mounted, setMounted] = useState(false)
