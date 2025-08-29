@@ -37,11 +37,8 @@
     "react-transition-group": "^4.4.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
     "build:vite": "vite build",
     "preview": "vite preview",
     "setup": "./scripts/setup.sh",
