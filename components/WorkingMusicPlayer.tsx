@@ -54,16 +54,17 @@ export default function WorkingMusicPlayer({
     if (currentSong && audioRef.current) {
       // For YouTube URLs, we'll use a proxy or embed approach
       if (currentSong.audioUrl.includes('youtube.com')) {
-        // Use YouTube embed for demo
+        // Use YouTube embed for playback
         const videoId = currentSong.audioUrl.split('v=')[1]
         if (videoId) {
           // Create YouTube iframe for playback
           const iframe = document.createElement('iframe')
-          iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1`
+          iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&enablejsapi=1`
           iframe.width = '0'
           iframe.height = '0'
           iframe.style.display = 'none'
           iframe.allow = 'autoplay; encrypted-media'
+          iframe.id = 'youtube-player'
           
           // Remove previous iframe
           const existingIframe = document.querySelector('#youtube-player')
@@ -71,11 +72,51 @@ export default function WorkingMusicPlayer({
             existingIframe.remove()
           }
           
-          iframe.id = 'youtube-player'
+          document.body.appendChild(iframe)
+          
+          // Listen for YouTube player events
+          const handleMessage = (event: MessageEvent) => {
+            if (event.origin !== 'https://www.youtube.com') return
+            
+            const data = event.data
+            if (data.event === 'onStateChange') {
+              if (data.info === 1) { // Playing
+                setIsPlaying(true)
+              } else if (data.info === 2) { // Paused
+                setIsPlaying(false)
+              } else if (data.info === 0) { // Ended
+                setIsPlaying(false)
+                onNext()
+              }
+            }
+          }
+          
+          window.addEventListener('message', handleMessage)
+          
+          return () => {
+            window.removeEventListener('message', handleMessage)
+          }
+        }
+      } else if (currentSong.audioUrl.includes('soundcloud.com')) {
+        // For SoundCloud, try to use their embed player
+        const trackId = currentSong.audioUrl.split('/').pop()
+        if (trackId) {
+          const iframe = document.createElement('iframe')
+          iframe.src = `https://w.soundcloud.com/player/?url=https://soundcloud.com/track/${trackId}&auto_play=true`
+          iframe.width = '0'
+          iframe.height = '0'
+          iframe.style.display = 'none'
+          iframe.id = 'soundcloud-player'
+          
+          const existingIframe = document.querySelector('#soundcloud-player')
+          if (existingIframe) {
+            existingIframe.remove()
+          }
+          
           document.body.appendChild(iframe)
         }
       } else {
-        // For other sources, try direct audio
+        // For other sources (Jamendo, direct audio), try direct audio
         audioRef.current.src = currentSong.audioUrl
         audioRef.current.load()
       }
@@ -84,7 +125,7 @@ export default function WorkingMusicPlayer({
       setCurrentTime(0)
       setDuration(currentSong.duration)
     }
-  }, [currentSong])
+  }, [currentSong, onNext])
 
   // Handle audio events
   useEffect(() => {
