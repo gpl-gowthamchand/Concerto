@@ -12,13 +12,12 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    minify: 'terser',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           ui: ['lucide-react', 'framer-motion'],
-          audio: ['wavesurfer.js', 'tone'],
         },
       },
     },

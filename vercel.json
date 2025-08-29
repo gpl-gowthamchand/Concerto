@@ -4,15 +4,6 @@
   "framework": "vite",
   "installCommand": "npm install",
   "devCommand": "npm run start",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
   "routes": [
     {
       "src": "/(.*)",
