@@ -44,11 +44,13 @@ interface SearchResult {
 
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false)
+  const [currentSong, setCurrentSong] = useState<Song | null>(null)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [showSearchResults, setShowSearchResults] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false)
   const [newPlaylistName, setNewPlaylistName] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Use our custom hooks
   const playlistManager = usePlaylistManager()
@@ -98,497 +100,372 @@ export default function Home() {
       description: "High energy music", 
       image: "💪", 
       songCount: 40,
-      color: "from-spotify-600 to-green-800"
-    },
-    { 
-      id: 4, 
-      title: "Focus Flow", 
-      description: "Music for concentration", 
-      image: "🧠", 
-      songCount: 60,
-      color: "from-purple-600 to-accent-purple"
-    },
-    { 
-      id: 5, 
-      title: "Concerto Exclusives", 
-      description: "Unique to our platform", 
-      image: "🎼", 
-      songCount: 25,
-      color: "from-youtube-600 to-spotify-600"
-    },
+      color: "from-green-600 to-green-800"
+    }
   ]
 
-  const quickActions = [
-    { icon: Radio, label: "Radio", color: "text-youtube-500", count: "12 stations" },
-    { icon: Mic, label: "Podcasts", color: "text-spotify-500", count: "2.4k shows" },
-    { icon: Volume2, label: "Live", color: "text-red-500", count: "56 active" },
-    { icon: TrendingUp, label: "Charts", color: "text-orange-500", count: "Updated daily" },
-  ]
+  const handleSearch = (query: string, filters: { songs?: boolean; artists?: boolean; albums?: boolean }) => {
+    setSearchQuery(query)
+    if (!query.trim()) {
+      setSearchResults([])
+      setShowSearchResults(false)
+      return
+    }
 
-  // Handle song selection and playback
-  const handlePlay = useCallback((song: Song, playlist?: Song[]) => {
-    const songsToQueue = playlist || [song]
-    const startIndex = songsToQueue.findIndex(s => s.id === song.id)
+    const results: SearchResult[] = []
     
-    queueManager.setQueue(songsToQueue, startIndex)
-    userPrefs.addToRecentlyPlayed(song.id)
-    userPrefs.updateListeningStats(song.genre || 'Unknown')
-    setIsPlaying(true)
-  }, [queueManager, userPrefs])
-
-  const handlePlayPause = useCallback(() => {
-    setIsPlaying(!isPlaying)
-  }, [isPlaying])
-
-  const handleNext = useCallback(() => {
-    const nextSong = queueManager.next()
-    if (nextSong) {
-      userPrefs.addToRecentlyPlayed(nextSong.id)
-      userPrefs.updateListeningStats(nextSong.genre || 'Unknown')
+    if (filters.songs !== false) {
+      const songResults = mockSongs.filter(song => 
+        song.title.toLowerCase().includes(query.toLowerCase()) ||
+        song.artist.toLowerCase().includes(query.toLowerCase()) ||
+        song.album.toLowerCase().includes(query.toLowerCase())
+      )
+      
+      songResults.forEach(song => {
+        results.push({
+          id: song.id,
+          type: 'song',
+          title: song.title,
+          subtitle: `${song.artist} • ${song.album}`,
+          icon: <Music className="w-5 h-5" />,
+          data: song
+        })
+      })
     }
-  }, [queueManager, userPrefs])
 
-  const handlePrevious = useCallback(() => {
-    queueManager.previous()
-  }, [queueManager])
-
-  const handleLike = useCallback((songId: string) => {
-    const isNowLiked = userPrefs.toggleLike(songId)
-    
-    // Add/remove from liked songs playlist
-    if (isNowLiked) {
-      const song = mockSongs.find(s => s.id === songId)
-      if (song) {
-        playlistManager.addToPlaylist('liked-songs', song)
-      }
-    } else {
-      playlistManager.removeFromPlaylist('liked-songs', songId)
-    }
-  }, [userPrefs, playlistManager])
-
-  const handleAddToPlaylist = useCallback((song: Song) => {
-    // For now, add to a default "My Music" playlist or show playlist selector
-    const myMusicPlaylist = playlistManager.playlists.find(p => p.name === 'My Music')
-    if (myMusicPlaylist) {
-      playlistManager.addToPlaylist(myMusicPlaylist.id, song)
-    } else {
-      // Create "My Music" playlist and add song
-      const newPlaylist = playlistManager.createPlaylist('My Music', 'My personal collection')
-      playlistManager.addToPlaylist(newPlaylist.id, song)
-    }
-  }, [playlistManager])
-
-  const handleShuffle = useCallback(() => {
-    if (mockSongs.length > 0) {
-      queueManager.setQueue(mockSongs)
-      queueManager.shuffle()
-      const firstShuffledSong = queueManager.currentSong
-      if (firstShuffledSong) {
-        userPrefs.addToRecentlyPlayed(firstShuffledSong.id)
-        setIsPlaying(true)
-      }
-    }
-  }, [queueManager, userPrefs])
-
-  const handleSearch = useCallback((results: SearchResult[]) => {
     setSearchResults(results)
-    setShowSearchResults(results.length > 0)
-  }, [])
+    setShowSearchResults(true)
+  }
 
-  const handleSongSelect = useCallback((song: Song) => {
-    handlePlay(song)
-  }, [handlePlay])
+  const handleSongSelect = (song: Song) => {
+    setCurrentSong(song)
+    setIsPlaying(true)
+    userPrefs.addToRecentlyPlayed(song.id)
+    setShowSearchResults(false)
+    setSearchQuery('')
+  }
 
-  const handleCreatePlaylist = useCallback(() => {
+  const handlePlayPause = () => {
+    if (currentSong) {
+      setIsPlaying(!isPlaying)
+    }
+  }
+
+  const handleNext = () => {
+    if (currentSong) {
+      const currentIndex = mockSongs.findIndex(song => song.id === currentSong.id)
+      const nextIndex = (currentIndex + 1) % mockSongs.length
+      const nextSong = mockSongs[nextIndex]
+      setCurrentSong(nextSong)
+      userPrefs.addToRecentlyPlayed(nextSong.id)
+    }
+  }
+
+  const handlePrevious = () => {
+    if (currentSong) {
+      const currentIndex = mockSongs.findIndex(song => song.id === currentSong.id)
+      const prevIndex = currentIndex === 0 ? mockSongs.length - 1 : currentIndex - 1
+      const prevSong = mockSongs[prevIndex]
+      setCurrentSong(prevSong)
+      userPrefs.addToRecentlyPlayed(prevSong.id)
+    }
+  }
+
+  const handleCreatePlaylist = () => {
     if (newPlaylistName.trim()) {
       playlistManager.createPlaylist(newPlaylistName.trim())
       setNewPlaylistName('')
       setShowCreatePlaylist(false)
     }
-  }, [newPlaylistName, playlistManager])
+  }
+
+  const handleLikeSong = (songId: string) => {
+    userPrefs.toggleLiked(songId)
+  }
+
+  const handleAddToPlaylist = (songId: string, playlistId: string) => {
+    const song = mockSongs.find(s => s.id === songId)
+    if (song) {
+      playlistManager.addToPlaylist(playlistId, song)
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-dark-800 flex">
-      {/* Sidebar */}
-      <div className="fixed left-0 top-0 h-full w-64 bg-black z-40 border-r border-gray-800">
-        <div className="p-6">
-          {/* Logo with Concerto Branding */}
-          <Link href="/" className="flex items-center space-x-3 mb-8">
-            <div className="w-10 h-10 concerto-gradient rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">♪</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold text-white">Concerto</span>
-              <span className="text-xs text-gray-400">Where every note matters</span>
-            </div>
-          </Link>
-
-          {/* Main Navigation */}
-          <div className="space-y-2 mb-8">
-            <div className="sidebar-item active">
-              <Music className="w-5 h-5" />
-              <span>Home</span>
-            </div>
-            <Link href="/discover" className="sidebar-item">
-              <TrendingUp className="w-5 h-5" />
-              <span>Browse</span>
-            </Link>
-            <Link href="/library" className="sidebar-item">
-              <Clock className="w-5 h-5" />
-              <span>Your Library</span>
-            </Link>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mb-6">
-            <h3 className="text-gray-400 text-sm font-semibold mb-4 uppercase tracking-wider">Quick Access</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {quickActions.map((action, index) => (
-                <button key={index} className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-800 transition-colors group">
-                  <action.icon className={`w-5 h-5 ${action.color} mb-1 group-hover:scale-110 transition-transform`} />
-                  <span className="text-xs text-gray-400">{action.label}</span>
-                  <span className="text-xs text-gray-500">{action.count}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Library */}
-          <div className="mb-6">
-            <h3 className="text-gray-400 text-sm font-semibold mb-4 uppercase tracking-wider">Your Music</h3>
-            <div className="space-y-2">
-              <div className="sidebar-item">
-                <Heart className="w-5 h-5 text-youtube-500" />
-                <span>Liked Songs</span>
-                <span className="ml-auto text-xs text-gray-400">{likedSongs.length}</span>
-              </div>
-              <Link href="/playlists" className="sidebar-item">
-                <Users className="w-5 h-5" />
-                <span>Playlists</span>
-                <span className="ml-auto text-xs text-gray-400">{playlistManager.playlists.length}</span>
-              </Link>
-              <div className="sidebar-item">
-                <Download className="w-5 h-5" />
-                <span>Downloads</span>
-                <span className="ml-auto text-xs text-gray-400">
-                  {playlistManager.getPlaylistSongs('downloads', mockSongs).length}
-                </span>
-              </div>
-              <div className="sidebar-item">
-                <List className="w-5 h-5" />
-                <span>Queue</span>
-                <span className="ml-auto text-xs text-gray-400">{queueManager.queue.length}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Create Playlist */}
-          <div className="space-y-2">
-            <button 
-              onClick={() => setShowCreatePlaylist(true)}
-              className="w-full btn-primary flex items-center justify-center space-x-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create Playlist</span>
-            </button>
-            <button 
-              onClick={handleShuffle}
-              className="w-full btn-primary-red flex items-center justify-center space-x-2"
-            >
-              <Shuffle className="w-4 h-4" />
-              <span>Shuffle All</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="ml-64 flex-1 pb-32">
-        {/* Top Bar */}
-        <div className="sticky top-0 bg-gradient-to-r from-black via-gray-900 to-black z-30 border-b border-gray-800">
-          <div className="flex items-center justify-between p-6">
+    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-primary-900">
+      {/* Header */}
+      <header className="bg-dark-800/80 backdrop-blur-md border-b border-dark-700 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <button className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
-                <ChevronLeft className="w-4 h-4 text-white" />
-              </button>
-              <button className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
-                <ChevronRight className="w-4 h-4 text-white" />
-              </button>
-            </div>
-            
-            {/* Functional Search Bar */}
-            <div className="flex-1 max-w-md mx-8">
-              <FunctionalSearchBar
-                onSearch={handleSearch}
-                onSongSelect={handleSongSelect}
-                placeholder="Search songs, artists, albums, or lyrics..."
-              />
+              <div className="w-10 h-10 bg-gradient-to-r from-primary-400 to-purple-400 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xl">C</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">Concerto</h1>
+                <p className="text-gray-400 text-sm">Your music companion</p>
+              </div>
             </div>
             
             <div className="flex items-center space-x-4">
-              <Link href="/settings" className="btn-secondary text-sm flex items-center space-x-2">
-                <Settings className="w-4 h-4" />
-                <span>Settings</span>
+              <Link href="/discover" className="btn-secondary">
+                <Music className="w-4 h-4 mr-2" />
+                Discover
               </Link>
-              <div className="w-10 h-10 concerto-gradient rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">U</span>
-              </div>
+              <Link href="/library" className="btn-secondary">
+                <List className="w-4 h-4 mr-2" />
+                Library
+              </Link>
+              <Link href="/playlists" className="btn-secondary">
+                <Heart className="w-4 h-4 mr-2" />
+                Playlists
+              </Link>
             </div>
           </div>
         </div>
+      </header>
 
-        <div className="p-6">
+      <main className="container mx-auto px-4 py-8 pb-32">
+        {/* Greeting Section */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-white mb-4">
+            {getGreeting()}, Music Lover! 🎵
+          </h2>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            Discover, create, and enjoy your perfect music experience with Concerto
+          </p>
+        </div>
+
+        {/* Search Section */}
+        <div className="mb-12">
+          <FunctionalSearchBar 
+            onSearch={handleSearch}
+            placeholder="Search for songs, artists, albums..."
+            className="max-w-2xl mx-auto"
+          />
+          
           {/* Search Results */}
-          {showSearchResults && (
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Search Results</h2>
-                <button
-                  onClick={() => setShowSearchResults(false)}
-                  className="text-gray-400 hover:text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {showSearchResults && searchResults.length > 0 && (
+            <div className="mt-4 max-w-2xl mx-auto">
+              <div className="bg-dark-800 rounded-lg border border-dark-700 max-h-96 overflow-y-auto">
                 {searchResults.map((result) => (
                   <div
                     key={result.id}
-                    onClick={() => result.data && handleSongSelect(result.data)}
-                    className="music-card group cursor-pointer"
+                    onClick={() => result.type === 'song' && result.data && handleSongSelect(result.data)}
+                    className="flex items-center space-x-4 p-4 hover:bg-dark-700 cursor-pointer transition-colors border-b border-dark-700 last:border-b-0"
                   >
-                    <div className="flex items-center space-x-3 p-4">
-                      <div className="text-gray-400">
-                        {result.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-white truncate">{result.title}</h3>
-                        <p className="text-gray-400 text-sm truncate">{result.subtitle}</p>
-                      </div>
-                      {result.data && (
-                        <button className="opacity-0 group-hover:opacity-100 transition-opacity play-button">
-                          <Play className="w-4 h-4 text-white fill-current" />
-                        </button>
-                      )}
+                    <div className="text-primary-400">
+                      {result.icon}
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-white font-medium truncate">{result.title}</h4>
+                      <p className="text-gray-400 text-sm truncate">{result.subtitle}</p>
+                    </div>
+                    {result.type === 'song' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (result.data) handleLikeSong(result.data.id)
+                        }}
+                        className="p-2 text-gray-400 hover:text-red-400 transition-colors"
+                      >
+                        <Heart className="w-4 h-4" fill={result.data && userPrefs.isLiked(result.data.id) ? 'currentColor' : 'none'} />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
-
-          {/* Greeting & Stats */}
-          {!showSearchResults && (
-            <>
-              <div className="mb-8">
-                <h1 className="text-4xl font-bold text-white mb-2">{getGreeting()}</h1>
-                <div className="flex items-center space-x-6 text-gray-400">
-                  <span>Ready to discover your next favorite song?</span>
-                  <span>•</span>
-                  <span>{userPrefs.preferences.songsPlayed} songs played</span>
-                  <span>•</span>
-                  <span>{Math.round(userPrefs.preferences.totalListeningTime / 60)} min listened</span>
-                </div>
-                
-                <div className="flex items-center space-x-4 mt-6">
-                  <button 
-                    onClick={handleShuffle}
-                    className="play-button-red"
-                  >
-                    <Shuffle className="w-6 h-6 text-white" />
-                  </button>
-                  <span className="text-white font-medium">Shuffle all your music</span>
-                  {queueManager.currentSong && (
-                    <span className="text-gray-400">• Now playing: {queueManager.currentSong.title}</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Quick Access Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                {recentlyPlayedSongs.map((song, index) => (
-                  <div key={song.id} className="bg-gray-800 rounded-lg flex items-center hover:bg-gray-700 transition-all duration-200 cursor-pointer group">
-                    <div className={`w-20 h-20 rounded-l-lg flex items-center justify-center text-2xl ${
-                      index % 3 === 0 ? 'bg-gradient-to-br from-youtube-600 to-red-700' :
-                      index % 3 === 1 ? 'bg-gradient-to-br from-spotify-500 to-green-700' :
-                      'bg-gradient-to-br from-purple-600 to-accent-purple'
-                    }`}>
-                      🎵
-                    </div>
-                    <div className="p-4 flex-1">
-                      <h3 className="font-semibold text-white truncate">{song.title}</h3>
-                      <p className="text-gray-400 text-sm truncate">{song.artist}</p>
-                    </div>
-                    <div className="pr-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={() => handlePlay(song, recentlyPlayedSongs)}
-                        className={index % 2 === 0 ? "play-button-red" : "play-button"}
-                      >
-                        <Play className="w-5 h-5 text-white fill-current" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Recently Played Section */}
-              {recentlyPlayedSongs.length > 0 && (
-                <div className="mb-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white">Jump back in</h2>
-                    <Link href="/library" className="text-gray-400 hover:text-youtube-500 text-sm font-semibold transition-colors">
-                      Show all
-                    </Link>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {mockSongs.slice(0, 5).map((song, index) => (
-                      <div key={song.id} className="music-card group">
-                        <div className={`aspect-square rounded-lg mb-4 flex items-center justify-center text-4xl relative ${
-                          index % 3 === 0 ? 'bg-gradient-to-br from-youtube-600 to-red-700' :
-                          index % 3 === 1 ? 'bg-gradient-to-br from-spotify-500 to-green-700' :
-                          'bg-gradient-to-br from-purple-600 to-accent-purple'
-                        }`}>
-                          🎵
-                          <button 
-                            onClick={() => handlePlay(song, mockSongs)}
-                            className="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 shadow-lg"
-                          >
-                            <Play className="w-4 h-4 text-black fill-current ml-0.5" />
-                          </button>
-                        </div>
-                        <h3 className="font-semibold text-white truncate mb-1">{song.title}</h3>
-                        <p className="text-gray-400 text-sm truncate">{song.artist}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Featured Playlists */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-white">Made for you</h2>
-                  <Link href="/discover" className="text-gray-400 hover:text-youtube-500 text-sm font-semibold transition-colors">
-                    Show all
-                  </Link>
-                </div>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {featuredPlaylists.map((playlist, index) => (
-                    <div key={playlist.id} className="music-card group">
-                      <div className={`aspect-square bg-gradient-to-br ${playlist.color} rounded-lg mb-4 flex items-center justify-center text-4xl relative`}>
-                        {playlist.image}
-                        <button 
-                          onClick={() => {
-                            // For demo, play a subset of songs
-                            const playlistSongs = mockSongs.slice(index * 3, (index * 3) + 10)
-                            handlePlay(playlistSongs[0], playlistSongs)
-                          }}
-                          className="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 shadow-lg"
-                        >
-                          <Play className="w-4 h-4 text-black fill-current ml-0.5" />
-                        </button>
-                        {playlist.title.includes('Concerto') && (
-                          <div className="absolute top-2 left-2 bg-youtube-600 text-white text-xs px-2 py-1 rounded-full">
-                            EXCLUSIVE
-                          </div>
-                        )}
-                      </div>
-                      <h3 className="font-semibold text-white truncate mb-1">{playlist.title}</h3>
-                      <p className="text-gray-400 text-sm truncate">{playlist.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Concerto Exclusives Section */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-2xl font-bold text-white flex items-center">
-                      <span className="concerto-gradient bg-clip-text text-transparent">Concerto Exclusives</span>
-                      <span className="ml-2 bg-youtube-600 text-white text-xs px-2 py-1 rounded-full">NEW</span>
-                    </h2>
-                    <p className="text-gray-400 text-sm">Music you can only find here</p>
-                  </div>
-                  <Link href="/discover" className="text-gray-400 hover:text-youtube-500 text-sm font-semibold transition-colors">
-                    Explore all
-                  </Link>
-                </div>
-                
-                <MusicLibrary
-                  songs={mockSongs.slice(10, 16)}
-                  currentSongId={queueManager.currentSong?.id}
-                  isPlaying={isPlaying}
-                  onPlay={(song) => handlePlay(song, mockSongs.slice(10, 16))}
-                  onPause={handlePlayPause}
-                  onLike={handleLike}
-                  onAddToPlaylist={handleAddToPlaylist}
-                />
-              </div>
-            </>
-          )}
         </div>
-      </div>
 
-      {/* Functional Music Player */}
-      {queueManager.currentSong && (
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-dark-800 rounded-lg p-6 border border-dark-700 hover:border-primary-500 transition-colors">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Trending Now</h3>
+              <p className="text-gray-400 mb-4">Discover what's hot in music right now</p>
+              <Link href="/discover" className="btn-primary w-full">
+                Explore Trends
+              </Link>
+            </div>
+          </div>
+
+          <div className="bg-dark-800 rounded-lg p-6 border border-dark-700 hover:border-primary-500 transition-colors">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Radio className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Radio Stations</h3>
+              <p className="text-gray-400 mb-4">Listen to curated radio stations</p>
+              <button className="btn-primary w-full">
+                Start Listening
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-dark-800 rounded-lg p-6 border border-dark-700 hover:border-primary-500 transition-colors">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-green-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mic className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Voice Commands</h3>
+              <p className="text-gray-400 mb-4">Control music with your voice</p>
+              <button className="btn-primary w-full">
+                Try Voice Control
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Playlists */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-white">Featured Playlists</h2>
+            <button className="text-primary-400 hover:text-primary-300 transition-colors">
+              View All
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featuredPlaylists.map((playlist) => (
+              <div key={playlist.id} className="bg-dark-800 rounded-lg p-6 border border-dark-700 hover:border-primary-500 transition-colors cursor-pointer group">
+                <div className="text-center space-y-4">
+                  <div className={`w-32 h-32 bg-gradient-to-br ${playlist.color} rounded-lg flex items-center justify-center mx-auto group-hover:scale-105 transition-transform`}>
+                    <span className="text-white font-bold text-4xl">{playlist.image}</span>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white text-lg mb-2 group-hover:text-primary-400 transition-colors">
+                      {playlist.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-3">
+                      {playlist.description}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>{playlist.songCount} songs</span>
+                      <span>Updated today</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recently Played */}
+        {recentlyPlayedSongs.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Recently Played</h2>
+              <button className="text-primary-400 hover:text-primary-300 transition-colors">
+                View All
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {recentlyPlayedSongs.map((song) => (
+                <div
+                  key={song.id}
+                  onClick={() => handleSongSelect(song)}
+                  className="bg-dark-800 rounded-lg p-4 border border-dark-700 hover:border-primary-500 transition-colors cursor-pointer group"
+                >
+                  <div className="text-center space-y-3">
+                    <div className="w-20 h-20 bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto group-hover:scale-105 transition-transform">
+                      <span className="text-white font-bold text-2xl">{song.cover}</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-white text-sm truncate group-hover:text-primary-400 transition-colors">
+                        {song.title}
+                      </h4>
+                      <p className="text-gray-400 text-xs truncate">{song.artist}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Liked Songs */}
+        {likedSongs.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Liked Songs</h2>
+              <button className="text-primary-400 hover:text-primary-300 transition-colors">
+                View All
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {likedSongs.slice(0, 6).map((song) => (
+                <div
+                  key={song.id}
+                  onClick={() => handleSongSelect(song)}
+                  className="bg-dark-800 rounded-lg p-4 border border-dark-700 hover:border-primary-500 transition-colors cursor-pointer group"
+                >
+                  <div className="text-center space-y-3">
+                    <div className="w-20 h-20 bg-gradient-to-br from-red-600 to-pink-600 rounded-lg flex items-center justify-center mx-auto group-hover:scale-105 transition-transform">
+                      <span className="text-white font-bold text-2xl">{song.cover}</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-white text-sm truncate group-hover:text-primary-400 transition-colors">
+                        {song.title}
+                      </h4>
+                      <p className="text-gray-400 text-xs truncate">{song.artist}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Create Playlist Modal */}
+        {showCreatePlaylist && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-dark-800 rounded-lg p-6 w-full max-w-md mx-4">
+              <h3 className="text-xl font-semibold text-white mb-4">Create New Playlist</h3>
+              <input
+                type="text"
+                value={newPlaylistName}
+                onChange={(e) => setNewPlaylistName(e.target.value)}
+                placeholder="Playlist name"
+                className="w-full p-3 bg-dark-700 text-white rounded-lg border border-dark-600 focus:outline-none focus:ring-2 focus:ring-primary-500 mb-4"
+              />
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleCreatePlaylist}
+                  className="flex-1 btn-primary"
+                >
+                  Create
+                </button>
+                <button
+                  onClick={() => setShowCreatePlaylist(false)}
+                  className="flex-1 btn-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PWA Installer */}
+        <PWAInstaller />
+      </main>
+
+      {/* Music Player */}
+      {currentSong && (
         <FunctionalMusicPlayer
-          currentSong={queueManager.currentSong}
-          playlist={queueManager.queue}
+          currentSong={currentSong}
           isPlaying={isPlaying}
           onPlayPause={handlePlayPause}
           onNext={handleNext}
           onPrevious={handlePrevious}
-          onSongChange={(song) => {
-            const index = queueManager.queue.findIndex(s => s.id === song.id)
-            if (index >= 0) {
-              queueManager.jumpTo(index)
-            }
-          }}
-          onLike={handleLike}
         />
       )}
-
-      {/* Create Playlist Modal */}
-      {showCreatePlaylist && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-96">
-            <h3 className="text-xl font-bold text-white mb-4">Create Playlist</h3>
-            <input
-              type="text"
-              placeholder="Playlist name"
-              value={newPlaylistName}
-              onChange={(e) => setNewPlaylistName(e.target.value)}
-              className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-youtube-500"
-              onKeyDown={(e) => e.key === 'Enter' && handleCreatePlaylist()}
-              autoFocus
-            />
-            <div className="flex space-x-2">
-              <button 
-                onClick={handleCreatePlaylist}
-                className="btn-primary flex-1"
-                disabled={!newPlaylistName.trim()}
-              >
-                Create
-              </button>
-              <button 
-                onClick={() => {
-                  setShowCreatePlaylist(false)
-                  setNewPlaylistName('')
-                }}
-                className="btn-secondary flex-1"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* PWA Installer */}
-      <PWAInstaller />
     </div>
   )
 }
