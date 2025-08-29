@@ -47,6 +47,84 @@ export interface SearchResult {
   relevance: number
 }
 
+interface YouTubeSearchResult {
+  id: {
+    videoId: string
+  }
+  snippet: {
+    title: string
+    channelTitle: string
+    thumbnails: {
+      high: {
+        url: string
+      }
+    }
+    publishedAt: string
+    viewCount?: string
+    likeCount?: string
+  }
+}
+
+interface SoundCloudTrack {
+  id: number
+  title: string
+  user: {
+    username: string
+    avatar_url: string
+  }
+  genre: string
+  duration: number
+  created_at: string
+  artwork_url: string
+  permalink_url: string
+  likes_count: number
+}
+
+interface JamendoTrack {
+  id: string
+  name: string
+  artist_name: string
+  album_name: string
+  duration: number
+  image: string
+  audio: string
+  genre: string
+  releasedate: string
+  likes: number
+}
+
+interface YouTubeTrendingResult {
+  id: string
+  snippet: {
+    title: string
+    channelTitle: string
+    thumbnails: {
+      high: {
+        url: string
+      }
+    }
+    publishedAt: string
+  }
+  statistics: {
+    viewCount: string
+    likeCount: string
+  }
+}
+
+interface YouTubePlaylistResult {
+  id: string
+  snippet: {
+    title: string
+    description: string
+    thumbnails: {
+      high: {
+        url: string
+      }
+    }
+    channelTitle: string
+  }
+}
+
 class RealMusicService {
   private youtubeApiKey: string
   private soundcloudClientId: string
@@ -77,7 +155,7 @@ class RealMusicService {
       results.push(...jamendoResults)
 
       // Search Free Music Archive (REAL API)
-      const fmaResults = await this.searchFreeMusicArchive(query, filters)
+      const fmaResults = await this.searchFreeMusicArchive()
       results.push(...fmaResults)
 
       // Sort by relevance
@@ -103,19 +181,19 @@ class RealMusicService {
       if (!data.items) return []
 
       // Convert YouTube API results to our format
-      const songs: RealSong[] = data.items.map((item: any) => ({
-        id: `yt_${item.id}`,
-        title: item.title,
-        artist: item.artist,
-        album: item.album,
-        duration: item.duration,
-        cover: item.cover,
-        audioUrl: item.audioUrl,
-        genre: item.genre,
-        year: item.year,
+      const songs: RealSong[] = data.items.map((item: YouTubeSearchResult) => ({
+        id: `yt_${item.id.videoId}`,
+        title: item.snippet.title,
+        artist: item.snippet.channelTitle,
+        album: 'YouTube', // Placeholder, actual album info might be missing
+        duration: 0, // Placeholder, actual duration might be missing
+        cover: item.snippet.thumbnails.high.url,
+        audioUrl: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+        genre: this.detectGenreFromTitle(item.snippet.title),
+        year: new Date(item.snippet.publishedAt).getFullYear(),
         source: 'youtube',
-        viewCount: item.viewCount,
-        likeCount: item.likeCount
+        viewCount: item.snippet.viewCount ? parseInt(item.snippet.viewCount, 10) : undefined,
+        likeCount: item.snippet.likeCount ? parseInt(item.snippet.likeCount, 10) : undefined
       }))
 
       return songs
@@ -145,7 +223,7 @@ class RealMusicService {
       if (!Array.isArray(data)) return []
 
       // Convert SoundCloud API results to our format
-      const songs: RealSong[] = data.map((track: any) => ({
+      const songs: RealSong[] = data.map((track: SoundCloudTrack) => ({
         id: `sc_${track.id}`,
         title: track.title,
         artist: track.user.username,
@@ -186,7 +264,7 @@ class RealMusicService {
       if (!data.results) return []
 
       // Convert Jamendo API results to our format
-      const songs: RealSong[] = data.results.map((track: any) => ({
+      const songs: RealSong[] = data.results.map((track: JamendoTrack) => ({
         id: `jam_${track.id}`,
         title: track.name,
         artist: track.artist_name,
@@ -214,11 +292,9 @@ class RealMusicService {
   }
 
   // Free Music Archive Search - REAL API CALL
-  private async searchFreeMusicArchive(query: string, filters: SearchFilters): Promise<SearchResult[]> {
+  private async searchFreeMusicArchive(): Promise<SearchResult[]> {
     try {
       // Use FMA's public API
-      const searchUrl = `https://freemusicarchive.org/api/gettracks.json?api_key=your_api_key&q=${encodeURIComponent(query)}&limit=20`
-      
       // Note: FMA requires API key registration
       // For now, return empty results
       return []
@@ -242,19 +318,19 @@ class RealMusicService {
       if (!data.items) return []
 
       // Convert to our format
-      return data.items.slice(0, limit).map((item: any) => ({
+      return data.items.slice(0, limit).map((item: YouTubeTrendingResult) => ({
         id: `trending_${item.id}`,
-        title: item.title,
-        artist: item.artist,
-        album: item.album,
-        duration: item.duration,
-        cover: item.cover,
-        audioUrl: item.audioUrl,
-        genre: item.genre,
-        year: item.year,
+        title: item.snippet.title,
+        artist: item.snippet.channelTitle,
+        album: 'YouTube', // Placeholder, actual album info might be missing
+        duration: 0, // Placeholder, actual duration might be missing
+        cover: item.snippet.thumbnails.high.url,
+        audioUrl: `https://www.youtube.com/watch?v=${item.id}`, // Assuming item.id is the videoId
+        genre: this.detectGenreFromTitle(item.snippet.title),
+        year: new Date(item.snippet.publishedAt).getFullYear(),
         source: 'youtube',
-        viewCount: item.viewCount,
-        likeCount: item.likeCount
+        viewCount: item.statistics.viewCount ? parseInt(item.statistics.viewCount, 10) : undefined,
+        likeCount: item.statistics.likeCount ? parseInt(item.statistics.likeCount, 10) : undefined
       }))
     } catch (error) {
       console.error('Error loading trending music:', error)
@@ -276,7 +352,7 @@ class RealMusicService {
       if (!data.items) return []
 
       // Convert to our format
-      return data.items.map((playlist: any) => ({
+      return data.items.map((playlist: YouTubePlaylistResult) => ({
         id: `playlist_${playlist.id}`,
         title: playlist.snippet.title,
         description: playlist.snippet.description.substring(0, 100),
@@ -395,7 +471,7 @@ class RealMusicService {
   }
 
   // Get song details with lyrics - REAL API CALL
-  async getSongDetails(songId: string): Promise<RealSong | null> {
+  async getSongDetails(): Promise<RealSong | null> {
     try {
       // This would make additional API calls to get full song details
       // For now, return null as we don't have lyrics APIs
@@ -430,7 +506,7 @@ class RealMusicService {
       
       if (!data.items) return []
 
-      return data.items.map((item: any) => ({
+      return data.items.map((item: YouTubeSearchResult) => ({
         id: `new_${item.id.videoId}`,
         title: item.snippet.title.replace(/[^\w\s]/gi, '').substring(0, 50),
         artist: item.snippet.channelTitle,

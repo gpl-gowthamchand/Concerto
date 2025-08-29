@@ -12,7 +12,6 @@ import {
   Repeat,
   Heart,
   Share2,
-  Download,
   List
 } from 'lucide-react'
 import { RealSong } from '../lib/realMusicService'
@@ -38,7 +37,6 @@ export default function WorkingMusicPlayer({
 }: WorkingMusicPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useState(0.7)
   const [isMuted, setMuted] = useState(false)
   const [showQueue, setShowQueue] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
@@ -186,20 +184,6 @@ export default function WorkingMusicPlayer({
     setCurrentTime(clickTime)
   }, [duration])
 
-  // Handle volume change
-  const handleVolumeChange = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!volumeRef.current || !audioRef.current) return
-    
-    const rect = volumeRef.current.getBoundingClientRect()
-    const clickX = e.clientX - rect.left
-    const width = rect.width
-    const newVolume = Math.max(0, Math.min(1, clickX / width))
-    
-    setVolume(newVolume)
-    audioRef.current.volume = newVolume
-    setMuted(false)
-  }, [])
-
   // Format time
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60)
@@ -236,8 +220,9 @@ export default function WorkingMusicPlayer({
           text: `Check out ${currentSong.title} by ${currentSong.artist}`,
           url: currentSong.audioUrl
         })
-      } catch (error) {
-        console.log('Share cancelled')
+      } catch {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(`${currentSong?.title} by ${currentSong?.artist} - ${currentSong?.audioUrl}`)
       }
     } else {
       // Fallback: copy to clipboard
@@ -405,7 +390,7 @@ export default function WorkingMusicPlayer({
             <h3 className="text-white font-semibold mb-3">Queue</h3>
             {queue.length > 0 ? (
               <div className="space-y-2">
-                {queue.map((song, index) => (
+                {queue.map((song) => (
                   <div
                     key={song.id}
                     onClick={() => onSongChange?.(song)}

@@ -2,12 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { 
-  Music, 
   Heart, 
-  Play, 
   Plus, 
-  Clock, 
-  Users, 
   TrendingUp,
   Filter,
   Search,

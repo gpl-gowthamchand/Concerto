@@ -1,5 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+interface YouTubeSnippet {
+  title: string
+  channelTitle: string
+  thumbnails: {
+    high: {
+      url: string
+    }
+  }
+  publishedAt: string
+}
+
+interface YouTubeItem {
+  id: {
+    videoId: string
+  }
+  snippet: YouTubeSnippet
+  statistics?: {
+    viewCount: string
+    likeCount: string
+  }
+}
+
+interface YouTubeResponse {
+  items: YouTubeItem[]
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -30,11 +56,11 @@ export async function GET(request: NextRequest) {
       throw new Error(`YouTube API request failed: ${response.status}`)
     }
 
-    const data = await response.json()
+    const data: YouTubeResponse = await response.json()
     
     // Transform the data to our format
     const transformedData = {
-      items: data.items?.map((item: any) => ({
+      items: data.items?.map((item: YouTubeItem) => ({
         id: item.id?.videoId || item.id,
         title: item.snippet.title.replace(/[^\w\s]/gi, '').substring(0, 50),
         artist: item.snippet.channelTitle,
