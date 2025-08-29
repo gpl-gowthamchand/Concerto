@@ -11,36 +11,53 @@ import {
   Mic
 } from 'lucide-react'
 
-// Import all our new functional components and hooks
-import FunctionalMusicPlayer from '../components/FunctionalMusicPlayer'
+// Import real music service and working player
+import WorkingMusicPlayer from '../components/WorkingMusicPlayer'
 import FunctionalSearchBar from '../components/FunctionalSearchBar'
 import PWAInstaller from '../components/PWAInstaller'
-import { mockSongs, Song } from '../lib/musicData'
+import { realMusicService, RealSong, RealPlaylist, SearchResult } from '../lib/realMusicService'
 import { usePlaylistManager } from '../hooks/usePlaylistManager'
 import { useUserPreferences } from '../hooks/useUserPreferences'
 
-interface SearchResult {
-  id: string
-  type: 'song' | 'artist' | 'album' | 'playlist' | 'lyric'
-  title: string
-  subtitle: string
-  icon: React.ReactNode
-  data?: Song
-  highlight?: string
-}
-
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentSong, setCurrentSong] = useState<Song | null>(null)
+  const [currentSong, setCurrentSong] = useState<RealSong | null>(null)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [showSearchResults, setShowSearchResults] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false)
   const [newPlaylistName, setNewPlaylistName] = useState('')
+  const [trendingSongs, setTrendingSongs] = useState<RealSong[]>([])
+  const [featuredPlaylists, setFeaturedPlaylists] = useState<RealPlaylist[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   // Use our custom hooks
   const playlistManager = usePlaylistManager()
   const userPrefs = useUserPreferences()
+
+  // Load real music data on component mount
+  useEffect(() => {
+    const loadMusicData = async () => {
+      try {
+        setIsLoading(true)
+        
+        // Load trending music and featured playlists
+        const [trending, playlists] = await Promise.all([
+          realMusicService.getTrendingMusic(20),
+          realMusicService.getFeaturedPlaylists(10)
+        ])
+        
+        setTrendingSongs(trending)
+        setFeaturedPlaylists(playlists)
+      } catch (error) {
+        console.error('Error loading music data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadMusicData()
+  }, [])
 
   // Update time every minute for greeting
   useEffect(() => {
@@ -56,72 +73,31 @@ export default function Home() {
   }
 
   // Get user's favorite songs and recently played
-  const likedSongs = mockSongs.filter(song => userPrefs.isLiked(song.id))
+  const likedSongs = trendingSongs.filter(song => userPrefs.isLiked(song.id))
   const recentlyPlayedSongs = userPrefs.preferences.recentlyPlayed
     .slice(0, 6)
-    .map(id => mockSongs.find(song => song.id === id))
-    .filter((song): song is Song => song !== undefined)
+    .map(id => trendingSongs.find(song => song.id === id))
+    .filter((song): song is RealSong => song !== undefined)
 
-  const featuredPlaylists = [
-    { 
-      id: 1, 
-      title: "Today's Top Hits", 
-      description: "The biggest songs right now", 
-      image: "🔥", 
-      songCount: 50,
-      color: "from-youtube-600 to-youtube-800"
-    },
-    { 
-      id: 2, 
-      title: "Chill Vibes", 
-      description: "Relax and unwind", 
-      image: "🌙", 
-      songCount: 75,
-      color: "from-blue-600 to-blue-800"
-    },
-    { 
-      id: 3, 
-      title: "Workout Beats", 
-      description: "High energy music", 
-      image: "💪", 
-      songCount: 40,
-      color: "from-green-600 to-green-800"
-    }
-  ]
-
-  const handleSearch = (query: string, filters: { songs?: boolean; artists?: boolean; albums?: boolean }) => {
+  const handleSearch = async (query: string, filters: { songs?: boolean; artists?: boolean; albums?: boolean }) => {
     if (!query.trim()) {
       setSearchResults([])
       setShowSearchResults(false)
       return
     }
 
-    const results: SearchResult[] = []
-    
-    if (filters.songs !== false) {
-      const songResults = mockSongs.filter(song => 
-        song.title.toLowerCase().includes(query.toLowerCase()) ||
-        song.artist.toLowerCase().includes(query.toLowerCase()) ||
-        song.album.toLowerCase().includes(query.toLowerCase())
-      )
-      
-      songResults.forEach(song => {
-        results.push({
-          id: song.id,
-          type: 'song',
-          title: song.title,
-          subtitle: `${song.artist} • ${song.album}`,
-          icon: <Music className="w-5 h-5" />,
-          data: song
-        })
-      })
+    try {
+      const results = await realMusicService.searchMusic(query, filters)
+      setSearchResults(results)
+      setShowSearchResults(true)
+    } catch (error) {
+      console.error('Search error:', error)
+      setSearchResults([])
+      setShowSearchResults(false)
     }
-
-    setSearchResults(results)
-    setShowSearchResults(true)
   }
 
-  const handleSongSelect = (song: Song) => {
+  const handleSongSelect = (song: RealSong) => {
     setCurrentSong(song)
     setIsPlaying(true)
     userPrefs.addToRecentlyPlayed(song.id)
@@ -135,20 +111,20 @@ export default function Home() {
   }
 
   const handleNext = () => {
-    if (currentSong) {
-      const currentIndex = mockSongs.findIndex(song => song.id === currentSong.id)
-      const nextIndex = (currentIndex + 1) % mockSongs.length
-      const nextSong = mockSongs[nextIndex]
+    if (currentSong && trendingSongs.length > 0) {
+      const currentIndex = trendingSongs.findIndex(song => song.id === currentSong.id)
+      const nextIndex = (currentIndex + 1) % trendingSongs.length
+      const nextSong = trendingSongs[nextIndex]
       setCurrentSong(nextSong)
       userPrefs.addToRecentlyPlayed(nextSong.id)
     }
   }
 
   const handlePrevious = () => {
-    if (currentSong) {
-      const currentIndex = mockSongs.findIndex(song => song.id === currentSong.id)
-      const prevIndex = currentIndex === 0 ? mockSongs.length - 1 : currentIndex - 1
-      const prevSong = mockSongs[prevIndex]
+    if (currentSong && trendingSongs.length > 0) {
+      const currentIndex = trendingSongs.findIndex(song => song.id === currentSong.id)
+      const prevIndex = currentIndex === 0 ? trendingSongs.length - 1 : currentIndex - 1
+      const prevSong = trendingSongs[prevIndex]
       setCurrentSong(prevSong)
       userPrefs.addToRecentlyPlayed(prevSong.id)
     }
@@ -164,6 +140,24 @@ export default function Home() {
 
   const handleLikeSong = (songId: string) => {
     userPrefs.toggleLiked(songId)
+  }
+
+  const handlePlaylistClick = (playlist: RealPlaylist) => {
+    // Navigate to playlist page or play first song
+    if (playlist.songs.length > 0) {
+      handleSongSelect(playlist.songs[0])
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-primary-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading your music...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -225,26 +219,31 @@ export default function Home() {
               <div className="bg-dark-800 rounded-lg border border-dark-700 max-h-96 overflow-y-auto">
                 {searchResults.map((result) => (
                   <div
-                    key={result.id}
-                    onClick={() => result.type === 'song' && result.data && handleSongSelect(result.data)}
+                    key={result.data.id}
+                    onClick={() => result.type === 'song' && handleSongSelect(result.data as RealSong)}
                     className="flex items-center space-x-4 p-4 hover:bg-dark-700 cursor-pointer transition-colors border-b border-dark-700 last:border-b-0"
                   >
                     <div className="text-primary-400">
-                      {result.icon}
+                      <Music className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-white font-medium truncate">{result.title}</h4>
-                      <p className="text-gray-400 text-sm truncate">{result.subtitle}</p>
+                      <h4 className="text-white font-medium truncate">{result.data.title}</h4>
+                      <p className="text-gray-400 text-sm truncate">
+                        {result.type === 'song' 
+                          ? `${(result.data as RealSong).artist} • ${(result.data as RealSong).album}`
+                          : (result.data as RealPlaylist).description
+                        }
+                      </p>
                     </div>
                     {result.type === 'song' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          if (result.data) handleLikeSong(result.data.id)
+                          handleLikeSong(result.data.id)
                         }}
                         className="p-2 text-gray-400 hover:text-red-400 transition-colors"
                       >
-                        <Heart className="w-4 h-4" fill={result.data && userPrefs.isLiked(result.data.id) ? 'currentColor' : 'none'} />
+                        <Heart className="w-4 h-4" fill={userPrefs.isLiked(result.data.id) ? 'currentColor' : 'none'} />
                       </button>
                     )}
                   </div>
@@ -307,10 +306,22 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featuredPlaylists.map((playlist) => (
-              <div key={playlist.id} className="bg-dark-800 rounded-lg p-6 border border-dark-700 hover:border-primary-500 transition-colors cursor-pointer group">
+              <div 
+                key={playlist.id} 
+                onClick={() => handlePlaylistClick(playlist)}
+                className="bg-dark-800 rounded-lg p-6 border border-dark-700 hover:border-primary-500 transition-colors cursor-pointer group"
+              >
                 <div className="text-center space-y-4">
-                  <div className={`w-32 h-32 bg-gradient-to-br ${playlist.color} rounded-lg flex items-center justify-center mx-auto group-hover:scale-105 transition-transform`}>
-                    <span className="text-white font-bold text-4xl">{playlist.image}</span>
+                  <div className="w-32 h-32 bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto group-hover:scale-105 transition-transform overflow-hidden">
+                    {playlist.cover.startsWith('http') ? (
+                      <img 
+                        src={playlist.cover} 
+                        alt={playlist.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white font-bold text-4xl">{playlist.cover}</span>
+                    )}
                   </div>
                   <div>
                     <h3 className="font-semibold text-white text-lg mb-2 group-hover:text-primary-400 transition-colors">
@@ -321,8 +332,49 @@ export default function Home() {
                     </p>
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>{playlist.songCount} songs</span>
-                      <span>Updated today</span>
+                      <span className="capitalize">{playlist.mood}</span>
                     </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Trending Songs */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-white">Trending Songs</h2>
+            <button className="text-primary-400 hover:text-primary-300 transition-colors">
+              View All
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {trendingSongs.slice(0, 12).map((song) => (
+              <div
+                key={song.id}
+                onClick={() => handleSongSelect(song)}
+                className="bg-dark-800 rounded-lg p-4 border border-dark-700 hover:border-primary-500 transition-colors cursor-pointer group"
+              >
+                <div className="text-center space-y-3">
+                  <div className="w-20 h-20 bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto group-hover:scale-105 transition-transform overflow-hidden">
+                    {song.cover.startsWith('http') ? (
+                      <img 
+                        src={song.cover} 
+                        alt={song.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white font-bold text-2xl">{song.cover}</span>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-white text-sm truncate group-hover:text-primary-400 transition-colors">
+                      {song.title}
+                    </h4>
+                    <p className="text-gray-400 text-xs truncate">{song.artist}</p>
+                    <p className="text-gray-500 text-xs truncate">{song.album}</p>
                   </div>
                 </div>
               </div>
@@ -348,8 +400,16 @@ export default function Home() {
                   className="bg-dark-800 rounded-lg p-4 border border-dark-700 hover:border-primary-500 transition-colors cursor-pointer group"
                 >
                   <div className="text-center space-y-3">
-                    <div className="w-20 h-20 bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto group-hover:scale-105 transition-transform">
-                      <span className="text-white font-bold text-2xl">{song.cover}</span>
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center mx-auto group-hover:scale-105 transition-transform overflow-hidden">
+                      {song.cover.startsWith('http') ? (
+                        <img 
+                          src={song.cover} 
+                          alt={song.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white font-bold text-2xl">{song.cover}</span>
+                      )}
                     </div>
                     <div>
                       <h4 className="font-medium text-white text-sm truncate group-hover:text-primary-400 transition-colors">
@@ -382,8 +442,16 @@ export default function Home() {
                   className="bg-dark-800 rounded-lg p-4 border border-dark-700 hover:border-primary-500 transition-colors cursor-pointer group"
                 >
                   <div className="text-center space-y-3">
-                    <div className="w-20 h-20 bg-gradient-to-br from-red-600 to-pink-600 rounded-lg flex items-center justify-center mx-auto group-hover:scale-105 transition-transform">
-                      <span className="text-white font-bold text-2xl">{song.cover}</span>
+                    <div className="w-20 h-20 bg-gradient-to-br from-red-600 to-pink-600 rounded-lg flex items-center justify-center mx-auto group-hover:scale-105 transition-transform overflow-hidden">
+                      {song.cover.startsWith('http') ? (
+                        <img 
+                          src={song.cover} 
+                          alt={song.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white font-bold text-2xl">{song.cover}</span>
+                      )}
                     </div>
                     <div>
                       <h4 className="font-medium text-white text-sm truncate group-hover:text-primary-400 transition-colors">
@@ -432,14 +500,15 @@ export default function Home() {
         <PWAInstaller />
       </main>
 
-      {/* Music Player */}
+      {/* Working Music Player */}
       {currentSong && (
-        <FunctionalMusicPlayer
+        <WorkingMusicPlayer
           currentSong={currentSong}
           isPlaying={isPlaying}
           onPlayPause={handlePlayPause}
           onNext={handleNext}
           onPrevious={handlePrevious}
+          queue={trendingSongs}
         />
       )}
     </div>
