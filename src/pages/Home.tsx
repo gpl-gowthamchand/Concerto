@@ -10,6 +10,7 @@ const Home: React.FC = () => {
   const [featuredTracks, setFeaturedTracks] = useState<MusicSearchResult[]>([]);
   const [recentPlaylists, setRecentPlaylists] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useUserStore();
   const { play, addToQueue } = useAudioStore();
 
@@ -20,9 +21,13 @@ const Home: React.FC = () => {
   const loadHomeData = async () => {
     try {
       setIsLoading(true);
+      setError(null);
+      
+      console.log('Loading home data...');
       
       // Load featured tracks (trending music)
       const trendingMusic = await musicApiService.getTrendingMusic();
+      console.log('Trending music loaded:', trendingMusic);
       setFeaturedTracks(trendingMusic.slice(0, 6));
 
       // Load recent playlists (mock for now)
@@ -34,6 +39,7 @@ const Home: React.FC = () => {
       ]);
     } catch (error) {
       console.error('Error loading home data:', error);
+      setError('Failed to load home data');
       toast.error('Failed to load home data');
     } finally {
       setIsLoading(false);
@@ -85,6 +91,34 @@ const Home: React.FC = () => {
     }
   };
 
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-white mb-4">Welcome back, {user?.username || 'User'}!</h1>
+          <p className="text-dark-400 text-lg">
+            Discover new music, revisit your favorites, and let AI guide your musical journey
+          </p>
+        </div>
+        
+        <div className="card">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-red-400 mb-4">Error Loading Data</h2>
+            <p className="text-dark-400 mb-4">{error}</p>
+            <button 
+              onClick={loadHomeData}
+              className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
   if (isLoading) {
     return (
       <div className="space-y-6">
