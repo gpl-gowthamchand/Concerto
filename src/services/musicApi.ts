@@ -1,21 +1,26 @@
 import axios from 'axios';
 
-// Free Music API Endpoints
+// Multiple Music Sources (like BlackHole, ViMusic, etc.)
 const API_ENDPOINTS = {
-  // YouTube Music (via yt-dlp)
+  // YouTube Music (primary source)
   YOUTUBE_SEARCH: 'https://www.googleapis.com/youtube/v3/search',
   YOUTUBE_VIDEO: 'https://www.googleapis.com/youtube/v3/videos',
+  YOUTUBE_INVIDIOUS: 'https://invidious.snopyta.org/api/v1/search',
   
-  // JioSaavn (unofficial API)
+  // JioSaavn (Indian music)
   JIOSAAVN_SEARCH: 'https://saavn.me/api/search',
   JIOSAAVN_SONG: 'https://saavn.me/api/songs',
   
-  // SoundCloud (via unofficial API)
+  // SoundCloud (independent artists)
   SOUNDCLOUD_SEARCH: 'https://api-v2.soundcloud.com/search',
   
-  // Deezer (free API)
+  // Deezer (unofficial API)
   DEEZER_SEARCH: 'https://api.deezer.com/search',
   DEEZER_TRACK: 'https://api.deezer.com/track',
+  DEEZER_ARTIST: 'https://api.deezer.com/artist',
+  
+  // Spotify (metadata only)
+  SPOTIFY_SEARCH: 'https://api.spotify.com/v1/search',
   
   // MusicBrainz (metadata)
   MUSICBRAINZ_SEARCH: 'https://musicbrainz.org/ws/2',
@@ -27,15 +32,22 @@ const API_ENDPOINTS = {
   GENIUS_SEARCH: 'https://api.genius.com/search',
   
   // Musixmatch (lyrics)
-  MUSIXMATCH_SEARCH: 'https://api.musixmatch.com/ws/1.1/matcher.lyrics.get'
+  MUSIXMATCH_SEARCH: 'https://api.musixmatch.com/ws/1.1/matcher.lyrics.get',
+  
+  // Free Music Archive
+  FMA_SEARCH: 'https://freemusicarchive.org/api/get/',
+  
+  // Internet Archive
+  IA_SEARCH: 'https://archive.org/advancedsearch.php'
 };
 
-// API Keys (you'll need to get these)
+// API Keys
 const API_KEYS = {
   YOUTUBE: process.env.REACT_APP_YOUTUBE_API_KEY || 'YOUR_YOUTUBE_API_KEY',
   LASTFM: process.env.REACT_APP_LASTFM_API_KEY || 'YOUR_LASTFM_API_KEY',
   GENIUS: process.env.REACT_APP_GENIUS_ACCESS_TOKEN || 'YOUR_GENIUS_ACCESS_TOKEN',
-  MUSIXMATCH: process.env.REACT_APP_MUSIXMATCH_API_KEY || 'YOUR_MUSIXMATCH_API_KEY'
+  MUSIXMATCH: process.env.REACT_APP_MUSIXMATCH_API_KEY || 'YOUR_MUSIXMATCH_API_KEY',
+  SPOTIFY: process.env.REACT_APP_SPOTIFY_CLIENT_ID || 'YOUR_SPOTIFY_CLIENT_ID'
 };
 
 export interface MusicSearchResult {
@@ -51,9 +63,11 @@ export interface MusicSearchResult {
   bpm?: number;
   key?: string;
   year?: number;
-  source: 'youtube' | 'jiosaavn' | 'soundcloud' | 'deezer';
+  source: 'youtube' | 'jiosaavn' | 'soundcloud' | 'deezer' | 'fma' | 'ia';
   playCount?: number;
   addedAt: Date;
+  quality?: string;
+  bitrate?: number;
 }
 
 export interface SearchFilters {
@@ -65,10 +79,12 @@ export interface SearchFilters {
   bpm?: { min: number; max: number };
   key?: string;
   source?: string[];
+  quality?: 'low' | 'medium' | 'high';
 }
 
-// Fallback mock data for when APIs are not available
+// Extended fallback data with more sources
 const FALLBACK_MUSIC_DATA: MusicSearchResult[] = [
+  // Popular songs with real YouTube URLs
   {
     id: '1',
     title: 'Blinding Lights',
@@ -84,7 +100,9 @@ const FALLBACK_MUSIC_DATA: MusicSearchResult[] = [
     year: 2020,
     source: 'youtube',
     playCount: 2500000000,
-    addedAt: new Date()
+    addedAt: new Date(),
+    quality: 'high',
+    bitrate: 256
   },
   {
     id: '2',
@@ -101,7 +119,9 @@ const FALLBACK_MUSIC_DATA: MusicSearchResult[] = [
     year: 2016,
     source: 'youtube',
     playCount: 1500000000,
-    addedAt: new Date()
+    addedAt: new Date(),
+    quality: 'high',
+    bitrate: 256
   },
   {
     id: '3',
@@ -118,7 +138,9 @@ const FALLBACK_MUSIC_DATA: MusicSearchResult[] = [
     year: 2017,
     source: 'youtube',
     playCount: 3000000000,
-    addedAt: new Date()
+    addedAt: new Date(),
+    quality: 'high',
+    bitrate: 256
   },
   {
     id: '4',
@@ -135,7 +157,9 @@ const FALLBACK_MUSIC_DATA: MusicSearchResult[] = [
     year: 2019,
     source: 'youtube',
     playCount: 2000000000,
-    addedAt: new Date()
+    addedAt: new Date(),
+    quality: 'high',
+    bitrate: 256
   },
   {
     id: '5',
@@ -152,27 +176,93 @@ const FALLBACK_MUSIC_DATA: MusicSearchResult[] = [
     year: 2019,
     source: 'youtube',
     playCount: 1800000000,
-    addedAt: new Date()
+    addedAt: new Date(),
+    quality: 'high',
+    bitrate: 256
   },
+  // SoundCloud tracks (independent artists)
   {
     id: '6',
+    title: 'Midnight City',
+    artist: 'M83',
+    album: 'Hurry Up, We\'re Dreaming',
+    duration: 243,
+    url: 'https://soundcloud.com/m83/midnight-city',
+    artwork: 'https://i1.sndcdn.com/artworks-000031903199-6e0w1a-t500x500.jpg',
+    genre: 'Electronic',
+    mood: 'Atmospheric',
+    bpm: 120,
+    key: 'A',
+    year: 2011,
+    source: 'soundcloud',
+    playCount: 50000000,
+    addedAt: new Date(),
+    quality: 'medium',
+    bitrate: 128
+  },
+  // Deezer tracks
+  {
+    id: '7',
     title: 'Old Town Road',
     artist: 'Lil Nas X',
     album: '7',
     duration: 157,
-    url: 'https://www.youtube.com/watch?v=r7qovpFAGrQ',
-    artwork: 'https://i.ytimg.com/vi/r7qovpFAGrQ/maxresdefault.jpg',
+    url: 'https://www.deezer.com/track/70033622',
+    artwork: 'https://e-cdns-images.dzcdn.net/images/cover/70033622-264x264.jpg',
     genre: 'Country',
     mood: 'Fun',
     bpm: 136,
     key: 'C',
     year: 2019,
-    source: 'youtube',
+    source: 'deezer',
     playCount: 1200000000,
-    addedAt: new Date()
+    addedAt: new Date(),
+    quality: 'high',
+    bitrate: 320
   },
+  // Free Music Archive tracks
   {
-    id: '7',
+    id: '8',
+    title: 'Acoustic Breeze',
+    artist: 'Benjamin Tissot',
+    album: 'Bensound Collection',
+    duration: 180,
+    url: 'https://freemusicarchive.org/music/Benjamin_Tissot/Bensound_Collection/Acoustic_Breeze',
+    artwork: 'https://freemusicarchive.org/file/images/albums/Benjamin_Tissot_-_Bensound_Collection_-_20150503123456564.jpg',
+    genre: 'Acoustic',
+    mood: 'Relaxing',
+    bpm: 80,
+    key: 'G',
+    year: 2015,
+    source: 'fma',
+    playCount: 1000000,
+    addedAt: new Date(),
+    quality: 'medium',
+    bitrate: 192
+  },
+  // Internet Archive tracks
+  {
+    id: '9',
+    title: 'Jazz in the Night',
+    artist: 'Various Artists',
+    album: 'Jazz Collection',
+    duration: 210,
+    url: 'https://archive.org/details/jazz_collection_2020',
+    artwork: 'https://archive.org/services/img/jazz_collection_2020',
+    genre: 'Jazz',
+    mood: 'Smooth',
+    bpm: 90,
+    key: 'F',
+    year: 2020,
+    source: 'ia',
+    playCount: 500000,
+    addedAt: new Date(),
+    quality: 'medium',
+    bitrate: 160
+  },
+  // More popular tracks
+  {
+    id: '10',
     title: 'Sunflower',
     artist: 'Post Malone & Swae Lee',
     album: 'Spider-Man: Into the Spider-Verse',
@@ -186,93 +276,72 @@ const FALLBACK_MUSIC_DATA: MusicSearchResult[] = [
     year: 2018,
     source: 'youtube',
     playCount: 1600000000,
-    addedAt: new Date()
-  },
-  {
-    id: '8',
-    title: 'Havana',
-    artist: 'Camila Cabello',
-    album: 'Camila',
-    duration: 217,
-    url: 'https://www.youtube.com/watch?v=BQ0mxQXmLsk',
-    artwork: 'https://i.ytimg.com/vi/BQ0mxQXmLsk/maxresdefault.jpg',
-    genre: 'Pop',
-    mood: 'Latin',
-    bpm: 105,
-    key: 'C',
-    year: 2017,
-    source: 'youtube',
-    playCount: 1400000000,
-    addedAt: new Date()
-  },
-  {
-    id: '9',
-    title: 'Uptown Funk',
-    artist: 'Mark Ronson ft. Bruno Mars',
-    album: 'Uptown Special',
-    duration: 270,
-    url: 'https://www.youtube.com/watch?v=OPf0YbXqDm0',
-    artwork: 'https://i.ytimg.com/vi/OPf0YbXqDm0/maxresdefault.jpg',
-    genre: 'Funk',
-    mood: 'Energetic',
-    bpm: 115,
-    key: 'D',
-    year: 2014,
-    source: 'youtube',
-    playCount: 2200000000,
-    addedAt: new Date()
-  },
-  {
-    id: '10',
-    title: 'Despacito',
-    artist: 'Luis Fonsi & Daddy Yankee',
-    album: 'Despacito & Mis Grandes Éxitos',
-    duration: 229,
-    url: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
-    artwork: 'https://i.ytimg.com/vi/kJQP7kiw5Fk/maxresdefault.jpg',
-    genre: 'Latin',
-    mood: 'Romantic',
-    bpm: 89,
-    key: 'B',
-    year: 2017,
-    source: 'youtube',
-    playCount: 3500000000,
-    addedAt: new Date()
+    addedAt: new Date(),
+    quality: 'high',
+    bitrate: 256
   }
 ];
 
 class MusicAPIService {
   private async searchYouTube(query: string, maxResults: number = 10): Promise<MusicSearchResult[]> {
     try {
-      // Check if API key is available
-      if (API_KEYS.YOUTUBE === 'YOUR_YOUTUBE_API_KEY') {
-        console.log('YouTube API key not configured, using fallback data');
-        return this.getFallbackResults(query, 'youtube', maxResults);
-      }
-
-      const response = await axios.get(API_ENDPOINTS.YOUTUBE_SEARCH, {
+      // Try Invidious first (no API key needed)
+      const invidiousResponse = await axios.get(API_ENDPOINTS.YOUTUBE_INVIDIOUS, {
         params: {
-          part: 'snippet',
           q: query,
           type: 'video',
-          videoCategoryId: '10', // Music category
-          maxResults,
-          key: API_KEYS.YOUTUBE
+          sort_by: 'relevance',
+          duration: 'medium'
         }
       });
 
-      return response.data.items.map((item: any) => ({
-        id: item.id.videoId,
-        title: item.snippet.title.replace(/\(Official Music Video\)|\(Official Video\)|\(Official\)/gi, '').trim(),
-        artist: item.snippet.channelTitle,
-        album: 'YouTube Music',
-        duration: 0, // Will be fetched separately
-        url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-        artwork: item.snippet.thumbnails.high.url,
-        genre: 'Various',
-        source: 'youtube' as const,
-        addedAt: new Date()
-      }));
+      if (invidiousResponse.data && invidiousResponse.data.length > 0) {
+        return invidiousResponse.data.slice(0, maxResults).map((item: any) => ({
+          id: item.videoId,
+          title: item.title.replace(/\(Official Music Video\)|\(Official Video\)|\(Official\)/gi, '').trim(),
+          artist: item.author,
+          album: 'YouTube Music',
+          duration: item.lengthSeconds,
+          url: `https://www.youtube.com/watch?v=${item.videoId}`,
+          artwork: item.videoThumbnails?.[0]?.url || 'https://via.placeholder.com/300x300',
+          genre: 'Various',
+          source: 'youtube' as const,
+          addedAt: new Date(),
+          quality: 'high',
+          bitrate: 256
+        }));
+      }
+
+      // Fallback to YouTube API if key is available
+      if (API_KEYS.YOUTUBE !== 'YOUR_YOUTUBE_API_KEY') {
+        const response = await axios.get(API_ENDPOINTS.YOUTUBE_SEARCH, {
+          params: {
+            part: 'snippet',
+            q: query,
+            type: 'video',
+            videoCategoryId: '10',
+            maxResults,
+            key: API_KEYS.YOUTUBE
+          }
+        });
+
+        return response.data.items.map((item: any) => ({
+          id: item.id.videoId,
+          title: item.snippet.title.replace(/\(Official Music Video\)|\(Official Video\)|\(Official\)/gi, '').trim(),
+          artist: item.snippet.channelTitle,
+          album: 'YouTube Music',
+          duration: 0,
+          url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+          artwork: item.snippet.thumbnails.high.url,
+          genre: 'Various',
+          source: 'youtube' as const,
+          addedAt: new Date(),
+          quality: 'high',
+          bitrate: 256
+        }));
+      }
+
+      return this.getFallbackResults(query, 'youtube', maxResults);
     } catch (error) {
       console.error('YouTube search error:', error);
       return this.getFallbackResults(query, 'youtube', maxResults);
@@ -299,7 +368,9 @@ class MusicAPIService {
         artwork: item.image?.[2]?.link || item.image?.[0]?.link,
         genre: item.language || 'Various',
         source: 'jiosaavn' as const,
-        addedAt: new Date()
+        addedAt: new Date(),
+        quality: 'high',
+        bitrate: 320
       }));
     } catch (error) {
       console.error('JioSaavn search error:', error);
@@ -322,11 +393,13 @@ class MusicAPIService {
         artist: item.artist.name,
         album: item.album.title,
         duration: item.duration,
-        url: item.preview, // 30-second preview
+        url: item.preview,
         artwork: item.album.cover_medium,
         genre: item.genre_id ? 'Various' : 'Unknown',
         source: 'deezer' as const,
-        addedAt: new Date()
+        addedAt: new Date(),
+        quality: 'medium',
+        bitrate: 128
       }));
     } catch (error) {
       console.error('Deezer search error:', error);
@@ -354,11 +427,43 @@ class MusicAPIService {
         artwork: item.artwork_url || item.user.avatar_url,
         genre: 'Various',
         source: 'soundcloud' as const,
-        addedAt: new Date()
+        addedAt: new Date(),
+        quality: 'medium',
+        bitrate: 128
       }));
     } catch (error) {
       console.error('SoundCloud search error:', error);
       return this.getFallbackResults(query, 'soundcloud', maxResults);
+    }
+  }
+
+  private async searchFreeMusicArchive(query: string, maxResults: number = 10): Promise<MusicSearchResult[]> {
+    try {
+      const response = await axios.get(API_ENDPOINTS.FMA_SEARCH, {
+        params: {
+          q: query,
+          limit: maxResults,
+          type: 'tracks'
+        }
+      });
+
+      return response.data.dataset.map((item: any) => ({
+        id: item.track_id.toString(),
+        title: item.track_title,
+        artist: item.artist_name,
+        album: item.album_title || 'Unknown Album',
+        duration: parseInt(item.track_duration) || 180,
+        url: item.track_url,
+        artwork: item.track_image_file || 'https://via.placeholder.com/300x300',
+        genre: item.genre_title || 'Various',
+        source: 'fma' as const,
+        addedAt: new Date(),
+        quality: 'medium',
+        bitrate: 192
+      }));
+    } catch (error) {
+      console.error('FMA search error:', error);
+      return this.getFallbackResults(query, 'fma', maxResults);
     }
   }
 
@@ -380,19 +485,21 @@ class MusicAPIService {
   async searchMusic(query: string, filters?: SearchFilters): Promise<MusicSearchResult[]> {
     const results: MusicSearchResult[] = [];
     
-    // Search across multiple sources
-    const sources = filters?.source || ['youtube', 'jiosaavn', 'deezer'];
+    // Search across multiple sources (like BlackHole)
+    const sources = filters?.source || ['youtube', 'jiosaavn', 'deezer', 'soundcloud', 'fma'];
     
     const searchPromises = sources.map(async (source) => {
       switch (source) {
         case 'youtube':
-          return await this.searchYouTube(query, 5);
+          return await this.searchYouTube(query, 4);
         case 'jiosaavn':
-          return await this.searchJioSaavn(query, 5);
+          return await this.searchJioSaavn(query, 4);
         case 'deezer':
-          return await this.searchDeezer(query, 5);
+          return await this.searchDeezer(query, 4);
         case 'soundcloud':
-          return await this.searchSoundCloud(query, 5);
+          return await this.searchSoundCloud(query, 4);
+        case 'fma':
+          return await this.searchFreeMusicArchive(query, 4);
         default:
           return [];
       }
@@ -422,13 +529,28 @@ class MusicAPIService {
       );
     }
 
+    if (filters?.quality) {
+      filteredResults = filteredResults.filter(item => {
+        switch (filters.quality) {
+          case 'high':
+            return item.bitrate && item.bitrate >= 256;
+          case 'medium':
+            return item.bitrate && item.bitrate >= 128;
+          case 'low':
+            return true;
+          default:
+            return true;
+        }
+      });
+    }
+
     // If no results found, return fallback data
     if (filteredResults.length === 0) {
       console.log('No results found, returning fallback data');
       return this.getFallbackResults(query, 'youtube', 10);
     }
 
-    return filteredResults.slice(0, 20); // Limit total results
+    return filteredResults.slice(0, 20);
   }
 
   async getTrackDetails(trackId: string, source: string): Promise<MusicSearchResult | null> {
@@ -459,7 +581,9 @@ class MusicAPIService {
               artwork: item.snippet.thumbnails.high.url,
               genre: 'Various',
               source: 'youtube' as const,
-              addedAt: new Date()
+              addedAt: new Date(),
+              quality: 'high',
+              bitrate: 256
             };
           }
           break;
@@ -477,7 +601,9 @@ class MusicAPIService {
             artwork: track.album.cover_medium,
             genre: 'Various',
             source: 'deezer' as const,
-            addedAt: new Date()
+            addedAt: new Date(),
+            quality: 'medium',
+            bitrate: 128
           };
 
         default:
@@ -560,6 +686,23 @@ class MusicAPIService {
       console.error('Get recommendations error:', error);
       return FALLBACK_MUSIC_DATA.slice(0, 5);
     }
+  }
+
+  // Get available sources
+  getAvailableSources(): string[] {
+    return ['youtube', 'jiosaavn', 'deezer', 'soundcloud', 'fma'];
+  }
+
+  // Get source info
+  getSourceInfo(source: string): { name: string; quality: string; legal: boolean } {
+    const sourceInfo = {
+      youtube: { name: 'YouTube Music', quality: 'High (256kbps)', legal: false },
+      jiosaavn: { name: 'JioSaavn', quality: 'High (320kbps)', legal: false },
+      deezer: { name: 'Deezer', quality: 'Medium (128kbps)', legal: true },
+      soundcloud: { name: 'SoundCloud', quality: 'Medium (128kbps)', legal: true },
+      fma: { name: 'Free Music Archive', quality: 'Medium (192kbps)', legal: true }
+    };
+    return sourceInfo[source as keyof typeof sourceInfo] || { name: 'Unknown', quality: 'Unknown', legal: false };
   }
 }
 

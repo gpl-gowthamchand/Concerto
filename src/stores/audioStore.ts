@@ -1,172 +1,218 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { Track, AudioState, QueueItem } from '../types';
+import { MusicSearchResult } from '../services/musicApi';
 
-interface AudioStore extends AudioState {
+interface AudioState {
+  // Current track
+  currentTrack: MusicSearchResult | null;
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+  volume: number;
+  isMuted: boolean;
+  
+  // Playback modes
+  repeat: 'none' | 'one' | 'all';
+  shuffle: boolean;
+  
+  // Queue
+  queue: MusicSearchResult[];
+  queueIndex: number;
+  
+  // History
+  history: MusicSearchResult[];
+  
   // Actions
-  play: (track?: Track) => void;
+  play: (track: MusicSearchResult) => void;
   pause: () => void;
+  resume: () => void;
   stop: () => void;
-  next: () => void;
-  previous: () => void;
   seek: (time: number) => void;
   setVolume: (volume: number) => void;
   toggleMute: () => void;
-  setPlaybackRate: (rate: number) => void;
   toggleRepeat: () => void;
   toggleShuffle: () => void;
-  addToQueue: (track: Track, source?: string) => void;
+  next: () => void;
+  previous: () => void;
+  addToQueue: (track: MusicSearchResult) => void;
   removeFromQueue: (index: number) => void;
   clearQueue: () => void;
-  setQueue: (tracks: Track[], source?: string) => void;
-  updateCurrentTrack: (track: Track) => void;
-  addToHistory: (track: Track) => void;
+  playQueue: (tracks: MusicSearchResult[], startIndex?: number) => void;
+  addToHistory: (track: MusicSearchResult) => void;
   clearHistory: () => void;
-  reset: () => void;
 }
 
-const initialState: AudioState = {
-  isPlaying: false,
+export const useAudioStore = create<AudioState>((set, get) => ({
+  // Initial state
   currentTrack: null,
+  isPlaying: false,
   currentTime: 0,
   duration: 0,
   volume: 1,
   isMuted: false,
-  playbackRate: 1,
   repeat: 'none',
   shuffle: false,
   queue: [],
+  queueIndex: -1,
   history: [],
-};
 
-export const useAudioStore = create<AudioStore>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
+  // Actions
+  play: (track: MusicSearchResult) => {
+    set({
+      currentTrack: track,
+      isPlaying: true,
+      currentTime: 0,
+      duration: track.duration || 0
+    });
+    get().addToHistory(track);
+  },
 
-      play: (track?: Track) => {
-        if (track) {
-          set({ currentTrack: track, isPlaying: true, currentTime: 0 });
-        } else {
-          set({ isPlaying: true });
-        }
-      },
+  pause: () => {
+    set({ isPlaying: false });
+  },
 
-      pause: () => set({ isPlaying: false }),
+  resume: () => {
+    set({ isPlaying: true });
+  },
 
-      stop: () => set({ isPlaying: false, currentTime: 0 }),
+  stop: () => {
+    set({
+      isPlaying: false,
+      currentTime: 0,
+      currentTrack: null
+    });
+  },
 
-      next: () => {
-        const { queue, currentTrack, repeat, shuffle } = get();
-        if (queue.length === 0) return;
+  seek: (time: number) => {
+    set({ currentTime: Math.max(0, Math.min(time, get().duration)) });
+  },
 
-        let nextIndex = 0;
-        if (currentTrack) {
-          const currentIndex = queue.findIndex(item => item.track.id === currentTrack.id);
-          if (currentIndex !== -1 && currentIndex < queue.length - 1) {
-            nextIndex = currentIndex + 1;
-          }
-        }
+  setVolume: (volume: number) => {
+    set({ volume: Math.max(0, Math.min(1, volume)) });
+  },
 
-        const nextItem = queue[nextIndex];
-        if (nextItem) {
-          set({ 
-            currentTrack: nextItem.track, 
-            isPlaying: true, 
-            currentTime: 0 
-          });
-        }
-      },
+  toggleMute: () => {
+    set({ isMuted: !get().isMuted });
+  },
 
-      previous: () => {
-        const { queue, currentTrack, repeat, shuffle } = get();
-        if (queue.length === 0) return;
+  toggleRepeat: () => {
+    const { repeat } = get();
+    const newRepeat = repeat === 'none' ? 'all' : repeat === 'all' ? 'one' : 'none';
+    set({ repeat: newRepeat });
+  },
 
-        let prevIndex = 0;
-        if (currentTrack) {
-          const currentIndex = queue.findIndex(item => item.track.id === currentTrack.id);
-          if (currentIndex > 0) {
-            prevIndex = currentIndex - 1;
-          }
-        }
+  toggleShuffle: () => {
+    set({ shuffle: !get().shuffle });
+  },
 
-        const prevItem = queue[prevIndex];
-        if (prevItem) {
-          set({ 
-            currentTrack: prevItem.track, 
-            isPlaying: true, 
-            currentTime: 0 
-          });
-        }
-      },
-
-      seek: (time: number) => set({ currentTime: Math.max(0, Math.min(time, get().duration)) }),
-
-      setVolume: (volume: number) => set({ volume: Math.max(0, Math.min(1, volume)) }),
-
-      toggleMute: () => set(state => ({ isMuted: !state.isMuted })),
-
-      setPlaybackRate: (rate: number) => set({ playbackRate: rate }),
-
-      toggleRepeat: () => {
-        const { repeat } = get();
-        const nextRepeat = repeat === 'none' ? 'all' : repeat === 'all' ? 'one' : 'none';
-        set({ repeat: nextRepeat });
-      },
-
-      toggleShuffle: () => set(state => ({ shuffle: !state.shuffle })),
-
-      addToQueue: (track: Track, source = 'user') => {
-        const queueItem: QueueItem = {
-          track,
-          addedAt: new Date(),
-          addedBy: 'user',
-          source: source as any,
-        };
-        set(state => ({ queue: [...state.queue, queueItem] }));
-      },
-
-      removeFromQueue: (index: number) => {
-        set(state => ({
-          queue: state.queue.filter((_, i) => i !== index)
-        }));
-      },
-
-      clearQueue: () => set({ queue: [] }),
-
-      setQueue: (tracks: Track[], source = 'playlist') => {
-        const queueItems: QueueItem[] = tracks.map(track => ({
-          track,
-          addedAt: new Date(),
-          addedBy: 'user',
-          source: source as any,
-        }));
-        set({ queue: queueItems });
-      },
-
-      updateCurrentTrack: (track: Track) => set({ currentTrack: track }),
-
-      addToHistory: (track: Track) => {
-        set(state => ({
-          history: [track, ...state.history.filter(t => t.id !== track.id)].slice(0, 100)
-        }));
-      },
-
-      clearHistory: () => set({ history: [] }),
-
-      reset: () => set(initialState),
-    }),
-    {
-      name: 'concerto-audio-store',
-      partialize: (state) => ({
-        volume: state.volume,
-        isMuted: state.isMuted,
-        playbackRate: state.playbackRate,
-        repeat: state.repeat,
-        shuffle: state.shuffle,
-        queue: state.queue,
-        history: state.history,
-      }),
+  next: () => {
+    const { queue, queueIndex, repeat, currentTrack } = get();
+    
+    if (repeat === 'one' && currentTrack) {
+      // Repeat current track
+      set({ currentTime: 0 });
+      return;
     }
-  )
-);
+
+    if (queue.length === 0) {
+      // No queue, stop playback
+      set({ isPlaying: false, currentTrack: null });
+      return;
+    }
+
+    let nextIndex = queueIndex + 1;
+    
+    if (nextIndex >= queue.length) {
+      if (repeat === 'all') {
+        // Loop back to start
+        nextIndex = 0;
+      } else {
+        // Stop playback
+        set({ isPlaying: false, currentTrack: null });
+        return;
+      }
+    }
+
+    const nextTrack = queue[nextIndex];
+    set({
+      currentTrack: nextTrack,
+      queueIndex: nextIndex,
+      currentTime: 0,
+      duration: nextTrack.duration || 0
+    });
+    get().addToHistory(nextTrack);
+  },
+
+  previous: () => {
+    const { queue, queueIndex, currentTrack } = get();
+    
+    if (queue.length === 0) {
+      // No queue, restart current track
+      if (currentTrack) {
+        set({ currentTime: 0 });
+      }
+      return;
+    }
+
+    let prevIndex = queueIndex - 1;
+    
+    if (prevIndex < 0) {
+      // Go to last track
+      prevIndex = queue.length - 1;
+    }
+
+    const prevTrack = queue[prevIndex];
+    set({
+      currentTrack: prevTrack,
+      queueIndex: prevIndex,
+      currentTime: 0,
+      duration: prevTrack.duration || 0
+    });
+    get().addToHistory(prevTrack);
+  },
+
+  addToQueue: (track: MusicSearchResult) => {
+    const { queue } = get();
+    set({ queue: [...queue, track] });
+  },
+
+  removeFromQueue: (index: number) => {
+    const { queue, queueIndex } = get();
+    const newQueue = queue.filter((_, i) => i !== index);
+    let newQueueIndex = queueIndex;
+    
+    if (index <= queueIndex && queueIndex > 0) {
+      newQueueIndex--;
+    }
+    
+    set({ queue: newQueue, queueIndex: newQueueIndex });
+  },
+
+  clearQueue: () => {
+    set({ queue: [], queueIndex: -1 });
+  },
+
+  playQueue: (tracks: MusicSearchResult[], startIndex: number = 0) => {
+    if (tracks.length === 0) return;
+    
+    const startTrack = tracks[startIndex];
+    set({
+      queue: tracks,
+      queueIndex: startIndex,
+      currentTrack: startTrack,
+      isPlaying: true,
+      currentTime: 0,
+      duration: startTrack.duration || 0
+    });
+    get().addToHistory(startTrack);
+  },
+
+  addToHistory: (track: MusicSearchResult) => {
+    const { history } = get();
+    const newHistory = [track, ...history.filter(t => t.id !== track.id)].slice(0, 50);
+    set({ history: newHistory });
+  },
+
+  clearHistory: () => {
+    set({ history: [] });
+  }
+}));
