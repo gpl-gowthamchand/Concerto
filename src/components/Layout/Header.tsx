@@ -4,10 +4,11 @@ import { Search, Bell, User, LogOut, Settings, Moon, Sun } from 'lucide-react';
 import { useUserStore } from '../../stores/userStore';
 import { useAudioStore } from '../../stores/audioStore';
 import VoiceSearch from '../Search/VoiceSearch';
+import toast from 'react-hot-toast';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useUserStore();
+  const { user, logout, updatePreferences } = useUserStore();
   const { currentTrack } = useAudioStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showVoiceSearch, setShowVoiceSearch] = useState(false);
@@ -25,8 +26,17 @@ const Header: React.FC = () => {
   };
 
   const toggleTheme = () => {
-    // Toggle theme logic would go here
-    console.log('Toggle theme');
+    const currentTheme = user?.preferences.theme || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    // Update user preferences
+    updatePreferences({ theme: newTheme });
+    
+    // Apply theme to document
+    document.documentElement.setAttribute('data-theme', newTheme);
+    
+    // Show feedback
+    toast.success(`${newTheme === 'dark' ? '🌙 Dark' : '☀️ Light'} theme applied!`);
   };
 
   return (
@@ -100,9 +110,13 @@ const Header: React.FC = () => {
           <button
             onClick={toggleTheme}
             className="p-2 text-dark-400 hover:text-dark-100 hover:bg-dark-700 rounded-lg transition-colors duration-200"
-            title="Toggle Theme"
+            title={`Switch to ${(user?.preferences.theme || 'dark') === 'dark' ? 'Light' : 'Dark'} Theme`}
           >
-            <Moon className="h-5 w-5" />
+            {(user?.preferences.theme || 'dark') === 'dark' ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
           </button>
 
           {/* User Menu */}
