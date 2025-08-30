@@ -28,7 +28,6 @@ interface RealAudioPlayerProps {
 const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   
   const { 
@@ -220,7 +219,7 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
     }
   }, [onTrackEnd, next]);
 
-  const handleError = useCallback((e: Event) => {
+  const handleError = useCallback((e: React.SyntheticEvent<HTMLAudioElement, Event>) => {
     console.error('Audio error:', e);
     setError('Failed to load audio');
     setIsLoading(false);
@@ -255,8 +254,8 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
           e.preventDefault();
           if (isPlaying) {
             pause();
-          } else {
-            play(track!);
+          } else if (track) {
+            play(track);
           }
           break;
         case 'ArrowLeft':

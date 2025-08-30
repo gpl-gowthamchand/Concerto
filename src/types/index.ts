@@ -1,43 +1,4 @@
-export interface Track {
-  id: string;
-  title: string;
-  artist: string;
-  album?: string;
-  duration: number;
-  url: string;
-  artwork?: string;
-  genre?: string;
-  mood?: string;
-  bpm?: number;
-  key?: string;
-  year?: number;
-  lyrics?: string;
-  source: 'youtube' | 'soundcloud' | 'deezer' | 'jiosaavn';
-  streamUrl?: string;
-  downloadUrl?: string;
-  isDownloaded?: boolean;
-  playCount: number;
-  lastPlayed?: Date;
-  addedAt: Date;
-}
-
-export interface Playlist {
-  id: string;
-  name: string;
-  description?: string;
-  tracks: Track[];
-  artwork?: string;
-  isPublic: boolean;
-  isCollaborative: boolean;
-  collaborators?: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  totalDuration: number;
-  trackCount: number;
-  mood?: string;
-  genre?: string;
-}
-
+// User related types
 export interface User {
   id: string;
   username: string;
@@ -56,172 +17,137 @@ export interface UserPreferences {
   audioQuality: 'low' | 'medium' | 'high';
   autoplay: boolean;
   crossfade: boolean;
-  equalizer: EqualizerSettings;
-  notifications: NotificationSettings;
-  privacy: PrivacySettings;
-}
-
-export interface EqualizerSettings {
-  enabled: boolean;
-  presets: EqualizerPreset[];
-  custom: number[];
-  currentPreset: string;
-}
-
-export interface EqualizerPreset {
-  name: string;
-  values: number[];
-  description?: string;
-}
-
-export interface NotificationSettings {
-  newReleases: boolean;
-  playlistUpdates: boolean;
-  friendActivity: boolean;
-  recommendations: boolean;
-  pushNotifications: boolean;
-}
-
-export interface PrivacySettings {
-  profileVisibility: 'public' | 'friends' | 'private';
-  showListeningHistory: boolean;
-  showCurrentTrack: boolean;
-  allowFriendRequests: boolean;
+  equalizer: {
+    enabled: boolean;
+    presets: string[];
+    customBands: number[];
+  };
+  notifications: {
+    email: boolean;
+    push: boolean;
+    newReleases: boolean;
+    recommendations: boolean;
+  };
+  privacy: {
+    profileVisibility: 'public' | 'private' | 'friends';
+    showListeningActivity: boolean;
+    allowDataCollection: boolean;
+  };
 }
 
 export interface UserStats {
-  totalListeningTime: number;
   totalTracks: number;
   totalPlaylists: number;
-  favoriteGenres: string[];
-  topArtists: string[];
   listeningStreak: number;
   lastActive: Date;
 }
 
-export interface SearchResult {
-  tracks: Track[];
-  artists: Artist[];
-  albums: Album[];
-  playlists: Playlist[];
-  totalResults: number;
-}
-
-export interface Artist {
+// Playlist related types
+export interface Playlist {
   id: string;
   name: string;
-  bio?: string;
-  avatar?: string;
-  genres: string[];
-  monthlyListeners: number;
-  topTracks: string[];
-  albums: string[];
-  similarArtists: string[];
-}
-
-export interface Album {
-  id: string;
-  title: string;
-  artist: string;
+  description?: string;
+  tracks: MusicSearchResult[];
   artwork?: string;
-  tracks: Track[];
-  genre: string;
-  year: number;
+  isPublic: boolean;
+  isCollaborative: boolean;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
   totalDuration: number;
   trackCount: number;
+  mood?: string;
+  genre?: string;
 }
 
-export interface QueueItem {
-  track: Track;
-  addedAt: Date;
-  addedBy: string;
-  source: 'user' | 'playlist' | 'radio' | 'recommendation';
+// Social related types
+export interface SocialActivity {
+  id: string;
+  userId: string;
+  type: 'like' | 'share' | 'follow' | 'playlist_create' | 'track_add';
+  targetId: string;
+  targetType: 'track' | 'playlist' | 'user';
+  timestamp: Date;
+  metadata?: Record<string, any>;
 }
 
+// Audio related types
 export interface AudioState {
   isPlaying: boolean;
-  currentTrack: Track | null;
+  currentTrack: MusicSearchResult | null;
   currentTime: number;
   duration: number;
   volume: number;
   isMuted: boolean;
-  playbackRate: number;
   repeat: 'none' | 'one' | 'all';
   shuffle: boolean;
-  queue: QueueItem[];
-  history: Track[];
+  queue: MusicSearchResult[];
+  queueIndex: number;
+  history: MusicSearchResult[];
 }
 
+// Search related types
 export interface SearchFilters {
   query: string;
   genre?: string;
   mood?: string;
-  duration?: {
-    min: number;
-    max: number;
-  };
-  year?: {
-    min: number;
-    max: number;
-  };
-  bpm?: {
-    min: number;
-    max: number;
-  };
+  duration?: { min: number; max: number };
+  year?: { min: number; max: number };
+  bpm?: { min: number; max: number };
   key?: string;
   source?: string[];
+  quality?: 'low' | 'medium' | 'high';
 }
 
-export interface MoodAnalysis {
-  mood: string;
-  confidence: number;
-  characteristics: string[];
-  similarMoods: string[];
-}
-
-export interface RecommendationEngine {
-  userPreferences: string[];
-  listeningHistory: Track[];
-  similarUsers: string[];
-  trendingTracks: Track[];
-  moodBasedSuggestions: Track[];
-  genreBasedSuggestions: Track[];
-}
-
-export interface AnalyticsData {
-  listeningTime: {
-    daily: number[];
-    weekly: number[];
-    monthly: number[];
-  };
-  genreDistribution: Record<string, number>;
-  moodDistribution: Record<string, number>;
-  peakListeningHours: number[];
-  topArtists: Array<{ name: string; count: number }>;
-  topTracks: Array<{ title: string; count: number }>;
-}
-
-export interface SocialActivity {
+// Music result types (imported from musicApi service)
+export interface MusicSearchResult {
   id: string;
-  userId: string;
-  type: 'track_played' | 'playlist_created' | 'track_liked' | 'followed_user';
-  data: any;
-  timestamp: Date;
-  isPublic: boolean;
+  title: string;
+  artist: string;
+  album?: string;
+  duration: number;
+  url: string;
+  artwork: string;
+  genre: string;
+  mood?: string;
+  bpm?: number;
+  key?: string;
+  year?: number;
+  source: 'youtube' | 'jiosaavn' | 'soundcloud' | 'deezer' | 'fma' | 'ia';
+  playCount?: number;
+  addedAt: Date;
+  quality?: string;
+  bitrate?: number;
 }
 
-export interface VoiceCommand {
-  command: string;
-  action: string;
-  parameters: Record<string, any>;
-  confidence: number;
+// Analytics related types
+export interface AnalyticsData {
+  totalListeningTime: number;
+  tracksPlayed: number;
+  playlistsCreated: number;
+  listeningStreak: number;
+  peakHours: { hour: number; plays: number }[];
+  monthlyTrends: { month: string; plays: number }[];
+  topGenres: { genre: string; plays: number }[];
+  topArtists: { artist: string; plays: number }[];
 }
 
-export interface OfflineData {
-  downloadedTracks: Track[];
-  cachedPlaylists: Playlist[];
-  userData: User;
-  lastSync: Date;
-  storageUsed: number;
-  maxStorage: number;
+// Offline related types
+export interface OfflineTrack {
+  id: string;
+  title: string;
+  artist: string;
+  album?: string;
+  duration: number;
+  filePath: string;
+  fileSize: number;
+  downloadedAt: Date;
+  artwork?: string;
+}
+
+export interface StorageInfo {
+  used: number;
+  total: number;
+  available: number;
+  percentageUsed: number;
 }

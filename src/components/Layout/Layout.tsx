@@ -25,7 +25,7 @@ const Layout: React.FC = () => {
         
         {/* Audio Player */}
         <RealAudioPlayer 
-          track={currentTrack}
+          track={currentTrack || undefined}
           onTrackEnd={() => {
             // Handle track end - this will be handled by the audio store
           }}
