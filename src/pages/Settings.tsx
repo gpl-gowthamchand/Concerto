@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Settings as SettingsIcon, Palette, Music, Bell, Shield, Download, Globe, Database, Info } from 'lucide-react';
 import { useUserStore } from '../stores/userStore';
+import toast from 'react-hot-toast';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'general' | 'audio' | 'notifications' | 'privacy' | 'storage' | 'about'>('general');
@@ -10,11 +11,19 @@ const Settings: React.FC = () => {
     updatePreferences({ theme: theme as 'dark' | 'light' | 'auto' });
     // Apply theme to document
     document.documentElement.setAttribute('data-theme', theme);
+    
+    // Show feedback
+    const themeNames = {
+      dark: 'Dark Theme',
+      light: 'Light Theme', 
+      auto: 'Auto Theme'
+    };
+    toast.success(`${themeNames[theme as keyof typeof themeNames]} applied!`);
   };
 
   const renderGeneral = () => (
     <div className="space-y-6">
-      <div className="bg-dark-800 rounded-xl p-6">
+      <div className="card">
         <h3 className="text-xl font-semibold text-white mb-4 flex items-center space-x-2">
           <Palette className="w-5 h-5" />
           <span>Appearance</span>
@@ -23,33 +32,36 @@ const Settings: React.FC = () => {
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Theme</label>
             <select 
-              className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white"
+              className="input-field w-full"
               value={user?.preferences.theme || 'dark'}
               onChange={(e) => handleThemeChange(e.target.value)}
             >
-              <option value="dark">Dark</option>
-              <option value="light">Light</option>
-              <option value="auto">Auto (System)</option>
+              <option value="dark">🌙 Dark Theme</option>
+              <option value="light">☀️ Light Theme</option>
+              <option value="auto">🔄 Auto (System)</option>
             </select>
+            <p className="text-sm text-gray-400 mt-1">
+              Current theme: {user?.preferences.theme || 'dark'}
+            </p>
           </div>
           
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Language</label>
             <select 
-              className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white"
+              className="input-field w-full"
               value={user?.preferences.language || 'en'}
               onChange={(e) => updatePreferences({ language: e.target.value })}
             >
-              <option value="en">English</option>
-              <option value="es">Spanish</option>
-              <option value="fr">French</option>
-              <option value="de">German</option>
+              <option value="en">🇺🇸 English</option>
+              <option value="es">🇪🇸 Spanish</option>
+              <option value="fr">🇫🇷 French</option>
+              <option value="de">🇩🇪 German</option>
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Time Format</label>
-            <select className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white">
+            <select className="input-field w-full">
               <option value="12">12-hour</option>
               <option value="24">24-hour</option>
             </select>
@@ -57,7 +69,7 @@ const Settings: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-dark-800 rounded-xl p-6">
+      <div className="card">
         <h3 className="text-xl font-semibold text-white mb-4 flex items-center space-x-2">
           <Globe className="w-5 h-5" />
           <span>Regional</span>
@@ -65,17 +77,17 @@ const Settings: React.FC = () => {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Country/Region</label>
-            <select className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white">
-              <option value="us">United States</option>
-              <option value="uk">United Kingdom</option>
-              <option value="ca">Canada</option>
-              <option value="au">Australia</option>
+            <select className="input-field w-full">
+              <option value="us">🇺🇸 United States</option>
+              <option value="uk">🇬🇧 United Kingdom</option>
+              <option value="ca">🇨🇦 Canada</option>
+              <option value="au">🇦🇺 Australia</option>
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Currency</label>
-            <select className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white">
+            <select className="input-field w-full">
               <option value="usd">USD ($)</option>
               <option value="eur">EUR (€)</option>
               <option value="gbp">GBP (£)</option>
