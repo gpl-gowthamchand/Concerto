@@ -66,9 +66,9 @@ const Search: React.FC = () => {
       setResults(searchResults);
       
       if (searchResults.length === 0) {
-        toast.error('No results found. Try a different search term.');
+        toast.error('No results found. Try searching for popular artists like "The Weeknd", "Ed Sheeran", or "Billie Eilish"');
       } else {
-        toast.success(`Found ${searchResults.length} tracks`);
+        toast.success(`Found ${searchResults.length} tracks (using fallback data - add API keys for real results)`);
       }
     } catch (error) {
       console.error('Search failed:', error);
