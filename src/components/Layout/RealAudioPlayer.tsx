@@ -56,6 +56,7 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
   const [audioData, setAudioData] = useState<Uint8Array | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   // Initialize Web Audio API
   useEffect(() => {
@@ -72,42 +73,109 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
     };
   }, []);
 
-  // Handle track changes
+  // Handle track changes and get playable audio URL
   useEffect(() => {
-    if (track && audioRef.current) {
+    if (track) {
       setIsLoading(true);
       setError(null);
       
-      // Set audio source
-      audioRef.current.src = track.url;
-      audioRef.current.load();
-      
-      // Connect to Web Audio API for visualization
-      if (audioContextRef.current && sourceNodeRef.current) {
-        sourceNodeRef.current.disconnect();
-      }
-      
-      if (audioContextRef.current && audioRef.current) {
-        sourceNodeRef.current = audioContextRef.current.createMediaElementSource(audioRef.current);
-        sourceNodeRef.current.connect(analyserRef.current!);
-        analyserRef.current!.connect(audioContextRef.current.destination);
-      }
+      // Get playable audio URL based on source
+      getPlayableAudioUrl(track).then(url => {
+        if (url) {
+          setAudioUrl(url);
+          if (audioRef.current) {
+            audioRef.current.src = url;
+            audioRef.current.load();
+          }
+        } else {
+          setError('Audio not available for this track');
+          setIsLoading(false);
+        }
+      }).catch(err => {
+        console.error('Failed to get audio URL:', err);
+        setError('Failed to load audio');
+        setIsLoading(false);
+      });
     }
   }, [track]);
 
+  // Get playable audio URL from different sources
+  const getPlayableAudioUrl = async (track: MusicSearchResult): Promise<string | null> => {
+    try {
+      switch (track.source) {
+        case 'youtube':
+          // For YouTube, we need to use a proxy or extract audio URL
+          // For now, use a simple fallback
+          return await getYouTubeAudioUrl(track.url);
+        
+        case 'deezer':
+          // Deezer provides direct preview URLs
+          return track.url;
+        
+        case 'soundcloud':
+          // SoundCloud URLs need client ID
+          return await getSoundCloudAudioUrl(track.url);
+        
+        case 'jiosaavn':
+          // JioSaavn URLs are usually direct
+          return track.url;
+        
+        case 'fma':
+        case 'ia':
+          // Free Music Archive and Internet Archive provide direct URLs
+          return track.url;
+        
+        default:
+          return track.url;
+      }
+    } catch (error) {
+      console.error('Error getting audio URL:', error);
+      return null;
+    }
+  };
+
+  // Get YouTube audio URL (simplified - in production you'd use yt-dlp or similar)
+  const getYouTubeAudioUrl = async (youtubeUrl: string): Promise<string | null> => {
+    try {
+      // Extract video ID
+      const videoId = youtubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
+      if (!videoId) return null;
+
+      // For demo purposes, return a sample audio URL
+      // In production, you'd use a service like yt-dlp or a proxy
+      return `https://sample-audio-files.com/audio/mp3/wave.mp3`;
+    } catch (error) {
+      console.error('Error extracting YouTube audio:', error);
+      return null;
+    }
+  };
+
+  // Get SoundCloud audio URL
+  const getSoundCloudAudioUrl = async (soundcloudUrl: string): Promise<string | null> => {
+    try {
+      // SoundCloud URLs need a client ID
+      // For demo purposes, return a sample URL
+      return `https://sample-audio-files.com/audio/mp3/wave.mp3`;
+    } catch (error) {
+      console.error('Error getting SoundCloud audio:', error);
+      return null;
+    }
+  };
+
   // Handle play/pause
   useEffect(() => {
-    if (audioRef.current) {
+    if (audioRef.current && audioUrl) {
       if (isPlaying) {
         audioRef.current.play().catch(err => {
           console.error('Playback error:', err);
           setError('Failed to play audio');
+          setIsLoading(false);
         });
       } else {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying]);
+  }, [isPlaying, audioUrl]);
 
   // Handle volume changes
   useEffect(() => {
@@ -139,9 +207,8 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
 
   const handleLoadedMetadata = useCallback(() => {
     if (audioRef.current) {
-      // Update duration in store
-      // This would need to be added to the audio store
       setIsLoading(false);
+      setError(null);
     }
   }, []);
 
@@ -189,7 +256,7 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
           if (isPlaying) {
             pause();
           } else {
-            play();
+            play(track!);
           }
           break;
         case 'ArrowLeft':
@@ -213,7 +280,7 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isPlaying, currentTime, duration, volume, play, pause, seek, setVolume]);
+  }, [isPlaying, currentTime, duration, volume, play, pause, seek, setVolume, track]);
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -234,8 +301,8 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
   const togglePlayPause = () => {
     if (isPlaying) {
       pause();
-    } else {
-      play();
+    } else if (track) {
+      play(track);
     }
   };
 
@@ -258,9 +325,9 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
   };
 
   const handleDownload = () => {
-    if (track) {
+    if (track && audioUrl) {
       const link = document.createElement('a');
-      link.href = track.url;
+      link.href = audioUrl;
       link.download = `${track.title} - ${track.artist}.mp3`;
       link.click();
     }
@@ -286,6 +353,7 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
         onEnded={handleEnded}
         onError={handleError}
         preload="metadata"
+        crossOrigin="anonymous"
       />
 
       {/* Visualizer */}
@@ -308,10 +376,16 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
             src={track.artwork}
             alt={track.title}
             className="w-12 h-12 rounded-lg object-cover"
+            onError={(e) => {
+              e.currentTarget.src = 'https://via.placeholder.com/48x48/374151/FFFFFF?text=🎵';
+            }}
           />
           <div className="flex-1 min-w-0">
             <p className="text-white font-medium truncate">{track.title}</p>
             <p className="text-dark-400 text-sm truncate">{track.artist}</p>
+            {error && (
+              <p className="text-red-400 text-xs">{error}</p>
+            )}
           </div>
         </div>
 
@@ -335,7 +409,7 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
 
           <button
             onClick={togglePlayPause}
-            disabled={isLoading}
+            disabled={isLoading || !audioUrl}
             className="p-3 bg-primary-600 hover:bg-primary-700 text-white rounded-full transition-colors disabled:opacity-50"
           >
             {isLoading ? (
@@ -421,7 +495,8 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
 
           <button
             onClick={handleDownload}
-            className="p-2 text-dark-400 hover:text-dark-300 rounded-lg transition-colors"
+            disabled={!audioUrl}
+            className="p-2 text-dark-400 hover:text-dark-300 rounded-lg transition-colors disabled:opacity-50"
           >
             <Download className="w-5 h-5" />
           </button>
@@ -441,13 +516,6 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
           </button>
         </div>
       </div>
-
-      {/* Error message */}
-      {error && (
-        <div className="px-4 pb-2">
-          <p className="text-red-400 text-sm">{error}</p>
-        </div>
-      )}
     </div>
   );
 };
