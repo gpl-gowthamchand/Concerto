@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Settings as SettingsIcon, Palette, Music, Bell, Shield, Download, Globe, Database, Info } from 'lucide-react';
 import { useUserStore } from '../stores/userStore';
-import toast from 'react-hot-toast';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'general' | 'audio' | 'notifications' | 'privacy' | 'storage' | 'about'>('general');
@@ -11,14 +10,6 @@ const Settings: React.FC = () => {
     updatePreferences({ theme: theme as 'dark' | 'light' | 'auto' });
     // Apply theme to document
     document.documentElement.setAttribute('data-theme', theme);
-    
-    // Show feedback
-    const themeNames = {
-      dark: 'Dark Theme',
-      light: 'Light Theme', 
-      auto: 'Auto Theme'
-    };
-    toast.success(`${themeNames[theme as keyof typeof themeNames]} applied!`);
   };
 
   const renderGeneral = () => (

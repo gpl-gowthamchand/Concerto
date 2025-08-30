@@ -4,7 +4,6 @@ import { Search, Bell, User, LogOut, Settings, Moon, Sun } from 'lucide-react';
 import { useUserStore } from '../../stores/userStore';
 import { useAudioStore } from '../../stores/audioStore';
 import VoiceSearch from '../Search/VoiceSearch';
-import toast from 'react-hot-toast';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -34,9 +33,6 @@ const Header: React.FC = () => {
     
     // Apply theme to document
     document.documentElement.setAttribute('data-theme', newTheme);
-    
-    // Show feedback
-    toast.success(`${newTheme === 'dark' ? '🌙 Dark' : '☀️ Light'} theme applied!`);
   };
 
   return (
