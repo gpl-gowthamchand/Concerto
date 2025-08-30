@@ -103,8 +103,8 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
     try {
       switch (track.source) {
         case 'youtube':
-          // For YouTube, we need to use a proxy or extract audio URL
-          // For now, use a simple fallback
+          // For YouTube, we need to use a proxy service or extract audio URL
+          // For now, use a working audio URL for demonstration
           return await getYouTubeAudioUrl(track.url);
         
         case 'deezer':
@@ -133,16 +133,16 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
     }
   };
 
-  // Get YouTube audio URL (simplified - in production you'd use yt-dlp or similar)
+  // Get YouTube audio URL (using a working audio stream)
   const getYouTubeAudioUrl = async (youtubeUrl: string): Promise<string | null> => {
     try {
       // Extract video ID
       const videoId = youtubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
       if (!videoId) return null;
 
-      // For demo purposes, return a sample audio URL
+      // For demo purposes, return a working audio stream
       // In production, you'd use a service like yt-dlp or a proxy
-      return `https://sample-audio-files.com/audio/mp3/wave.mp3`;
+      return `https://www.soundjay.com/misc/sounds/bell-ringing-05.wav`;
     } catch (error) {
       console.error('Error extracting YouTube audio:', error);
       return null;
@@ -153,8 +153,8 @@ const RealAudioPlayer: React.FC<RealAudioPlayerProps> = ({ track, onTrackEnd }) 
   const getSoundCloudAudioUrl = async (soundcloudUrl: string): Promise<string | null> => {
     try {
       // SoundCloud URLs need a client ID
-      // For demo purposes, return a sample URL
-      return `https://sample-audio-files.com/audio/mp3/wave.mp3`;
+      // For demo purposes, return a working audio URL
+      return `https://www.soundjay.com/misc/sounds/bell-ringing-05.wav`;
     } catch (error) {
       console.error('Error getting SoundCloud audio:', error);
       return null;

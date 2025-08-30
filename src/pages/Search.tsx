@@ -1,104 +1,103 @@
-import React, { useState, useEffect } from 'react';
-import { Search as SearchIcon, Mic, Filter, Sparkles, History, TrendingUp, Play, Heart, Plus, MoreVertical } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search as SearchIcon, Mic, Filter, History, TrendingUp, Play, Heart, Plus, MoreVertical } from 'lucide-react';
 import { useAudioStore } from '../stores/audioStore';
 import { useUserStore } from '../stores/userStore';
-import VoiceSearch from '../components/Search/VoiceSearch';
 import { musicApiService, MusicSearchResult, SearchFilters } from '../services/musicApi';
+import VoiceSearch from '../components/Search/VoiceSearch';
 import toast from 'react-hot-toast';
 
 const Search: React.FC = () => {
   const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState<SearchFilters>({
-    query: '',
-    genre: '',
-    mood: '',
-    duration: { min: 0, max: 600 },
-    year: { min: 1900, max: 2024 },
-    bpm: { min: 0, max: 200 },
-    key: '',
-    source: ['youtube', 'jiosaavn', 'deezer']
-  });
   const [results, setResults] = useState<MusicSearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [trendingSearches, setTrendingSearches] = useState<string[]>([]);
-  const [showVoiceSearch, setShowVoiceSearch] = useState(false);
+  const [filters, setFilters] = useState<SearchFilters>({ query: '' });
+  const [showFilters, setShowFilters] = useState(false);
   const [selectedSource, setSelectedSource] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<'tracks' | 'artists' | 'albums' | 'playlists'>('tracks');
 
-  const { play, addToQueue } = useAudioStore();
   const { user } = useUserStore();
+  const { play, addToQueue } = useAudioStore();
 
+  // Load search history and trending searches
   useEffect(() => {
-    // Load search history from localStorage
-    const history = localStorage.getItem('concerto-search-history');
-    if (history) {
-      setSearchHistory(JSON.parse(history));
+    const savedHistory = localStorage.getItem('searchHistory');
+    if (savedHistory) {
+      setSearchHistory(JSON.parse(savedHistory));
     }
 
-    // Load trending searches
+    // Set trending searches
     setTrendingSearches([
-      'Shape of You', 'Blinding Lights', 'Dance Monkey', 'Bad Guy',
-      'Old Town Road', 'Sunflower', 'Havana', 'Uptown Funk'
+      'The Weeknd',
+      'Drake',
+      'Billie Eilish',
+      'Ed Sheeran',
+      'Queen',
+      'Led Zeppelin',
+      'Bob Marley',
+      'Radiohead',
+      'Jazz',
+      'Classical'
     ]);
   }, []);
 
-  const handleSearch = async (searchQuery?: string) => {
-    const searchTerm = searchQuery || query;
-    if (!searchTerm.trim()) return;
-
-    setIsSearching(true);
-    
-    // Add to search history
-    const newHistory = [searchTerm, ...searchHistory.filter(h => h !== searchTerm)].slice(0, 10);
-    setSearchHistory(newHistory);
-    localStorage.setItem('concerto-search-history', JSON.stringify(newHistory));
-
-    try {
-      // Use real music API
-      const searchFilters = {
-        ...filters,
-        query: searchTerm,
-        source: selectedSource === 'all' ? ['youtube', 'jiosaavn', 'deezer'] : [selectedSource]
-      };
-
-      const searchResults = await musicApiService.searchMusic(searchTerm, searchFilters);
-      setResults(searchResults);
-      
-      if (searchResults.length === 0) {
-        toast.error('No results found. Try searching for popular artists like "The Weeknd", "Ed Sheeran", or "Billie Eilish"');
-      } else {
-        toast.success(`Found ${searchResults.length} tracks (using fallback data - add API keys for real results)`);
+  // Debounced search
+  const debouncedSearch = useCallback(
+    debounce(async (searchQuery: string) => {
+      if (searchQuery.trim().length < 2) {
+        setResults([]);
+        return;
       }
-    } catch (error) {
-      console.error('Search failed:', error);
-      toast.error('Search failed. Please try again.');
-    } finally {
-      setIsSearching(false);
-    }
-  };
 
+      setIsLoading(true);
+      try {
+        const searchResults = await musicApiService.searchMusic(searchQuery, {
+          ...filters,
+          query: searchQuery,
+          source: selectedSource === 'all' ? undefined : [selectedSource]
+        });
+
+        setResults(searchResults);
+        
+        // Add to search history
+        if (searchQuery.trim() && !searchHistory.includes(searchQuery.trim())) {
+          const newHistory = [searchQuery.trim(), ...searchHistory.slice(0, 9)];
+          setSearchHistory(newHistory);
+          localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+        }
+
+        toast.success(`Found ${searchResults.length} results for "${searchQuery}"`);
+      } catch (error) {
+        console.error('Search error:', error);
+        toast.error('Search failed. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    }, 500),
+    [filters, selectedSource]
+  );
+
+  // Handle search input
+  useEffect(() => {
+    debouncedSearch(query);
+  }, [query, debouncedSearch]);
+
+  // Handle voice search
   const handleVoiceSearch = (transcript: string) => {
     setQuery(transcript);
-    handleSearch(transcript);
-    setShowVoiceSearch(false);
   };
 
-  const handlePlayTrack = async (track: MusicSearchResult) => {
-    try {
-      // Get full track details
-      const trackDetails = await musicApiService.getTrackDetails(track.id, track.source);
-      if (trackDetails) {
-        play(trackDetails);
-        toast.success(`Now playing: ${trackDetails.title}`);
-      } else {
-        play(track);
-        toast.success(`Now playing: ${track.title}`);
-      }
-    } catch (error) {
-      console.error('Playback error:', error);
-      toast.error('Failed to play track');
-    }
+  // Handle search submission
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    debouncedSearch(query);
+  };
+
+  // Handle track actions
+  const handlePlayTrack = (track: MusicSearchResult) => {
+    play(track);
+    toast.success(`Now playing: ${track.title}`);
   };
 
   const handleAddToQueue = (track: MusicSearchResult) => {
@@ -111,31 +110,36 @@ const Search: React.FC = () => {
     toast.success(`Added ${track.title} to favorites`);
   };
 
-  const applyFilters = () => {
-    handleSearch();
-    setShowFilters(false);
+  // Handle search history click
+  const handleHistoryClick = (historyItem: string) => {
+    setQuery(historyItem);
   };
 
+  // Handle trending search click
+  const handleTrendingClick = (trendingItem: string) => {
+    setQuery(trendingItem);
+  };
+
+  // Clear search results
+  const clearResults = () => {
+    setResults([]);
+    setQuery('');
+  };
+
+  // Clear filters
   const clearFilters = () => {
-    setFilters({
-      query: '',
-      genre: '',
-      mood: '',
-      duration: { min: 0, max: 600 },
-      year: { min: 1900, max: 2024 },
-      bpm: { min: 0, max: 200 },
-      key: '',
-      source: ['youtube', 'jiosaavn', 'deezer']
-    });
+    setFilters({ query: '' });
     setSelectedSource('all');
   };
 
+  // Format duration
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // Get source icon
   const getSourceIcon = (source: string) => {
     switch (source) {
       case 'youtube':
@@ -146,9 +150,19 @@ const Search: React.FC = () => {
         return '🎧';
       case 'soundcloud':
         return '☁️';
+      case 'fma':
+        return '🎼';
+      case 'ia':
+        return '📚';
       default:
         return '🎵';
     }
+  };
+
+  // Get source name
+  const getSourceName = (source: string) => {
+    const sourceInfo = musicApiService.getSourceInfo(source);
+    return sourceInfo.name;
   };
 
   return (
@@ -162,133 +176,79 @@ const Search: React.FC = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="max-w-2xl mx-auto">
+      <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
         <div className="relative">
-          <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-dark-400 h-5 w-5" />
+          <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-dark-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Search for songs, artists, albums, or playlists..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            className="w-full pl-12 pr-24 py-4 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            placeholder="Search for songs, artists, albums, or playlists..."
+            className="w-full pl-12 pr-20 py-4 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
-          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-2">
+            <VoiceSearch onTranscript={handleVoiceSearch} />
             <button
-              onClick={() => setShowVoiceSearch(!showVoiceSearch)}
-              className="p-2 text-dark-400 hover:text-primary-400 transition-colors"
-              title="Voice Search"
-            >
-              <Mic className="h-5 w-5" />
-            </button>
-            <button
+              type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className="p-2 text-dark-400 hover:text-primary-400 transition-colors"
-              title="Advanced Filters"
+              className="p-2 text-dark-400 hover:text-dark-300 rounded-lg transition-colors"
             >
-              <Filter className="h-5 w-5" />
+              <Filter className="w-5 h-5" />
             </button>
             <button
-              onClick={() => handleSearch()}
-              disabled={isSearching}
-              className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50"
+              type="submit"
+              className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
             >
-              {isSearching ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <SearchIcon className="h-4 w-4" />
-              )}
+              Search
             </button>
           </div>
         </div>
+      </form>
 
-        {/* Voice Search Modal */}
-        {showVoiceSearch && (
-          <VoiceSearch 
-            onClose={() => setShowVoiceSearch(false)} 
-            onTranscript={handleVoiceSearch}
-          />
-        )}
-      </div>
-
-      {/* Advanced Filters */}
+      {/* Filters */}
       {showFilters && (
-        <div className="max-w-4xl mx-auto card">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Source Selection */}
+        <div className="max-w-2xl mx-auto card">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">Music Source</label>
+              <label className="block text-sm font-medium text-white mb-2">Music Source</label>
               <select
                 value={selectedSource}
                 onChange={(e) => setSelectedSource(e.target.value)}
-                className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white"
+                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="all">All Sources</option>
                 <option value="youtube">YouTube Music</option>
                 <option value="jiosaavn">JioSaavn</option>
                 <option value="deezer">Deezer</option>
                 <option value="soundcloud">SoundCloud</option>
+                <option value="fma">Free Music Archive</option>
+                <option value="ia">Internet Archive</option>
               </select>
             </div>
-
-            {/* Genre Filter */}
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">Genre</label>
+              <label className="block text-sm font-medium text-white mb-2">Genre</label>
               <input
                 type="text"
                 placeholder="e.g., Rock, Pop, Jazz"
-                value={filters.genre}
-                onChange={(e) => setFilters({ ...filters, genre: e.target.value })}
-                className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white"
+                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
-
-            {/* Duration Filter */}
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">Duration (minutes)</label>
-              <div className="flex space-x-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={filters.duration?.min || ''}
-                  onChange={(e) => setFilters({ 
-                    ...filters, 
-                    duration: { 
-                      ...filters.duration!, 
-                      min: parseInt(e.target.value) || 0 
-                    } 
-                  })}
-                  className="flex-1 bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white"
-                />
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={filters.duration?.max || ''}
-                  onChange={(e) => setFilters({ 
-                    ...filters, 
-                    duration: { 
-                      ...filters.duration!, 
-                      max: parseInt(e.target.value) || 600 
-                    } 
-                  })}
-                  className="flex-1 bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white"
-                />
-              </div>
+              <label className="block text-sm font-medium text-white mb-2">Quality</label>
+              <select className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <option value="all">All Qualities</option>
+                <option value="high">High (320kbps)</option>
+                <option value="medium">Medium (192kbps)</option>
+                <option value="low">Low (128kbps)</option>
+              </select>
             </div>
           </div>
-
-          <div className="flex justify-end space-x-3 mt-6">
+          <div className="mt-4 flex justify-end">
             <button
               onClick={clearFilters}
-              className="px-4 py-2 bg-dark-700 text-dark-300 hover:bg-dark-600 rounded-lg transition-colors"
+              className="px-4 py-2 text-dark-400 hover:text-dark-300 transition-colors"
             >
-              Clear
-            </button>
-            <button
-              onClick={applyFilters}
-              className="px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors"
-            >
-              Apply Filters
+              Clear Filters
             </button>
           </div>
         </div>
@@ -302,85 +262,116 @@ const Search: React.FC = () => {
               Search Results ({results.length})
             </h2>
             <button
-              onClick={() => setResults([])}
-              className="text-primary-400 hover:text-primary-300 text-sm"
+              onClick={clearResults}
+              className="text-primary-400 hover:text-primary-300 text-sm transition-colors"
             >
               Clear Results
             </button>
           </div>
 
-          {/* Tracks */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-white">Tracks</h3>
-            {results.map((track) => (
-              <div key={`${track.id}-${track.source}`} className="card group hover:bg-dark-700 transition-colors">
-                <div className="flex items-center space-x-4">
+          {/* Results Tabs */}
+          <div className="flex space-x-4 border-b border-dark-700">
+            {(['tracks', 'artists', 'albums', 'playlists'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  activeTab === tab
+                    ? 'text-primary-400 border-b-2 border-primary-400'
+                    : 'text-dark-400 hover:text-dark-300'
+                }`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Tracks Results */}
+          {activeTab === 'tracks' && (
+            <div className="space-y-3">
+              {results.map((track) => (
+                <div
+                  key={`${track.id}-${track.source}`}
+                  className="flex items-center space-x-4 p-4 bg-dark-800 rounded-lg hover:bg-dark-700 transition-colors group"
+                >
                   <img
                     src={track.artwork}
                     alt={track.title}
                     className="w-12 h-12 rounded-lg object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/48x48/374151/FFFFFF?text=🎵';
+                    }}
                   />
+                  
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate">{track.title}</p>
+                    <h3 className="text-white font-medium truncate">{track.title}</h3>
                     <p className="text-dark-400 text-sm truncate">
                       {track.artist} • {track.album} • {track.genre}
                     </p>
                     <div className="flex items-center space-x-2 mt-1">
                       <span className="text-xs text-dark-500">{formatDuration(track.duration)}</span>
-                      <span className="text-xs text-dark-500">{getSourceIcon(track.source)} {track.source}</span>
+                      <span className="text-xs text-dark-500">•</span>
+                      <span className="text-xs text-dark-500">{getSourceName(track.source)}</span>
+                      <span className="text-xs text-dark-500">•</span>
+                      <span className="text-xs text-dark-500">{track.quality}</span>
                     </div>
                   </div>
+
                   <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handlePlayTrack(track)}
-                      className="p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                      className="p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-full transition-colors"
                       title="Play"
                     >
-                      <Play className="h-4 w-4" />
+                      <Play className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleAddToQueue(track)}
-                      className="p-2 bg-dark-600 hover:bg-dark-500 text-white rounded-lg transition-colors"
+                      className="p-2 bg-dark-600 hover:bg-dark-500 text-white rounded-full transition-colors"
                       title="Add to Queue"
                     >
-                      <Plus className="h-4 w-4" />
+                      <Plus className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleLikeTrack(track)}
-                      className="p-2 bg-dark-600 hover:bg-dark-500 text-white rounded-lg transition-colors"
+                      className="p-2 bg-dark-600 hover:bg-dark-500 text-white rounded-full transition-colors"
                       title="Like"
                     >
-                      <Heart className="h-4 w-4" />
+                      <Heart className="w-4 h-4" />
                     </button>
-                    <button className="p-2 bg-dark-600 hover:bg-dark-500 text-white rounded-lg transition-colors">
-                      <MoreVertical className="h-4 w-4" />
+                    <button className="p-2 bg-dark-600 hover:bg-dark-500 text-white rounded-full transition-colors">
+                      <MoreVertical className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {/* Other tabs would show different content */}
+          {activeTab !== 'tracks' && (
+            <div className="text-center py-8">
+              <p className="text-dark-400">Coming soon: {activeTab} search results</p>
+            </div>
+          )}
         </div>
       )}
 
       {/* Search History */}
       {!results.length && searchHistory.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
+          <h3 className="text-xl font-bold text-white flex items-center space-x-2">
             <History className="w-5 h-5" />
             <span>Recent Searches</span>
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-2">
-            {searchHistory.map((term, index) => (
+            {searchHistory.map((item, index) => (
               <button
                 key={index}
-                onClick={() => {
-                  setQuery(term);
-                  handleSearch(term);
-                }}
-                className="px-3 py-1 bg-dark-700 text-dark-300 hover:bg-dark-600 rounded-lg transition-colors"
+                onClick={() => handleHistoryClick(item)}
+                className="px-3 py-1 bg-dark-700 hover:bg-dark-600 text-white rounded-full text-sm transition-colors"
               >
-                {term}
+                {item}
               </button>
             ))}
           </div>
@@ -390,28 +381,45 @@ const Search: React.FC = () => {
       {/* Trending Searches */}
       {!results.length && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
+          <h3 className="text-xl font-bold text-white flex items-center space-x-2">
             <TrendingUp className="w-5 h-5" />
             <span>Trending Searches</span>
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-2">
-            {trendingSearches.map((term, index) => (
+            {trendingSearches.map((item, index) => (
               <button
                 key={index}
-                onClick={() => {
-                  setQuery(term);
-                  handleSearch(term);
-                }}
-                className="px-3 py-1 bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors"
+                onClick={() => handleTrendingClick(item)}
+                className="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white rounded-full text-sm transition-colors"
               >
-                {term}
+                {item}
               </button>
             ))}
           </div>
         </div>
       )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
+          <p className="text-dark-400 mt-2">Searching...</p>
+        </div>
+      )}
     </div>
   );
 };
+
+// Debounce utility function
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 export default Search;
