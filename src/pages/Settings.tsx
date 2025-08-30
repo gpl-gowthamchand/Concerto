@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { Settings as SettingsIcon, Palette, Music, Bell, Shield, Download, Globe, Database, Info } from 'lucide-react';
+import { useUserStore } from '../stores/userStore';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'general' | 'audio' | 'notifications' | 'privacy' | 'storage' | 'about'>('general');
+  const { user, updatePreferences } = useUserStore();
+
+  const handleThemeChange = (theme: string) => {
+    updatePreferences({ theme: theme as 'dark' | 'light' | 'auto' });
+    // Apply theme to document
+    document.documentElement.setAttribute('data-theme', theme);
+  };
 
   const renderGeneral = () => (
     <div className="space-y-6">
@@ -14,7 +22,11 @@ const Settings: React.FC = () => {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Theme</label>
-            <select className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white">
+            <select 
+              className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white"
+              value={user?.preferences.theme || 'dark'}
+              onChange={(e) => handleThemeChange(e.target.value)}
+            >
               <option value="dark">Dark</option>
               <option value="light">Light</option>
               <option value="auto">Auto (System)</option>
@@ -23,7 +35,11 @@ const Settings: React.FC = () => {
           
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Language</label>
-            <select className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white">
+            <select 
+              className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white"
+              value={user?.preferences.language || 'en'}
+              onChange={(e) => updatePreferences({ language: e.target.value })}
+            >
               <option value="en">English</option>
               <option value="es">Spanish</option>
               <option value="fr">French</option>

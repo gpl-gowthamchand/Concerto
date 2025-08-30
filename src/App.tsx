@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/Layout/Layout';
 import Home from './pages/Home';
@@ -20,29 +20,27 @@ import NotFound from './pages/NotFound';
 function App() {
   return (
     <HelmetProvider>
-      <Router>
-        <Routes>
-          {/* Auth routes outside layout */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* Main app routes with layout */}
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="search" element={<Search />} />
-            <Route path="library" element={<Library />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="social" element={<Social />} />
-            <Route path="offline" element={<Offline />} />
-            <Route path="playlist/:id" element={<PlaylistPage />} />
-            <Route path="artist/:id" element={<ArtistPage />} />
-            <Route path="album/:id" element={<AlbumPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </Router>
+      <Routes>
+        {/* Auth routes outside layout */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        
+        {/* Main app routes with layout */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="search" element={<Search />} />
+          <Route path="library" element={<Library />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="social" element={<Social />} />
+          <Route path="offline" element={<Offline />} />
+          <Route path="playlist/:id" element={<PlaylistPage />} />
+          <Route path="artist/:id" element={<ArtistPage />} />
+          <Route path="album/:id" element={<AlbumPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
     </HelmetProvider>
   );
 }

@@ -2,6 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme CSS Variables */
+:root {
+  /* Dark theme (default) */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --border-color: #475569;
+  --accent-primary: #0ea5e9;
+  --accent-secondary: #d946ef;
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --border-color: #cbd5e1;
+  --accent-primary: #0ea5e9;
+  --accent-secondary: #d946ef;
+}
+
+[data-theme="auto"] {
+  /* Auto theme will use system preference */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --border-color: #475569;
+  --accent-primary: #0ea5e9;
+  --accent-secondary: #d946ef;
+}
+
+@media (prefers-color-scheme: light) {
+  [data-theme="auto"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --border-color: #cbd5e1;
+  }
+}
+
 @layer base {
   * {
     @apply border-dark-700;
@@ -10,6 +61,8 @@
   body {
     @apply bg-dark-900 text-dark-50 font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
   }
   
   html {
@@ -28,10 +81,15 @@
   
   .card {
     @apply bg-dark-800 rounded-xl p-6 shadow-lg border border-dark-700;
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
   }
   
   .input-field {
     @apply bg-dark-700 border border-dark-600 text-dark-100 placeholder-dark-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
   }
   
   .glass-effect {
@@ -74,14 +132,17 @@
 
 ::-webkit-scrollbar-track {
   @apply bg-dark-800;
+  background-color: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
   @apply bg-dark-600 rounded-full;
+  background-color: var(--border-color);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-dark-500;
+  background-color: var(--text-muted);
 }
 
 /* Audio visualizer styles */
@@ -98,6 +159,7 @@
 /* Waveform styles */
 .waveform {
   @apply bg-dark-600 rounded-full;
+  background-color: var(--border-color);
 }
 
 .waveform-active {
