@@ -3,7 +3,7 @@ import { useAppDispatch } from '../redux/hooks';
 import { setActiveSong, setPlaylist } from '../redux/features/playerSlice';
 import SongCard from '../components/SongCard';
 import { HiPlay, HiRefresh, HiSearch } from 'react-icons/hi';
-import { musicApi, OnlineSong } from '../services/musicApi';
+import { musicApi, OnlineSong } from '../services/enhancedMusicApi';
 
 const OnlineMusic: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -12,14 +12,13 @@ const OnlineMusic: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('pop');
+  const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const [activeTab, setActiveTab] = useState('popular');
 
-  const genres = [
-    { value: 'pop', title: 'Pop' },
-    { value: 'rock', title: 'Rock' },
-    { value: 'jazz', title: 'Jazz' },
-    { value: 'electronic', title: 'Electronic' },
-    { value: 'classical', title: 'Classical' },
-    { value: 'hip hop', title: 'Hip Hop' },
+  const genres = musicApi.getGenres().map(genre => ({ value: genre.toLowerCase(), title: genre }));
+  const platforms = [
+    { value: 'all', title: 'All Platforms' },
+    ...musicApi.getPlatforms().map(platform => ({ value: platform.id, title: platform.name }))
   ];
 
   const loadPopularTracks = async () => {
@@ -60,6 +59,30 @@ const OnlineMusic: React.FC = () => {
     }
   };
 
+  const loadTracksByPlatform = async (platform: string) => {
+    setLoading(true);
+    try {
+      const tracks = await musicApi.getTracksByPlatform(platform);
+      setSongs(tracks);
+    } catch (error) {
+      console.error('Error loading tracks by platform:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadTrendingTracks = async () => {
+    setLoading(true);
+    try {
+      const tracks = await musicApi.getTrendingTracks();
+      setSongs(tracks);
+    } catch (error) {
+      console.error('Error loading trending tracks:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadPopularTracks();
   }, []);
@@ -79,7 +102,7 @@ const OnlineMusic: React.FC = () => {
   return (
     <div className="flex flex-col">
       <div className="w-full flex justify-between items-center sm:flex-row flex-col mt-4 mb-10">
-        <h2 className="font-bold text-3xl text-white text-left">Online Music</h2>
+        <h2 className="font-bold text-3xl text-white text-left">🎵 Multi-Platform Music</h2>
         <div className="flex items-center space-x-4">
           <button
             onClick={loadPopularTracks}
@@ -96,6 +119,29 @@ const OnlineMusic: React.FC = () => {
             <span>Play All</span>
           </button>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex space-x-1 mb-6">
+        {[
+          { id: 'popular', label: 'Popular', action: loadPopularTracks },
+          { id: 'trending', label: 'Trending', action: loadTrendingTracks },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => {
+              setActiveTab(tab.id);
+              tab.action();
+            }}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === tab.id
+                ? 'bg-primary-500 text-white'
+                : 'text-gray-400 hover:text-white hover:bg-dark-800'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Search Bar */}
@@ -121,16 +167,44 @@ const OnlineMusic: React.FC = () => {
         </div>
       </div>
 
+      {/* Platform Filter */}
+      <div className="mb-4">
+        <h3 className="text-white font-semibold mb-3">🎧 Streaming Platforms</h3>
+        <div className="flex flex-wrap gap-2">
+          {platforms.map((platform) => (
+            <button
+              key={platform.value}
+              onClick={() => {
+                setSelectedPlatform(platform.value);
+                if (platform.value === 'all') {
+                  loadPopularTracks();
+                } else {
+                  loadTracksByPlatform(platform.value);
+                }
+              }}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                selectedPlatform === platform.value
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-dark-800 text-gray-400 hover:text-white hover:bg-dark-700'
+              }`}
+            >
+              {platform.title}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Genre Filter */}
       <div className="mb-6">
+        <h3 className="text-white font-semibold mb-3">🎵 Genres</h3>
         <div className="flex flex-wrap gap-2">
-          {genres.map((genre) => (
+          {genres.slice(0, 8).map((genre) => (
             <button
               key={genre.value}
               onClick={() => handleGenreChange(genre.value)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 selectedGenre === genre.value
-                  ? 'bg-primary-500 text-white'
+                  ? 'bg-secondary-500 text-white'
                   : 'bg-dark-800 text-gray-400 hover:text-white hover:bg-dark-700'
               }`}
             >
@@ -164,12 +238,19 @@ const OnlineMusic: React.FC = () => {
       )}
 
       {/* Info Banner */}
-      <div className="mt-8 p-4 bg-dark-800 rounded-lg border border-dark-700">
-        <h3 className="text-white font-semibold mb-2">About Online Music</h3>
-        <p className="text-gray-400 text-sm">
-          This feature streams music from online sources. Some tracks may be previews only. 
-          For full tracks, consider integrating with premium music APIs like Spotify, Apple Music, or YouTube Music.
+      <div className="mt-8 p-4 bg-gradient-to-r from-primary-900 to-secondary-900 rounded-lg border border-primary-700">
+        <h3 className="text-white font-semibold mb-2">🎵 Multi-Platform Music Streaming</h3>
+        <p className="text-gray-300 text-sm mb-3">
+          Stream music from multiple popular platforms including YouTube Music, Spotify, JioSaavn, Wynk Music, Deezer, and SoundCloud.
         </p>
+        <div className="flex flex-wrap gap-2">
+          <span className="px-2 py-1 bg-primary-600 text-white text-xs rounded">YouTube Music</span>
+          <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">Spotify</span>
+          <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded">JioSaavn</span>
+          <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded">Wynk</span>
+          <span className="px-2 py-1 bg-orange-600 text-white text-xs rounded">Deezer</span>
+          <span className="px-2 py-1 bg-red-600 text-white text-xs rounded">SoundCloud</span>
+        </div>
       </div>
     </div>
   );

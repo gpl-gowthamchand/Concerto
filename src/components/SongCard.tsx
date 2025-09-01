@@ -43,6 +43,24 @@ const SongCard: React.FC<SongCardProps> = ({ song, data, i }) => {
       <div className="mt-3">
         <h3 className="text-white font-medium truncate">{song.title}</h3>
         <p className="text-gray-400 text-sm truncate">{song.artist}</p>
+        {song.platform && (
+          <div className="flex items-center justify-between mt-2">
+            <span className={`px-2 py-1 text-xs rounded ${
+              song.source === 'youtube' ? 'bg-red-600 text-white' :
+              song.source === 'spotify' ? 'bg-green-600 text-white' :
+              song.source === 'jiosaavn' ? 'bg-blue-600 text-white' :
+              song.source === 'wynk' ? 'bg-purple-600 text-white' :
+              song.source === 'deezer' ? 'bg-orange-600 text-white' :
+              song.source === 'soundcloud' ? 'bg-red-500 text-white' :
+              'bg-gray-600 text-white'
+            }`}>
+              {song.platform}
+            </span>
+            {song.quality && (
+              <span className="text-xs text-gray-500">{song.quality}</span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -9,7 +9,9 @@ export interface Song {
   audio: string;
   image: string;
   genre?: string;
-  source?: 'local' | 'online';
+  source?: 'local' | 'online' | 'youtube' | 'spotify' | 'jiosaavn' | 'wynk' | 'deezer' | 'soundcloud';
+  platform?: string;
+  quality?: string;
 }
 
 export interface PlayerState {
