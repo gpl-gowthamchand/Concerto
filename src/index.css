@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-700;
+  }
+  
+  body {
+    @apply bg-dark-900 text-white;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .slider::-webkit-slider-track {
+    background: #374151;
+    height: 4px;
+    border-radius: 2px;
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #0ea5e9;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .slider::-webkit-slider-thumb:hover {
+    background: #0284c7;
+  }
+
+  .slider::-moz-range-track {
+    background: #374151;
+    height: 4px;
+    border-radius: 2px;
+    border: none;
+  }
+
+  .slider::-moz-range-thumb {
+    background: #0ea5e9;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+  }
+
+  .slider::-moz-range-thumb:hover {
+    background: #0284c7;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .smooth-transition {
+    transition: all 0.3s ease-in-out;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
