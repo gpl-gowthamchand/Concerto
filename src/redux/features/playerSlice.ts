@@ -12,6 +12,10 @@ export interface Song {
   source?: 'local' | 'online' | 'youtube' | 'spotify' | 'jiosaavn' | 'wynk' | 'deezer' | 'soundcloud';
   platform?: string;
   quality?: string;
+  // New fields for better streaming
+  streamUrl?: string;
+  previewUrl?: string;
+  fullTrackUrl?: string;
 }
 
 export interface PlayerState {

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useAppSelector } from '../../redux/hooks';
-import StreamingPlayer from '../StreamingPlayer';
+import UnifiedPlayer from '../UnifiedPlayer';
 
 interface PlayerProps {
   seekTime: number;
@@ -46,14 +46,22 @@ const Player: React.FC<PlayerProps> = ({
     }
   }, [seekTime, isOnlineTrack]);
 
-  // If it's an online track, use the StreamingPlayer
+  // If it's an online track, use the UnifiedPlayer
   if (isOnlineTrack && activeSong) {
     return (
       <div className="w-full">
-        <StreamingPlayer
+        <UnifiedPlayer
           song={activeSong as any}
           isPlaying={isPlaying}
           onEnded={onEnded}
+          onTimeUpdate={(time) => {
+            // Handle time updates for online tracks
+            console.log('Online track time update:', time);
+          }}
+          onDurationChange={(duration) => {
+            // Handle duration changes for online tracks
+            console.log('Online track duration:', duration);
+          }}
         />
       </div>
     );
