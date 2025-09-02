@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import Sidebar from './components/Sidebar';
 import MusicPlayer from './components/MusicPlayer';
+import Home from './pages/Home';
 import OnlineMusic from './pages/OnlineMusic';
 import Library from './pages/Library';
 import Favorites from './pages/Favorites';
@@ -40,7 +41,8 @@ function App() {
             {/* Main Content */}
             <div className="flex-1 overflow-hidden">
               <Routes>
-                <Route path="/" element={<OnlineMusic />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/browse" element={<Home />} />
                 <Route path="/online" element={<OnlineMusic />} />
                 <Route path="/library" element={<Library />} />
                 <Route path="/favorites" element={<Favorites />} />

@@ -13,7 +13,7 @@ const Sidebar: React.FC = () => {
       <nav className="flex-1 p-4">
         <div className="space-y-1">
           <NavLink
-            to="/online"
+            to="/browse"
             className={({ isActive }) =>
               `flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                 isActive
