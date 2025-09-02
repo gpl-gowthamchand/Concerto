@@ -1,34 +1,37 @@
 import React from 'react';
+import { Song } from '../../redux/features/playerSlice';
 
 interface TrackProps {
-  isPlaying: boolean;
   isActive: boolean;
-  activeSong: any;
+  isPlaying: boolean;
+  song: Song;
 }
 
-const Track: React.FC<TrackProps> = ({ isPlaying, isActive, activeSong }) => {
+const Track: React.FC<TrackProps> = ({ isActive, isPlaying, song }) => {
   return (
-    <div className="flex items-center space-x-4">
-      <div className="relative">
+    <div className="flex items-center">
+      <div className="relative w-12 h-12 mr-3">
         <img
-          src={activeSong?.image || '/placeholder-album.jpg'}
-          alt={activeSong?.title || 'Track'}
-          className={`w-16 h-16 rounded-lg object-cover ${
-            isPlaying && isActive ? 'animate-pulse-slow' : ''
-          }`}
+          src={song.image}
+          alt={song.title}
+          className="w-full h-full object-cover rounded-lg"
+          onError={(e) => {
+            e.currentTarget.src = 'https://via.placeholder.com/48x48/6366f1/ffffff?text=🎵';
+          }}
         />
-        {isPlaying && isActive && (
-          <div className="absolute inset-0 bg-black bg-opacity-30 rounded-lg flex items-center justify-center">
-            <div className="w-2 h-2 bg-primary-400 rounded-full animate-pulse"></div>
+        {isActive && isPlaying && (
+          <div className="absolute inset-0 bg-black bg-opacity-20 rounded-lg flex items-center justify-center">
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
           </div>
         )}
       </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="text-white font-medium truncate">
-          {activeSong?.title || 'No song selected'}
-        </h3>
-        <p className="text-gray-400 text-sm truncate">
-          {activeSong?.artist || 'Unknown artist'}
+      
+      <div className="min-w-0 flex-1">
+        <h4 className="text-sm font-medium text-gray-900 truncate">
+          {song.title}
+        </h4>
+        <p className="text-xs text-gray-500 truncate">
+          {song.artist}
         </p>
       </div>
     </div>

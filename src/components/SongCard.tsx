@@ -1,63 +1,63 @@
 import React from 'react';
-import { useAppSelector, useAppDispatch } from '../redux/hooks';
+import { useAppDispatch } from '../redux/hooks';
 import { setActiveSong } from '../redux/features/playerSlice';
-import { HiPlay, HiPause } from 'react-icons/hi';
+import { Song } from '../redux/features/playerSlice';
 
 interface SongCardProps {
-  song: any;
-  data: any[];
+  song: Song;
+  data: Song[];
   i: number;
 }
 
 const SongCard: React.FC<SongCardProps> = ({ song, data, i }) => {
   const dispatch = useAppDispatch();
-  const { activeSong, isPlaying } = useAppSelector((state) => state.player);
 
-  const handlePlayClick = () => {
+  const handlePlayPauseClick = () => {
     dispatch(setActiveSong({ song, data, i }));
   };
 
-  const isActive = activeSong?.id === song.id;
-
   return (
-    <div
-      className="group relative p-4 bg-dark-800 rounded-lg hover:bg-dark-700 transition-colors cursor-pointer"
-      onClick={handlePlayClick}
-    >
-      <div className="relative">
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer group">
+      <div className="relative mb-3">
         <img
-          src={song.image || '/placeholder-album.jpg'}
+          src={song.image}
           alt={song.title}
           className="w-full h-48 object-cover rounded-lg"
+          onError={(e) => {
+            e.currentTarget.src = 'https://via.placeholder.com/300x200/6366f1/ffffff?text=🎵';
+          }}
         />
-        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all">
-          <button className="opacity-0 group-hover:opacity-100 bg-primary-500 hover:bg-primary-600 text-white rounded-full p-3 transition-all">
-            {isActive && isPlaying ? (
-              <HiPause className="w-6 h-6" />
-            ) : (
-              <HiPlay className="w-6 h-6" />
-            )}
-          </button>
-        </div>
+        <button
+          onClick={handlePlayPauseClick}
+          className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 rounded-lg opacity-0 group-hover:opacity-100"
+        >
+          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
+            <svg className="w-6 h-6 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+            </svg>
+          </div>
+        </button>
       </div>
-      <div className="mt-3">
-        <h3 className="text-white font-medium truncate">{song.title}</h3>
-        <p className="text-gray-400 text-sm truncate">{song.artist}</p>
+
+      <div>
+        <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate">{song.title}</h3>
+        <p className="text-gray-600 text-xs mb-2 truncate">{song.artist}</p>
+        
         {song.platform && (
-          <div className="flex items-center justify-between mt-2">
-            <span className={`px-2 py-1 text-xs rounded ${
-              song.source === 'youtube' ? 'bg-red-600 text-white' :
-              song.source === 'spotify' ? 'bg-green-600 text-white' :
-              song.source === 'jiosaavn' ? 'bg-blue-600 text-white' :
-              song.source === 'wynk' ? 'bg-purple-600 text-white' :
-              song.source === 'deezer' ? 'bg-orange-600 text-white' :
-              song.source === 'soundcloud' ? 'bg-red-500 text-white' :
-              'bg-gray-600 text-white'
+          <div className="flex items-center justify-between">
+            <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+              song.source === 'youtube' ? 'bg-red-100 text-red-800' :
+              song.source === 'spotify' ? 'bg-green-100 text-green-800' :
+              song.source === 'jiosaavn' ? 'bg-blue-100 text-blue-800' :
+              song.source === 'wynk' ? 'bg-purple-100 text-purple-800' :
+              song.source === 'deezer' ? 'bg-orange-100 text-orange-800' :
+              song.source === 'soundcloud' ? 'bg-red-100 text-red-800' :
+              'bg-gray-100 text-gray-800'
             }`}>
               {song.platform}
             </span>
             {song.quality && (
-              <span className="text-xs text-gray-500">{song.quality}</span>
+              <span className="text-xs text-gray-500 font-medium">{song.quality}</span>
             )}
           </div>
         )}
