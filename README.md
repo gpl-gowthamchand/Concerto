@@ -11,6 +11,9 @@ A beautiful, modern music player built with React, TypeScript, Redux Toolkit, an
 - 📚 **Library Management** - Organize your music collection
 - 🔍 **Search** - Find your favorite songs quickly
 - ⚡ **Fast & Lightweight** - Built with Vite for optimal performance
+- 🎧 **Multi-Platform Streaming** - Real music from YouTube, Spotify, SoundCloud, JioSaavn, Wynk, Deezer
+- 🎯 **Smart Player** - Automatic platform detection and embedded players
+- 🌐 **Cross-Platform Search** - Find songs across all streaming services
 
 ## Tech Stack
 
