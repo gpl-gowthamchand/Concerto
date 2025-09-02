@@ -8,6 +8,7 @@ const Home: React.FC = () => {
   const dispatch = useAppDispatch();
   const [songs, setSongs] = React.useState<OnlineSong[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     loadMusic();
@@ -16,10 +17,41 @@ const Home: React.FC = () => {
   const loadMusic = async () => {
     try {
       setLoading(true);
+      setError(null);
       const tracks = await musicApi.getPopularTracks();
       setSongs(tracks);
     } catch (err) {
       console.error('Failed to load music:', err);
+      setError('Failed to load music');
+      // Set some default songs to prevent blank page
+      setSongs([
+        {
+          id: 'default1',
+          title: 'Despacito',
+          artist: 'Luis Fonsi ft. Daddy Yankee',
+          album: 'Despacito',
+          duration: 281,
+          audio: 'https://www.youtube.com/embed/kJQP7kiw5Fk',
+          image: 'https://i.ytimg.com/vi/kJQP7kiw5Fk/maxresdefault.jpg',
+          genre: 'Reggaeton',
+          source: 'youtube',
+          platform: 'YouTube Music',
+          quality: 'HD',
+        },
+        {
+          id: 'default2',
+          title: 'Shape of You',
+          artist: 'Ed Sheeran',
+          album: '÷ (Divide)',
+          duration: 233,
+          audio: 'https://www.youtube.com/embed/JGwWNGJdvx8',
+          image: 'https://i.ytimg.com/vi/JGwWNGJdvx8/maxresdefault.jpg',
+          genre: 'Pop',
+          source: 'youtube',
+          platform: 'YouTube Music',
+          quality: 'HD',
+        }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -172,6 +204,12 @@ const Home: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
       </div>
     </div>
   );
