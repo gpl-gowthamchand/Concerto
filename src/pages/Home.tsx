@@ -14,44 +14,16 @@ const Home: React.FC = () => {
     loadMusic();
   }, []);
 
-  const loadMusic = async () => {
+  const loadMusic = () => {
     try {
       setLoading(true);
       setError(null);
-      const tracks = await musicApi.getPopularTracks();
+      // Use synchronous function since it's just sample data
+      const tracks = musicApi.getPopularTracks();
       setSongs(tracks);
     } catch (err) {
       console.error('Failed to load music:', err);
       setError('Failed to load music');
-      // Set some default songs to prevent blank page
-      setSongs([
-        {
-          id: 'default1',
-          title: 'Despacito',
-          artist: 'Luis Fonsi ft. Daddy Yankee',
-          album: 'Despacito',
-          duration: 281,
-          audio: 'https://www.youtube.com/embed/kJQP7kiw5Fk',
-          image: 'https://i.ytimg.com/vi/kJQP7kiw5Fk/maxresdefault.jpg',
-          genre: 'Reggaeton',
-          source: 'youtube',
-          platform: 'YouTube Music',
-          quality: 'HD',
-        },
-        {
-          id: 'default2',
-          title: 'Shape of You',
-          artist: 'Ed Sheeran',
-          album: '÷ (Divide)',
-          duration: 233,
-          audio: 'https://www.youtube.com/embed/JGwWNGJdvx8',
-          image: 'https://i.ytimg.com/vi/JGwWNGJdvx8/maxresdefault.jpg',
-          genre: 'Pop',
-          source: 'youtube',
-          platform: 'YouTube Music',
-          quality: 'HD',
-        }
-      ]);
     } finally {
       setLoading(false);
     }

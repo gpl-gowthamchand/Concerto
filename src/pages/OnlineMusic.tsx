@@ -16,10 +16,10 @@ const OnlineMusic: React.FC = () => {
     loadPopularTracks();
   }, []);
 
-  const loadPopularTracks = async () => {
+  const loadPopularTracks = () => {
     try {
       setLoading(true);
-      const tracks = await musicApi.getPopularTracks();
+      const tracks = musicApi.getPopularTracks();
       setSongs(tracks);
       setError(null);
     } catch (err) {
@@ -29,10 +29,10 @@ const OnlineMusic: React.FC = () => {
     }
   };
 
-  const loadTrendingTracks = async () => {
+  const loadTrendingTracks = () => {
     try {
       setLoading(true);
-      const tracks = await musicApi.getTrendingTracks();
+      const tracks = musicApi.getTrendingTracks();
       setSongs(tracks);
       setError(null);
     } catch (err) {
@@ -42,10 +42,10 @@ const OnlineMusic: React.FC = () => {
     }
   };
 
-  const loadTracksByPlatform = async (platform: string) => {
+  const loadTracksByPlatform = (platform: string) => {
     try {
       setLoading(true);
-      const tracks = await musicApi.getTracksByPlatform(platform);
+      const tracks = musicApi.getTracksByPlatform(platform);
       setSongs(tracks);
       setError(null);
     } catch (err) {

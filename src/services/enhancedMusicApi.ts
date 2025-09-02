@@ -546,7 +546,7 @@ const SAMPLE_TRACKS = {
 
 export const enhancedMusicApi = {
   // Get popular tracks from all platforms
-  async getPopularTracks(): Promise<OnlineSong[]> {
+  getPopularTracks(): OnlineSong[] {
     try {
       const allTracks: OnlineSong[] = [];
       
@@ -564,7 +564,7 @@ export const enhancedMusicApi = {
   },
 
   // Search across all platforms
-  async searchTracks(query: string): Promise<OnlineSong[]> {
+  searchTracks(query: string): OnlineSong[] {
     try {
       const allTracks: OnlineSong[] = [];
       
@@ -586,7 +586,7 @@ export const enhancedMusicApi = {
   },
 
   // Get tracks by platform
-  async getTracksByPlatform(platform: string): Promise<OnlineSong[]> {
+  getTracksByPlatform(platform: string): OnlineSong[] {
     try {
       const platformKey = platform.toLowerCase() as keyof typeof SAMPLE_TRACKS;
       return SAMPLE_TRACKS[platformKey] || [];
@@ -597,7 +597,7 @@ export const enhancedMusicApi = {
   },
 
   // Get tracks by genre
-  async getTracksByGenre(genre: string): Promise<OnlineSong[]> {
+  getTracksByGenre(genre: string): OnlineSong[] {
     try {
       const allTracks: OnlineSong[] = [];
       
@@ -616,7 +616,7 @@ export const enhancedMusicApi = {
   },
 
   // Get trending tracks
-  async getTrendingTracks(): Promise<OnlineSong[]> {
+  getTrendingTracks(): OnlineSong[] {
     try {
       const trendingTracks: OnlineSong[] = [
         ...SAMPLE_TRACKS.youtube.slice(0, 2),
