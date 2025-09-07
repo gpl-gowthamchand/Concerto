@@ -1,156 +1,92 @@
 import React, { useState } from 'react';
 import { useAppDispatch } from '../redux/hooks';
 import { setActiveSong, setPlaylist } from '../redux/features/playerSlice';
+import { musicApi, OnlineSong } from '../services/enhancedMusicApi';
 import SongCard from '../components/SongCard';
-import { HiPlay } from 'react-icons/hi';
-
-// Sample data with different genres
-const genreSongs = {
-  pop: [
-    {
-      id: 'pop1',
-      title: 'Pop Hit 1',
-      artist: 'Pop Artist 1',
-      album: 'Pop Album 1',
-      duration: 180,
-      audio: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-      image: 'https://via.placeholder.com/300x300/ec4899/ffffff?text=Pop+1',
-      genre: 'Pop'
-    },
-    {
-      id: 'pop2',
-      title: 'Pop Hit 2',
-      artist: 'Pop Artist 2',
-      album: 'Pop Album 2',
-      duration: 200,
-      audio: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-      image: 'https://via.placeholder.com/300x300/f472b6/ffffff?text=Pop+2',
-      genre: 'Pop'
-    },
-  ],
-  rock: [
-    {
-      id: 'rock1',
-      title: 'Rock Anthem 1',
-      artist: 'Rock Band 1',
-      album: 'Rock Album 1',
-      duration: 240,
-      audio: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-      image: 'https://via.placeholder.com/300x300/dc2626/ffffff?text=Rock+1',
-      genre: 'Rock'
-    },
-    {
-      id: 'rock2',
-      title: 'Rock Anthem 2',
-      artist: 'Rock Band 2',
-      album: 'Rock Album 2',
-      duration: 220,
-      audio: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-      image: 'https://via.placeholder.com/300x300/ef4444/ffffff?text=Rock+2',
-      genre: 'Rock'
-    },
-  ],
-  jazz: [
-    {
-      id: 'jazz1',
-      title: 'Jazz Standard 1',
-      artist: 'Jazz Musician 1',
-      album: 'Jazz Album 1',
-      duration: 300,
-      audio: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-      image: 'https://via.placeholder.com/300x300/059669/ffffff?text=Jazz+1',
-      genre: 'Jazz'
-    },
-    {
-      id: 'jazz2',
-      title: 'Jazz Standard 2',
-      artist: 'Jazz Musician 2',
-      album: 'Jazz Album 2',
-      duration: 280,
-      audio: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-      image: 'https://via.placeholder.com/300x300/10b981/ffffff?text=Jazz+2',
-      genre: 'Jazz'
-    },
-  ],
-  electronic: [
-    {
-      id: 'electronic1',
-      title: 'Electronic Beat 1',
-      artist: 'Electronic Artist 1',
-      album: 'Electronic Album 1',
-      duration: 320,
-      audio: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-      image: 'https://via.placeholder.com/300x300/7c3aed/ffffff?text=Electronic+1',
-      genre: 'Electronic'
-    },
-    {
-      id: 'electronic2',
-      title: 'Electronic Beat 2',
-      artist: 'Electronic Artist 2',
-      album: 'Electronic Album 2',
-      duration: 290,
-      audio: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-      image: 'https://via.placeholder.com/300x300/8b5cf6/ffffff?text=Electronic+2',
-      genre: 'Electronic'
-    },
-  ],
-};
-
-const genres = [
-  { value: 'pop', title: 'Pop' },
-  { value: 'rock', title: 'Rock' },
-  { value: 'jazz', title: 'Jazz' },
-  { value: 'electronic', title: 'Electronic' },
-];
 
 const Discover: React.FC = () => {
   const dispatch = useAppDispatch();
-  const [selectedGenre, setSelectedGenre] = useState('pop');
-  // const { isPlaying } = useAppSelector((state) => state.player);
+  const [selectedGenre, setSelectedGenre] = useState('all');
+  const [songs, setSongs] = useState<OnlineSong[]>([]);
 
-  const currentSongs = genreSongs[selectedGenre as keyof typeof genreSongs] || [];
+  React.useEffect(() => {
+    loadSongs();
+  }, [selectedGenre]);
 
-  const handlePlayAll = () => {
-    if (currentSongs.length > 0) {
-      dispatch(setPlaylist(currentSongs));
-      dispatch(setActiveSong({ song: currentSongs[0], data: currentSongs, i: 0 }));
+  const loadSongs = () => {
+    try {
+      let tracks: OnlineSong[];
+      if (selectedGenre === 'all') {
+        tracks = musicApi.getPopularTracks();
+      } else {
+        tracks = musicApi.getTracksByGenre(selectedGenre);
+      }
+      setSongs(tracks);
+    } catch (error) {
+      console.error('Failed to load songs:', error);
+      setSongs([]);
     }
   };
+
+  const handlePlayAll = () => {
+    if (songs.length > 0) {
+      dispatch(setPlaylist(songs));
+      dispatch(setActiveSong({ song: songs[0], data: songs, i: 0 }));
+    }
+  };
+
+  const genres = [
+    { value: 'all', title: 'All Genres' },
+    { value: 'pop', title: 'Pop' },
+    { value: 'rock', title: 'Rock' },
+    { value: 'electronic', title: 'Electronic' },
+    { value: 'bollywood', title: 'Bollywood' },
+    { value: 'reggaeton', title: 'Reggaeton' },
+  ];
 
   const genreTitle = genres.find(({ value }) => value === selectedGenre)?.title;
 
   return (
-    <div className="flex flex-col">
-      <div className="w-full flex justify-between items-center sm:flex-row flex-col mt-4 mb-10">
-        <h2 className="font-bold text-3xl text-white text-left">Discover {genreTitle}</h2>
-        
-        <div className="flex items-center space-x-4">
-          <select
-            onChange={(e) => setSelectedGenre(e.target.value)}
-            value={selectedGenre}
-            className="bg-dark-800 text-white p-3 text-sm rounded-lg outline-none border border-dark-700 focus:border-primary-500"
-          >
-            {genres.map((genre) => (
-              <option key={genre.value} value={genre.value}>
-                {genre.title}
-              </option>
-            ))}
-          </select>
-          
-          <button
-            onClick={handlePlayAll}
-            className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
-          >
-            <HiPlay className="w-5 h-5" />
-            <span>Play All</span>
-          </button>
+    <div className="flex-1 bg-gray-50 overflow-y-auto">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Discover {genreTitle}</h1>
+          </div>
+          <div className="flex items-center space-x-4">
+            <select
+              onChange={(e) => setSelectedGenre(e.target.value)}
+              value={selectedGenre}
+              className="bg-white border border-gray-300 text-gray-900 p-3 text-sm rounded-lg outline-none focus:border-gray-900"
+            >
+              {genres.map((genre) => (
+                <option key={genre.value} value={genre.value}>
+                  {genre.title}
+                </option>
+              ))}
+            </select>
+            
+            <button
+              onClick={handlePlayAll}
+              className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+              </svg>
+              <span>Play All</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {currentSongs.map((song, i) => (
-          <SongCard key={song.id} song={song} data={currentSongs} i={i} />
-        ))}
+      {/* Main Content */}
+      <div className="p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {songs.map((song, i) => (
+            <SongCard key={song.id} song={song} data={songs} i={i} />
+          ))}
+        </div>
       </div>
     </div>
   );

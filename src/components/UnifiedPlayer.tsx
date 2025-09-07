@@ -84,7 +84,7 @@ const UnifiedPlayer: React.FC<UnifiedPlayerProps> = ({
   if (playerType === 'embedded') {
     return (
       <div className="w-full">
-        <div className="bg-dark-800 rounded-lg overflow-hidden">
+        <div className="bg-white rounded-lg overflow-hidden shadow-sm">
           <iframe
             ref={iframeRef}
             src={song.streamUrl || song.audio}
@@ -105,7 +105,7 @@ const UnifiedPlayer: React.FC<UnifiedPlayerProps> = ({
           />
         </div>
         <div className="mt-2 text-center">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-600 text-sm">
             🎵 {song.title} - {song.artist} • {song.platform}
           </p>
         </div>
@@ -117,7 +117,7 @@ const UnifiedPlayer: React.FC<UnifiedPlayerProps> = ({
   if (playerType === 'external') {
     return (
       <div className="w-full">
-        <div className="bg-dark-800 rounded-lg p-6 border border-primary-700">
+        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-center mb-4">
             <img 
               src={song.image} 
@@ -128,13 +128,13 @@ const UnifiedPlayer: React.FC<UnifiedPlayerProps> = ({
               }}
             />
             <div className="text-left">
-              <h3 className="text-white font-semibold text-lg">{song.title}</h3>
-              <p className="text-gray-400">{song.artist}</p>
+              <h3 className="text-gray-900 font-semibold text-lg">{song.title}</h3>
+              <p className="text-gray-600">{song.artist}</p>
               <span className={`px-3 py-1 text-sm rounded-full ${
-                song.source === 'jiosaavn' ? 'bg-blue-600 text-white' :
-                song.source === 'wynk' ? 'bg-purple-600 text-white' :
-                song.source === 'deezer' ? 'bg-orange-600 text-white' :
-                'bg-gray-600 text-white'
+                song.source === 'jiosaavn' ? 'bg-blue-100 text-blue-800' :
+                song.source === 'wynk' ? 'bg-purple-100 text-purple-800' :
+                song.source === 'deezer' ? 'bg-orange-100 text-orange-800' :
+                'bg-gray-100 text-gray-800'
               }`}>
                 {song.platform}
               </span>
@@ -142,10 +142,10 @@ const UnifiedPlayer: React.FC<UnifiedPlayerProps> = ({
           </div>
           
           <div className="text-center mb-4">
-            <p className="text-gray-300 text-sm mb-2">
+            <p className="text-gray-700 text-sm mb-2">
               This track is available on {song.platform}
             </p>
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-500 text-xs">
               Click below to open in {song.platform} for the best experience
             </p>
           </div>
@@ -153,14 +153,14 @@ const UnifiedPlayer: React.FC<UnifiedPlayerProps> = ({
           <div className="flex gap-3 justify-center">
             <button
               onClick={handlePreview}
-              className="bg-secondary-500 hover:bg-secondary-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+              className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
             >
               <span className="mr-2">👁️</span>
               Preview
             </button>
             <button
               onClick={handleExternalPlay}
-              className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center"
+              className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center"
             >
               <span className="mr-2">🎧</span>
               Play Full Track
@@ -186,8 +186,8 @@ const UnifiedPlayer: React.FC<UnifiedPlayerProps> = ({
         }}
         className="hidden"
       />
-      <div className="bg-dark-800 rounded-lg p-4 text-center">
-        <p className="text-gray-400 text-sm">
+      <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+        <p className="text-gray-600 text-sm">
           Audio player for {song.title} - {song.artist}
         </p>
       </div>

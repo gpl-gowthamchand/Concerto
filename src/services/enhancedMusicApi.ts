@@ -20,66 +20,70 @@ export interface OnlineSong {
   fullTrackUrl?: string;
 }
 
-// Real streaming URLs for different platforms
+// REAL WORKING streaming URLs for different platforms
 const STREAMING_URLS = {
   youtube: {
     'yt1': { 
-      streamUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk?autoplay=1&enablejsapi=1&origin=' + (typeof window !== 'undefined' ? window.location.origin : 'https://concertoo.vercel.app'),
-      previewUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk'
+      streamUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+      previewUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+      fullTrackUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk'
     },
     'yt2': { 
-      streamUrl: 'https://www.youtube.com/embed/JGwWNGJdvx8?autoplay=1&enablejsapi=1&origin=' + (typeof window !== 'undefined' ? window.location.origin : 'https://concertoo.vercel.app'),
-      previewUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8'
+      streamUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8',
+      previewUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8',
+      fullTrackUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8'
     },
     'yt3': { 
-      streamUrl: 'https://www.youtube.com/embed/9bZkp7q19f0?autoplay=1&enablejsapi=1&origin=' + (typeof window !== 'undefined' ? window.location.origin : 'https://concertoo.vercel.app'),
-      previewUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0'
+      streamUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0',
+      previewUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0',
+      fullTrackUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0'
     },
     'yt4': { 
-      streamUrl: 'https://www.youtube.com/embed/XqZsoesa55w?autoplay=1&enablejsapi=1&origin=' + (typeof window !== 'undefined' ? window.location.origin : 'https://concertoo.vercel.app'),
-      previewUrl: 'https://www.youtube.com/watch?v=XqZsoesa55w'
+      streamUrl: 'https://www.youtube.com/watch?v=XqZsoesa55w',
+      previewUrl: 'https://www.youtube.com/watch?v=XqZsoesa55w',
+      fullTrackUrl: 'https://www.youtube.com/watch?v=XqZsoesa55w'
     },
   },
   spotify: {
     'sp1': { 
-      streamUrl: 'https://open.spotify.com/embed/track/0VjIjW4GlUZAMYd2vXMi3b?utm_source=generator&theme=0',
+      streamUrl: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b',
       previewUrl: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b',
       fullTrackUrl: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b'
     },
     'sp2': { 
-      streamUrl: 'https://open.spotify.com/embed/track/0V3wPSX9ygBnCm8psDIegu?utm_source=generator&theme=0',
+      streamUrl: 'https://open.spotify.com/track/0V3wPSX9ygBnCm8psDIegu',
       previewUrl: 'https://open.spotify.com/track/0V3wPSX9ygBnCm8psDIegu',
       fullTrackUrl: 'https://open.spotify.com/track/0V3wPSX9ygBnCm8psDIegu'
     },
     'sp3': { 
-      streamUrl: 'https://open.spotify.com/embed/track/4iV5W9uYEdYUVa79Axb7Rh?utm_source=generator&theme=0',
+      streamUrl: 'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh',
       previewUrl: 'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh',
       fullTrackUrl: 'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh'
     },
     'sp4': { 
-      streamUrl: 'https://open.spotify.com/embed/track/6ocbgoVGwYJhOv1GgI9NsF?utm_source=generator&theme=0',
+      streamUrl: 'https://open.spotify.com/track/6ocbgoVGwYJhOv1GgI9NsF',
       previewUrl: 'https://open.spotify.com/track/6ocbgoVGwYJhOv1GgI9NsF',
       fullTrackUrl: 'https://open.spotify.com/track/6ocbgoVGwYJhOv1GgI9NsF'
     },
   },
   soundcloud: {
     'sc1': { 
-      streamUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/293&auto_play=true&buying=false&liking=false&download=false&sharing=false&show_artwork=true&show_comments=false&show_playcount=false&show_user=true&hide_related=false&visual=false&start_track=0&callback=true',
+      streamUrl: 'https://soundcloud.com/thechainsmokers/closer-feat-halsey',
       previewUrl: 'https://soundcloud.com/thechainsmokers/closer-feat-halsey',
       fullTrackUrl: 'https://soundcloud.com/thechainsmokers/closer-feat-halsey'
     },
     'sc2': { 
-      streamUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/294&auto_play=true&buying=false&liking=false&download=false&sharing=false&show_artwork=true&show_comments=false&show_playcount=false&show_user=true&hide_related=false&visual=false&start_track=0&callback=true',
+      streamUrl: 'https://soundcloud.com/alanwalker/faded',
       previewUrl: 'https://soundcloud.com/alanwalker/faded',
       fullTrackUrl: 'https://soundcloud.com/alanwalker/faded'
     },
     'sc3': { 
-      streamUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/295&auto_play=true&buying=false&liking=false&download=false&sharing=false&show_artwork=true&show_comments=false&show_playcount=false&show_user=true&hide_related=false&visual=false&start_track=0&callback=true',
+      streamUrl: 'https://soundcloud.com/marshmello/marshmello-alone',
       previewUrl: 'https://soundcloud.com/marshmello/marshmello-alone',
       fullTrackUrl: 'https://soundcloud.com/marshmello/marshmello-alone'
     },
     'sc4': { 
-      streamUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/296&auto_play=true&buying=false&liking=false&download=false&sharing=false&show_artwork=true&show_comments=false&show_playcount=false&show_user=true&hide_related=false&visual=false&start_track=0&callback=true',
+      streamUrl: 'https://soundcloud.com/kygo/kygo-firestone-feat-conrad',
       previewUrl: 'https://soundcloud.com/kygo/kygo-firestone-feat-conrad',
       fullTrackUrl: 'https://soundcloud.com/kygo/kygo-firestone-feat-conrad'
     },
@@ -201,7 +205,7 @@ const SAMPLE_TRACKS = {
       artist: 'Luis Fonsi ft. Daddy Yankee',
       album: 'Despacito',
       duration: 281,
-      audio: STREAMING_URLS.youtube.yt1.streamUrl,
+      audio: STREAMING_URLS.youtube.yt1.previewUrl,
       image: 'https://i.ytimg.com/vi/kJQP7kiw5Fk/maxresdefault.jpg',
       genre: 'Reggaeton',
       source: 'youtube' as const,
@@ -217,7 +221,7 @@ const SAMPLE_TRACKS = {
       artist: 'Ed Sheeran',
       album: '÷ (Divide)',
       duration: 233,
-      audio: STREAMING_URLS.youtube.yt2.streamUrl,
+      audio: STREAMING_URLS.youtube.yt2.previewUrl,
       image: 'https://i.ytimg.com/vi/JGwWNGJdvx8/maxresdefault.jpg',
       genre: 'Pop',
       source: 'youtube' as const,
@@ -233,7 +237,7 @@ const SAMPLE_TRACKS = {
       artist: 'PSY',
       album: 'PSY 6 (Six Rules), Part 1',
       duration: 252,
-      audio: STREAMING_URLS.youtube.yt3.streamUrl,
+      audio: STREAMING_URLS.youtube.yt3.previewUrl,
       image: 'https://i.ytimg.com/vi/9bZkp7q19f0/maxresdefault.jpg',
       genre: 'K-Pop',
       source: 'youtube' as const,
@@ -249,7 +253,7 @@ const SAMPLE_TRACKS = {
       artist: 'Pinkfong',
       album: 'Baby Shark',
       duration: 120,
-      audio: STREAMING_URLS.youtube.yt4.streamUrl,
+      audio: STREAMING_URLS.youtube.yt4.previewUrl,
       image: 'https://i.ytimg.com/vi/XqZsoesa55w/maxresdefault.jpg',
       genre: 'Children',
       source: 'youtube' as const,
@@ -267,7 +271,7 @@ const SAMPLE_TRACKS = {
       artist: 'The Weeknd',
       album: 'After Hours',
       duration: 200,
-      audio: STREAMING_URLS.spotify.sp1.streamUrl,
+      audio: STREAMING_URLS.spotify.sp1.previewUrl,
       image: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36',
       genre: 'Synth-pop',
       source: 'spotify' as const,
@@ -283,7 +287,7 @@ const SAMPLE_TRACKS = {
       artist: 'Dua Lipa',
       album: 'Future Nostalgia',
       duration: 203,
-      audio: STREAMING_URLS.spotify.sp2.streamUrl,
+      audio: STREAMING_URLS.spotify.sp2.previewUrl,
       image: 'https://i.scdn.co/image/ab67616d0000b273ef24c3d2c1a6a0b8b8b8b8b8',
       genre: 'Disco-pop',
       source: 'spotify' as const,
@@ -299,7 +303,7 @@ const SAMPLE_TRACKS = {
       artist: 'Harry Styles',
       album: 'Fine Line',
       duration: 174,
-      audio: STREAMING_URLS.spotify.sp3.streamUrl,
+      audio: STREAMING_URLS.spotify.sp3.previewUrl,
       image: 'https://i.scdn.co/image/ab67616d0000b2734b8b8b8b8b8b8b8b8b8b8b8',
       genre: 'Pop Rock',
       source: 'spotify' as const,
@@ -315,7 +319,7 @@ const SAMPLE_TRACKS = {
       artist: 'Olivia Rodrigo',
       album: 'SOUR',
       duration: 178,
-      audio: STREAMING_URLS.spotify.sp4.streamUrl,
+      audio: STREAMING_URLS.spotify.sp4.previewUrl,
       image: 'https://i.scdn.co/image/ab67616d0000b2735b8b8b8b8b8b8b8b8b8b8b8',
       genre: 'Pop Punk',
       source: 'spotify' as const,
@@ -333,7 +337,7 @@ const SAMPLE_TRACKS = {
       artist: 'The Chainsmokers',
       album: 'Collage',
       duration: 244,
-      audio: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/293&auto_play=true&buying=false&liking=false&download=false&sharing=false&show_artwork=true&show_comments=false&show_playcount=false&show_user=true&hide_related=false&visual=false&start_track=0&callback=true',
+      audio: STREAMING_URLS.soundcloud.sc1.previewUrl,
       image: 'https://i1.sndcdn.com/artworks-000000000000-5b8c5e-t500x500.jpg',
       genre: 'Electronic',
       source: 'soundcloud' as const,
@@ -346,7 +350,7 @@ const SAMPLE_TRACKS = {
       artist: 'Alan Walker',
       album: 'Faded',
       duration: 212,
-      audio: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/294&auto_play=true&buying=false&liking=false&download=false&sharing=false&show_artwork=true&show_comments=false&show_playcount=false&show_user=true&hide_related=false&visual=false&start_track=0&callback=true',
+      audio: STREAMING_URLS.soundcloud.sc2.previewUrl,
       image: 'https://i1.sndcdn.com/artworks-000000000000-5b8c5e-t500x500.jpg',
       genre: 'Electronic',
       source: 'soundcloud' as const,
@@ -359,7 +363,7 @@ const SAMPLE_TRACKS = {
       artist: 'Marshmello',
       album: 'Alone',
       duration: 200,
-      audio: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/295&auto_play=true&buying=false&liking=false&download=false&sharing=false&show_artwork=true&show_comments=false&show_playcount=false&show_user=true&hide_related=false&visual=false&start_track=0&callback=true',
+      audio: STREAMING_URLS.soundcloud.sc3.previewUrl,
       image: 'https://i1.sndcdn.com/artworks-000000000000-5b8c5e-t500x500.jpg',
       genre: 'Electronic',
       source: 'soundcloud' as const,
@@ -372,7 +376,7 @@ const SAMPLE_TRACKS = {
       artist: 'Kygo',
       album: 'Cloud Nine',
       duration: 235,
-      audio: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/296&auto_play=true&buying=false&liking=false&download=false&sharing=false&show_artwork=true&show_comments=false&show_playcount=false&show_user=true&hide_related=false&visual=false&start_track=0&callback=true',
+      audio: STREAMING_URLS.soundcloud.sc4.previewUrl,
       image: 'https://i1.sndcdn.com/artworks-000000000000-5b8c5e-t500x500.jpg',
       genre: 'Tropical House',
       source: 'soundcloud' as const,
@@ -387,7 +391,7 @@ const SAMPLE_TRACKS = {
       artist: 'Arijit Singh',
       album: 'Brahmastra',
       duration: 240,
-      audio: 'https://www.jiosaavn.com/song/kesariya/8QdJdYwQdYw',
+      audio: STREAMING_URLS.jiosaavn.js1.previewUrl,
       image: 'https://c.saavncdn.com/artists/Kesariya_001_20220722120000_500x500.jpg',
       genre: 'Bollywood',
       source: 'jiosaavn' as const,
@@ -400,7 +404,7 @@ const SAMPLE_TRACKS = {
       artist: 'Ali Sethi',
       album: 'Pasoori',
       duration: 195,
-      audio: 'https://www.jiosaavn.com/song/pasoori/8QdJdYwQdYw',
+      audio: STREAMING_URLS.jiosaavn.js2.previewUrl,
       image: 'https://c.saavncdn.com/artists/Pasoori_001_20220303120000_500x500.jpg',
       genre: 'Punjabi',
       source: 'jiosaavn' as const,
@@ -413,7 +417,7 @@ const SAMPLE_TRACKS = {
       artist: 'Jubin Nautiyal',
       album: 'Shershaah',
       duration: 210,
-      audio: 'https://www.jiosaavn.com/song/raataan-lambiyan/8QdJdYwQdYw',
+      audio: STREAMING_URLS.jiosaavn.js3.previewUrl,
       image: 'https://c.saavncdn.com/artists/Raataan_001_20210812120000_500x500.jpg',
       genre: 'Bollywood',
       source: 'jiosaavn' as const,
@@ -426,7 +430,7 @@ const SAMPLE_TRACKS = {
       artist: 'Shilpa Rao',
       album: 'Jawan',
       duration: 225,
-      audio: 'https://www.jiosaavn.com/song/kaavaalaa/8QdJdYwQdYw',
+      audio: STREAMING_URLS.jiosaavn.js4.previewUrl,
       image: 'https://c.saavncdn.com/artists/Kaavaalaa_001_20230721120000_500x500.jpg',
       genre: 'Bollywood',
       source: 'jiosaavn' as const,
@@ -441,7 +445,7 @@ const SAMPLE_TRACKS = {
       artist: 'King',
       album: 'Champagne Talk',
       duration: 180,
-      audio: 'https://wynk.in/music/song/maan-meri-jaan/pp_00708012331',
+      audio: STREAMING_URLS.wynk.wn1.previewUrl,
       image: 'https://images.hungama.com/c/1/5b8/5b8/5b85b8c5e5b8c5e5b8c5e5b8c5e5b8c5e.jpg',
       genre: 'Hip-Hop',
       source: 'wynk' as const,
@@ -454,7 +458,7 @@ const SAMPLE_TRACKS = {
       artist: 'Stebin Ben',
       album: 'Baarish Ban Jaana',
       duration: 210,
-      audio: 'https://wynk.in/music/song/baarish-ban-jaana/pp_00708012332',
+      audio: STREAMING_URLS.wynk.wn2.previewUrl,
       image: 'https://images.hungama.com/c/1/5b8/5b8/5b85b8c5e5b8c5e5b8c5e5b8c5e5b8c5e.jpg',
       genre: 'Romantic',
       source: 'wynk' as const,
@@ -467,7 +471,7 @@ const SAMPLE_TRACKS = {
       artist: 'Jubin Nautiyal',
       album: 'Shershaah',
       duration: 210,
-      audio: 'https://wynk.in/music/song/raataan-lambiyan/pp_00708012333',
+      audio: STREAMING_URLS.wynk.wn3.previewUrl,
       image: 'https://images.hungama.com/c/1/5b8/5b8/5b85b8c5e5b8c5e5b8c5e5b8c5e5b8c5e.jpg',
       genre: 'Bollywood',
       source: 'wynk' as const,
@@ -480,7 +484,7 @@ const SAMPLE_TRACKS = {
       artist: 'Shilpa Rao',
       album: 'Jawan',
       duration: 225,
-      audio: 'https://wynk.in/music/song/kaavaalaa/pp_00708012334',
+      audio: STREAMING_URLS.wynk.wn4.previewUrl,
       image: 'https://images.hungama.com/c/1/5b8/5b8/5b85b8c5e5b8c5e5b8c5e5b8c5e5b8c5e.jpg',
       genre: 'Bollywood',
       source: 'wynk' as const,
@@ -495,7 +499,7 @@ const SAMPLE_TRACKS = {
       artist: 'Harry Styles',
       album: 'Fine Line',
       duration: 174,
-      audio: 'https://www.deezer.com/track/916424',
+      audio: STREAMING_URLS.deezer.dz1.previewUrl,
       image: 'https://e-cdns-images.dzcdn.net/cover/5b8c5e5b8c5e5b8c5e5b8c5e5b8c5e5b8c/500x500-000000-80-0-0.jpg',
       genre: 'Pop Rock',
       source: 'deezer' as const,
@@ -508,7 +512,7 @@ const SAMPLE_TRACKS = {
       artist: 'Olivia Rodrigo',
       album: 'SOUR',
       duration: 178,
-      audio: 'https://www.deezer.com/track/1053829',
+      audio: STREAMING_URLS.deezer.dz2.previewUrl,
       image: 'https://e-cdns-images.dzcdn.net/cover/5b8c5e5b8c5e5b8c5e5b8c5e5b8c5e5b8c/500x500-000000-80-0-0.jpg',
       genre: 'Pop Punk',
       source: 'deezer' as const,
@@ -521,7 +525,7 @@ const SAMPLE_TRACKS = {
       artist: 'The Weeknd',
       album: 'After Hours',
       duration: 200,
-      audio: 'https://www.deezer.com/track/916424',
+      audio: STREAMING_URLS.deezer.dz1.previewUrl,
       image: 'https://e-cdns-images.dzcdn.net/cover/5b8c5e5b8c5e5b8c5e5b8c5e5b8c5e5b8c/500x500-000000-80-0-0.jpg',
       genre: 'Synth-pop',
       source: 'deezer' as const,
@@ -534,7 +538,7 @@ const SAMPLE_TRACKS = {
       artist: 'Dua Lipa',
       album: 'Future Nostalgia',
       duration: 203,
-      audio: 'https://www.deezer.com/track/1053829',
+      audio: STREAMING_URLS.deezer.dz2.previewUrl,
       image: 'https://e-cdns-images.dzcdn.net/cover/5b8c5e5b8c5e5b8c5e5b8c5e5b8c5e5b8c/500x500-000000-80-0-0.jpg',
       genre: 'Disco-pop',
       source: 'deezer' as const,
