@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setCurrentTime } from '../../redux/features/playerSlice';
 
-const Seekbar: React.FC = () => {
+interface SeekbarProps {
+  onSeek: (time: number) => void;
+}
+
+const Seekbar: React.FC<SeekbarProps> = ({ onSeek }) => {
   const dispatch = useAppDispatch();
   const { currentTime, duration } = useAppSelector((state) => state.player);
   const [seekTime, setSeekTime] = useState(0);
@@ -25,6 +29,7 @@ const Seekbar: React.FC = () => {
 
   const handleSeekEnd = () => {
     dispatch(setCurrentTime(seekTime));
+    onSeek(seekTime);
   };
 
   return (

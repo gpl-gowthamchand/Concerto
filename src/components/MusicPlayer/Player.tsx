@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { useAppSelector } from '../../redux/hooks';
+import { useAppSelector, useAppDispatch } from '../../redux/hooks';
+import { playPause } from '../../redux/features/playerSlice';
 import UnifiedPlayer from '../UnifiedPlayer';
 
 interface PlayerProps {
@@ -15,10 +16,11 @@ const Player: React.FC<PlayerProps> = ({
   onTimeUpdate, 
   onLoadedData 
 }) => {
+  const dispatch = useAppDispatch();
   const ref = useRef<HTMLAudioElement>(null);
   const { activeSong, isPlaying, volume, repeat } = useAppSelector((state) => state.player);
 
-  // Check if this is an online streaming track
+  // Check if this is an online streaming track (not local)
   const isOnlineTrack = activeSong && typeof activeSong === 'object' && 'source' in activeSong && 
     (activeSong.source === 'youtube' || activeSong.source === 'spotify' || 
      activeSong.source === 'jiosaavn' || activeSong.source === 'wynk' || 
@@ -27,12 +29,15 @@ const Player: React.FC<PlayerProps> = ({
   useEffect(() => {
     if (ref.current && !isOnlineTrack) {
       if (isPlaying) {
-        ref.current.play();
+        ref.current.play().catch(error => {
+          console.error('Audio playback failed:', error);
+          dispatch(playPause(false));
+        });
       } else {
         ref.current.pause();
       }
     }
-  }, [isPlaying, activeSong, isOnlineTrack]);
+  }, [isPlaying, activeSong, isOnlineTrack, dispatch]);
 
   useEffect(() => {
     if (ref.current && !isOnlineTrack) {
@@ -41,7 +46,7 @@ const Player: React.FC<PlayerProps> = ({
   }, [volume, isOnlineTrack]);
 
   useEffect(() => {
-    if (ref.current && !isOnlineTrack) {
+    if (ref.current && !isOnlineTrack && seekTime > 0) {
       ref.current.currentTime = seekTime;
     }
   }, [seekTime, isOnlineTrack]);

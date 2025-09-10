@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppDispatch } from '../redux/hooks';
-import { setActiveSong } from '../redux/features/playerSlice';
+import { setActiveSong, playPause } from '../redux/features/playerSlice';
 import { Song } from '../redux/features/playerSlice';
 
 interface SongCardProps {
@@ -14,6 +14,7 @@ const SongCard: React.FC<SongCardProps> = ({ song, data, i }) => {
 
   const handlePlayPauseClick = () => {
     dispatch(setActiveSong({ song, data, i }));
+    dispatch(playPause(true));
   };
 
   return (

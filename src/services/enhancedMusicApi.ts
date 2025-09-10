@@ -198,6 +198,47 @@ const STREAMING_SOURCES = {
 
 // Sample data for different platforms with real streaming URLs
 const SAMPLE_TRACKS = {
+  local: [
+    {
+      id: 'local1',
+      title: 'Sample Track 1',
+      artist: 'Test Artist',
+      album: 'Test Album',
+      duration: 180,
+      audio: 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav',
+      image: 'https://via.placeholder.com/300x200/6366f1/ffffff?text=🎵',
+      genre: 'Test',
+      source: 'local' as const,
+      platform: 'Local',
+      quality: 'High',
+    },
+    {
+      id: 'local2',
+      title: 'Sample Track 2',
+      artist: 'Test Artist 2',
+      album: 'Test Album 2',
+      duration: 200,
+      audio: 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav',
+      image: 'https://via.placeholder.com/300x200/10b981/ffffff?text=🎶',
+      genre: 'Test',
+      source: 'local' as const,
+      platform: 'Local',
+      quality: 'High',
+    },
+    {
+      id: 'local3',
+      title: 'Sample Track 3',
+      artist: 'Test Artist 3',
+      album: 'Test Album 3',
+      duration: 160,
+      audio: 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav',
+      image: 'https://via.placeholder.com/300x200/f59e0b/ffffff?text=🎼',
+      genre: 'Test',
+      source: 'local' as const,
+      platform: 'Local',
+      quality: 'High',
+    },
+  ],
   youtube: [
     {
       id: 'yt1',
@@ -554,9 +595,14 @@ export const enhancedMusicApi = {
     try {
       const allTracks: OnlineSong[] = [];
       
-      // Combine tracks from all platforms
+      // Prioritize local tracks for testing
+      allTracks.push(...SAMPLE_TRACKS.local);
+      
+      // Add some tracks from other platforms
       Object.values(SAMPLE_TRACKS).forEach(platformTracks => {
-        allTracks.push(...platformTracks);
+        if (platformTracks !== SAMPLE_TRACKS.local) {
+          allTracks.push(...platformTracks.slice(0, 2)); // Limit to 2 per platform
+        }
       });
       
       // Shuffle and return

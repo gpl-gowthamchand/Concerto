@@ -1,5 +1,6 @@
-import React from 'react';
-import { useAppSelector } from '../../redux/hooks';
+import React, { useRef } from 'react';
+import { useAppSelector, useAppDispatch } from '../../redux/hooks';
+import { playPause, nextSong, setCurrentTime, setDuration } from '../../redux/features/playerSlice';
 import Controls from './Controls';
 import Seekbar from './Seekbar';
 import VolumeBar from './VolumeBar';
@@ -7,7 +8,32 @@ import Track from './Track';
 import Player from './Player';
 
 const MusicPlayer: React.FC = () => {
-  const { activeSong, isActive, isPlaying } = useAppSelector((state) => state.player);
+  const dispatch = useAppDispatch();
+  const { activeSong, isActive, isPlaying, currentSongs, currentIndex, currentTime, duration } = useAppSelector((state) => state.player);
+  const [seekTime, setSeekTime] = React.useState(0);
+
+  const handleEnded = () => {
+    if (currentSongs.length > 0) {
+      dispatch(playPause(false));
+      // Auto-play next song
+      const nextIndex = (currentIndex + 1) % currentSongs.length;
+      dispatch(nextSong(nextIndex));
+    }
+  };
+
+  const handleTimeUpdate = (event: React.SyntheticEvent<HTMLAudioElement>) => {
+    const newTime = event.currentTarget.currentTime;
+    dispatch(setCurrentTime(newTime));
+  };
+
+  const handleLoadedData = (event: React.SyntheticEvent<HTMLAudioElement>) => {
+    const newDuration = event.currentTarget.duration;
+    dispatch(setDuration(newDuration));
+  };
+
+  const handleSeek = (time: number) => {
+    setSeekTime(time);
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-gray-200 flex items-center px-4 z-50">
@@ -34,7 +60,7 @@ const MusicPlayer: React.FC = () => {
         {/* Center - Controls */}
         <div className="flex flex-col items-center flex-1 max-w-md">
           <Controls isPlaying={isPlaying} />
-          <Seekbar />
+          <Seekbar onSeek={handleSeek} />
         </div>
 
         {/* Right - Volume */}
@@ -45,10 +71,10 @@ const MusicPlayer: React.FC = () => {
 
       {/* Hidden Audio Player */}
       <Player 
-        seekTime={0}
-        onEnded={() => {}}
-        onTimeUpdate={() => {}}
-        onLoadedData={() => {}}
+        seekTime={seekTime}
+        onEnded={handleEnded}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedData={handleLoadedData}
       />
     </div>
   );
