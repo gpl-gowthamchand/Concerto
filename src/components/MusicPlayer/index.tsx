@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { playPause, nextSong, setCurrentTime, setDuration } from '../../redux/features/playerSlice';
 import Controls from './Controls';
@@ -9,7 +9,7 @@ import Player from './Player';
 
 const MusicPlayer: React.FC = React.memo(() => {
   const dispatch = useAppDispatch();
-  const { activeSong, isActive, isPlaying, currentSongs, currentIndex, currentTime, duration } = useAppSelector((state) => state.player);
+  const { activeSong, isActive, isPlaying, currentSongs, currentIndex } = useAppSelector((state) => state.player);
   const [seekTime, setSeekTime] = React.useState(0);
 
   const handleEnded = useCallback(() => {
@@ -78,8 +78,6 @@ const MusicPlayer: React.FC = React.memo(() => {
       />
     </div>
   );
-};
-
 });
 
 MusicPlayer.displayName = 'MusicPlayer';

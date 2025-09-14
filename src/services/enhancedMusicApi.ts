@@ -10,7 +10,7 @@ export interface OnlineSong {
   audio: string;
   image: string;
   genre?: string;
-  source: 'youtube' | 'spotify' | 'jiosaavn' | 'wynk' | 'deezer' | 'soundcloud';
+  source: 'youtube' | 'spotify' | 'jiosaavn' | 'wynk' | 'deezer' | 'soundcloud' | 'local';
   platform: string;
   quality?: string;
   lyrics?: string;

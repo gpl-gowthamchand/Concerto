@@ -65,8 +65,6 @@ const SongCard: React.FC<SongCardProps> = React.memo(({ song, data, i }) => {
       </div>
     </div>
   );
-};
-
 });
 
 SongCard.displayName = 'SongCard';

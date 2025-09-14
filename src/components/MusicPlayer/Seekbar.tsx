@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setCurrentTime } from '../../redux/features/playerSlice';
 
@@ -63,8 +63,6 @@ const Seekbar: React.FC<SeekbarProps> = React.memo(({ onSeek }) => {
       </span>
     </div>
   );
-};
-
 });
 
 Seekbar.displayName = 'Seekbar';
