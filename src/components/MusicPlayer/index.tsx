@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { playPause, nextSong, setCurrentTime, setDuration } from '../../redux/features/playerSlice';
 import Controls from './Controls';
@@ -7,33 +7,33 @@ import VolumeBar from './VolumeBar';
 import Track from './Track';
 import Player from './Player';
 
-const MusicPlayer: React.FC = () => {
+const MusicPlayer: React.FC = React.memo(() => {
   const dispatch = useAppDispatch();
   const { activeSong, isActive, isPlaying, currentSongs, currentIndex, currentTime, duration } = useAppSelector((state) => state.player);
   const [seekTime, setSeekTime] = React.useState(0);
 
-  const handleEnded = () => {
+  const handleEnded = useCallback(() => {
     if (currentSongs.length > 0) {
       dispatch(playPause(false));
       // Auto-play next song
       const nextIndex = (currentIndex + 1) % currentSongs.length;
       dispatch(nextSong(nextIndex));
     }
-  };
+  }, [dispatch, currentSongs.length, currentIndex]);
 
-  const handleTimeUpdate = (event: React.SyntheticEvent<HTMLAudioElement>) => {
+  const handleTimeUpdate = useCallback((event: React.SyntheticEvent<HTMLAudioElement>) => {
     const newTime = event.currentTarget.currentTime;
     dispatch(setCurrentTime(newTime));
-  };
+  }, [dispatch]);
 
-  const handleLoadedData = (event: React.SyntheticEvent<HTMLAudioElement>) => {
+  const handleLoadedData = useCallback((event: React.SyntheticEvent<HTMLAudioElement>) => {
     const newDuration = event.currentTarget.duration;
     dispatch(setDuration(newDuration));
-  };
+  }, [dispatch]);
 
-  const handleSeek = (time: number) => {
+  const handleSeek = useCallback((time: number) => {
     setSeekTime(time);
-  };
+  }, []);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-gray-200 flex items-center px-4 z-50">
@@ -79,5 +79,9 @@ const MusicPlayer: React.FC = () => {
     </div>
   );
 };
+
+});
+
+MusicPlayer.displayName = 'MusicPlayer';
 
 export default MusicPlayer;

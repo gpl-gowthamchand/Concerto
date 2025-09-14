@@ -10,6 +10,20 @@
   body {
     @apply bg-gray-50 text-gray-900;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Prevent text flickering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  /* Prevent layout shifts and flickering */
+  img {
+    will-change: auto;
+  }
+  
+  /* Smooth transitions for text elements */
+  h1, h2, h3, h4, h5, h6, p, span, div {
+    will-change: auto;
   }
 }
 
@@ -72,6 +86,20 @@
 
   .smooth-transition {
     transition: all 0.3s ease-in-out;
+  }
+  
+  /* Prevent text flickering during animations */
+  .no-flicker {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+  
+  /* Optimize text rendering */
+  .text-optimized {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 

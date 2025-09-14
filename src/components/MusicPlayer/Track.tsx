@@ -7,7 +7,7 @@ interface TrackProps {
   song: Song;
 }
 
-const Track: React.FC<TrackProps> = ({ isActive, isPlaying, song }) => {
+const Track: React.FC<TrackProps> = React.memo(({ isActive, isPlaying, song }) => {
   return (
     <div className="flex items-center">
       <div className="relative w-12 h-12 mr-3">
@@ -36,6 +36,8 @@ const Track: React.FC<TrackProps> = ({ isActive, isPlaying, song }) => {
       </div>
     </div>
   );
-};
+});
+
+Track.displayName = 'Track';
 
 export default Track;

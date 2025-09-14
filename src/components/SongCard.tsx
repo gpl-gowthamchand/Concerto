@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useAppDispatch } from '../redux/hooks';
 import { setActiveSong, playPause } from '../redux/features/playerSlice';
 import { Song } from '../redux/features/playerSlice';
@@ -9,13 +9,13 @@ interface SongCardProps {
   i: number;
 }
 
-const SongCard: React.FC<SongCardProps> = ({ song, data, i }) => {
+const SongCard: React.FC<SongCardProps> = React.memo(({ song, data, i }) => {
   const dispatch = useAppDispatch();
 
-  const handlePlayPauseClick = () => {
+  const handlePlayPauseClick = useCallback(() => {
     dispatch(setActiveSong({ song, data, i }));
     dispatch(playPause(true));
-  };
+  }, [dispatch, song, data, i]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer group">
@@ -66,5 +66,9 @@ const SongCard: React.FC<SongCardProps> = ({ song, data, i }) => {
     </div>
   );
 };
+
+});
+
+SongCard.displayName = 'SongCard';
 
 export default SongCard;

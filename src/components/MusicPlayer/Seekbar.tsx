@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setCurrentTime } from '../../redux/features/playerSlice';
 
@@ -6,31 +6,38 @@ interface SeekbarProps {
   onSeek: (time: number) => void;
 }
 
-const Seekbar: React.FC<SeekbarProps> = ({ onSeek }) => {
+const Seekbar: React.FC<SeekbarProps> = React.memo(({ onSeek }) => {
   const dispatch = useAppDispatch();
   const { currentTime, duration } = useAppSelector((state) => state.player);
   const [seekTime, setSeekTime] = useState(0);
-  const [appTime, setAppTime] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => {
-    setAppTime(currentTime);
-  }, [currentTime]);
+  // Only update appTime when not dragging to prevent flickering
+  const appTime = useMemo(() => {
+    return isDragging ? seekTime : currentTime;
+  }, [isDragging, seekTime, currentTime]);
 
-  const formatTime = (time: number) => {
+  const formatTime = useCallback((time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
+  }, []);
 
-  const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSeek = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
     setSeekTime(value);
-  };
+    setIsDragging(true);
+  }, []);
 
-  const handleSeekEnd = () => {
+  const handleSeekEnd = useCallback(() => {
+    setIsDragging(false);
     dispatch(setCurrentTime(seekTime));
     onSeek(seekTime);
-  };
+  }, [dispatch, seekTime, onSeek]);
+
+  const handleSeekStart = useCallback(() => {
+    setIsDragging(true);
+  }, []);
 
   return (
     <div className="flex items-center space-x-2 w-full max-w-md">
@@ -44,6 +51,8 @@ const Seekbar: React.FC<SeekbarProps> = ({ onSeek }) => {
         max={duration || 0}
         onInput={handleSeek}
         onChange={handleSeekEnd}
+        onMouseDown={handleSeekStart}
+        onTouchStart={handleSeekStart}
         className="flex-1 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
         style={{
           background: `linear-gradient(to right, #1f2937 0%, #1f2937 ${(appTime / (duration || 1)) * 100}%, #e5e7eb ${(appTime / (duration || 1)) * 100}%, #e5e7eb 100%)`
@@ -55,5 +64,9 @@ const Seekbar: React.FC<SeekbarProps> = ({ onSeek }) => {
     </div>
   );
 };
+
+});
+
+Seekbar.displayName = 'Seekbar';
 
 export default Seekbar;

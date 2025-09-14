@@ -24,8 +24,8 @@ function App() {
             <div className="bg-white border-b border-gray-200 px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <h1 className="text-2xl font-bold text-gray-900">Concerto</h1>
-                  <div className="text-sm text-gray-500">Music Player</div>
+                  <h1 className="text-2xl font-bold text-gray-900 text-optimized no-flicker">Concerto</h1>
+                  <div className="text-sm text-gray-500 text-optimized no-flicker">Music Player</div>
                 </div>
                 <div className="flex items-center space-x-4">
                   <button className="p-2 text-gray-500 hover:text-gray-700">
@@ -58,7 +58,7 @@ function App() {
                 <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                 </svg>
-                <h2 className="text-lg font-semibold text-gray-900">Now Playing</h2>
+                <h2 className="text-lg font-semibold text-gray-900 text-optimized no-flicker">Now Playing</h2>
               </div>
             </div>
             
@@ -70,15 +70,15 @@ function App() {
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">No Track Playing</h3>
-                <p className="text-gray-500">Select a track to start listening</p>
+                <h3 className="text-lg font-semibold text-gray-900 text-optimized no-flicker">No Track Playing</h3>
+                <p className="text-gray-500 text-optimized no-flicker">Select a track to start listening</p>
               </div>
 
               {/* Queue */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Queue</h3>
+                <h3 className="text-sm font-medium text-gray-700 mb-3 text-optimized no-flicker">Queue</h3>
                 <div className="space-y-2">
-                  <div className="text-sm text-gray-500 text-center py-4">
+                  <div className="text-sm text-gray-500 text-center py-4 text-optimized no-flicker">
                     No tracks in queue
                   </div>
                 </div>

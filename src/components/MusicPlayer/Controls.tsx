@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { playPause, nextSong, prevSong, setRepeat, setShuffle } from '../../redux/features/playerSlice';
 
@@ -6,16 +6,16 @@ interface ControlsProps {
   isPlaying: boolean;
 }
 
-const Controls: React.FC<ControlsProps> = ({ isPlaying }) => {
+const Controls: React.FC<ControlsProps> = React.memo(({ isPlaying }) => {
   const dispatch = useAppDispatch();
   const { currentSongs, currentIndex, repeat, shuffle } = useAppSelector((state) => state.player);
 
-  const handlePlayPause = () => {
+  const handlePlayPause = useCallback(() => {
     if (!currentSongs.length) return;
     dispatch(playPause(!isPlaying));
-  };
+  }, [dispatch, isPlaying, currentSongs.length]);
 
-  const handleNextSong = () => {
+  const handleNextSong = useCallback(() => {
     if (!currentSongs.length) return;
     dispatch(playPause(false));
 
@@ -24,9 +24,9 @@ const Controls: React.FC<ControlsProps> = ({ isPlaying }) => {
     } else {
       dispatch(nextSong(Math.floor(Math.random() * currentSongs.length)));
     }
-  };
+  }, [dispatch, currentSongs.length, shuffle, currentIndex]);
 
-  const handlePrevSong = () => {
+  const handlePrevSong = useCallback(() => {
     if (!currentSongs.length) return;
     if (currentIndex === 0) {
       dispatch(prevSong(currentSongs.length - 1));
@@ -35,13 +35,21 @@ const Controls: React.FC<ControlsProps> = ({ isPlaying }) => {
     } else {
       dispatch(prevSong(currentIndex - 1));
     }
-  };
+  }, [dispatch, currentSongs.length, currentIndex, shuffle]);
+
+  const handleShuffle = useCallback(() => {
+    dispatch(setShuffle(!shuffle));
+  }, [dispatch, shuffle]);
+
+  const handleRepeat = useCallback(() => {
+    dispatch(setRepeat(!repeat));
+  }, [dispatch, repeat]);
 
   return (
     <div className="flex items-center space-x-4">
       {/* Shuffle */}
       <button
-        onClick={() => dispatch(setShuffle(!shuffle))}
+        onClick={handleShuffle}
         className={`p-2 rounded-full transition-colors ${
           shuffle ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
         }`}
@@ -89,7 +97,7 @@ const Controls: React.FC<ControlsProps> = ({ isPlaying }) => {
 
       {/* Repeat */}
       <button
-        onClick={() => dispatch(setRepeat(!repeat))}
+        onClick={handleRepeat}
         className={`p-2 rounded-full transition-colors ${
           repeat ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
         }`}
@@ -100,6 +108,8 @@ const Controls: React.FC<ControlsProps> = ({ isPlaying }) => {
       </button>
     </div>
   );
-};
+});
+
+Controls.displayName = 'Controls';
 
 export default Controls;
