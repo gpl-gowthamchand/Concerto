@@ -24,22 +24,22 @@ export interface OnlineSong {
 const STREAMING_URLS = {
   youtube: {
     'yt1': { 
-      streamUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+      streamUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk?autoplay=0&controls=1&showinfo=0&rel=0',
       previewUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
       fullTrackUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk'
     },
     'yt2': { 
-      streamUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8',
+      streamUrl: 'https://www.youtube.com/embed/JGwWNGJdvx8?autoplay=0&controls=1&showinfo=0&rel=0',
       previewUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8',
       fullTrackUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8'
     },
     'yt3': { 
-      streamUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0',
+      streamUrl: 'https://www.youtube.com/embed/9bZkp7q19f0?autoplay=0&controls=1&showinfo=0&rel=0',
       previewUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0',
       fullTrackUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0'
     },
     'yt4': { 
-      streamUrl: 'https://www.youtube.com/watch?v=XqZsoesa55w',
+      streamUrl: 'https://www.youtube.com/embed/XqZsoesa55w?autoplay=0&controls=1&showinfo=0&rel=0',
       previewUrl: 'https://www.youtube.com/watch?v=XqZsoesa55w',
       fullTrackUrl: 'https://www.youtube.com/watch?v=XqZsoesa55w'
     },

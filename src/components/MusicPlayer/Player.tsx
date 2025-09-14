@@ -26,6 +26,7 @@ const Player: React.FC<PlayerProps> = ({
      activeSong.source === 'jiosaavn' || activeSong.source === 'wynk' || 
      activeSong.source === 'deezer' || activeSong.source === 'soundcloud');
 
+
   useEffect(() => {
     if (ref.current && !isOnlineTrack) {
       if (isPlaying) {

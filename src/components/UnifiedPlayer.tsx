@@ -82,12 +82,26 @@ const UnifiedPlayer: React.FC<UnifiedPlayerProps> = ({
 
   // Render embedded player (YouTube, Spotify, SoundCloud)
   if (playerType === 'embedded') {
+    // Convert YouTube watch URLs to embed URLs
+    const getEmbedUrl = (url: string) => {
+      if (song.source === 'youtube') {
+        // Extract video ID from YouTube URL
+        const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+        if (videoIdMatch) {
+          return `https://www.youtube.com/embed/${videoIdMatch[1]}?autoplay=0&controls=1&showinfo=0&rel=0&modestbranding=1`;
+        }
+      }
+      return url;
+    };
+
+    const embedUrl = getEmbedUrl(song.streamUrl || song.audio);
+
     return (
       <div className="w-full">
         <div className="bg-white rounded-lg overflow-hidden shadow-sm">
           <iframe
             ref={iframeRef}
-            src={song.streamUrl || song.audio}
+            src={embedUrl}
             width="100%"
             height="200"
             frameBorder="0"
@@ -95,6 +109,7 @@ const UnifiedPlayer: React.FC<UnifiedPlayerProps> = ({
             allowFullScreen
             title={`${song.title} - ${song.artist}`}
             className="w-full"
+            sandbox="allow-scripts allow-same-origin allow-presentation"
             onLoad={() => {
               console.log('Embedded player loaded:', song.title);
             }}
@@ -107,6 +122,9 @@ const UnifiedPlayer: React.FC<UnifiedPlayerProps> = ({
         <div className="mt-2 text-center">
           <p className="text-gray-600 text-sm">
             🎵 {song.title} - {song.artist} • {song.platform}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Click to open in {song.platform} for full experience
           </p>
         </div>
       </div>
