@@ -1,6 +1,8 @@
 // Advanced Music API with Metrolist-inspired features
 // Enhanced backend services with offline support, caching, and advanced features
 
+import { OnlineSong } from './enhancedMusicApi';
+
 export interface AdvancedSong extends OnlineSong {
   // Enhanced fields for advanced features
   isDownloaded?: boolean;
@@ -73,7 +75,9 @@ class CacheManager {
   set(key: string, value: any, ttl: number = 300000): void {
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey) {
+        this.cache.delete(firstKey);
+      }
     }
     
     this.cache.set(key, {
@@ -200,7 +204,8 @@ class LyricsService {
     const cacheKey = `${song.id}-lyrics`;
     
     if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey);
+      const cached = this.cache.get(cacheKey);
+      return cached || 'Lyrics not available';
     }
 
     try {
@@ -553,7 +558,7 @@ export const advancedMusicApi = {
   },
 
   // Private helper methods
-  private async performAdvancedSearch(query: string, filters?: any): Promise<AdvancedSong[]> {
+  async performAdvancedSearch(_query: string, _filters?: any): Promise<AdvancedSong[]> {
     // Simulate advanced search with filtering
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -561,7 +566,7 @@ export const advancedMusicApi = {
     return [];
   },
 
-  private async generateRecommendations(user: User): Promise<AdvancedSong[]> {
+  async generateRecommendations(_user: User): Promise<AdvancedSong[]> {
     // Simulate recommendation algorithm
     await new Promise(resolve => setTimeout(resolve, 1000));
     

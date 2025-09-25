@@ -54,10 +54,8 @@ const AdvancedPlayer: React.FC = () => {
     showLyrics,
     showQueue,
     favorites,
-    recentlyPlayed,
   } = useSelector((state: RootState) => state.player);
 
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lyrics, setLyrics] = useState<string>('');
@@ -66,7 +64,7 @@ const AdvancedPlayer: React.FC = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
-  const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const sleepTimerRef = useRef<number | null>(null);
 
   // Initialize audio context and setup
   useEffect(() => {
@@ -195,7 +193,7 @@ const AdvancedPlayer: React.FC = () => {
     if (activeSong) {
       const loadLyrics = async () => {
         try {
-          const lyricsText = await advancedMusicApi.getLyrics(activeSong);
+          const lyricsText = await advancedMusicApi.getLyrics(activeSong as any);
           setLyrics(lyricsText);
         } catch (error) {
           console.error('Error loading lyrics:', error);

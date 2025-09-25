@@ -72,7 +72,7 @@ const LyricsDisplay: React.FC<LyricsDisplayProps> = ({
     setIsFullscreen(!isFullscreen);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       onClose();
     }

@@ -64,7 +64,7 @@ const OfflineManager: React.FC<OfflineManagerProps> = ({ isOpen, onClose }) => {
       const downloadedSong = await advancedMusicApi.downloadSong(song);
       
       // Add to Redux store
-      dispatch(addToDownloaded(downloadedSong));
+      dispatch(addToDownloaded(downloadedSong as any));
       
       clearInterval(progressInterval);
       setDownloadProgress(100);
