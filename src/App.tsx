@@ -2,12 +2,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import Sidebar from './components/Sidebar';
-import MusicPlayer from './components/MusicPlayer';
+import AdvancedPlayer from './components/AdvancedPlayer/AdvancedPlayer';
 import Home from './pages/Home';
 import OnlineMusic from './pages/OnlineMusic';
 import Library from './pages/Library';
 import Favorites from './pages/Favorites';
 import Recent from './pages/Recent';
+import Settings from './pages/Settings';
 import './index.css';
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
                 <Route path="/library" element={<Library />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/recent" element={<Recent />} />
+                <Route path="/settings" element={<Settings />} />
               </Routes>
             </div>
           </div>
@@ -88,7 +90,7 @@ function App() {
         </div>
 
         {/* Bottom Player Bar */}
-        <MusicPlayer />
+        <AdvancedPlayer />
       </Router>
     </Provider>
   );
